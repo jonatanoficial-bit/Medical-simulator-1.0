@@ -1,0 +1,119 @@
+/* Estilos básicos para o Simulador Médico */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(180deg, #e0f1f5, #ffffff);
+    color: #333;
+}
+
+.screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+    text-align: center;
+}
+
+.hidden {
+    display: none;
+}
+
+.cover-img {
+    max-width: 90%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+}
+
+.primary-btn {
+    background-color: #0077b6;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    margin-top: 20px;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.primary-btn:hover {
+    background-color: #005f8c;
+}
+
+.notice {
+    margin-top: 15px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+/* Avatar selection */
+.avatar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+.avatar-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+.avatar-option img {
+    width: 100px;
+    height: 140px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid transparent;
+    transition: border-color 0.3s;
+}
+.avatar-option input[type="radio"] {
+    margin-top: 8px;
+}
+.avatar-option input[type="radio"]:checked + img,
+.avatar-option img:hover {
+    border-color: #0077b6;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 4px;
+}
+.form-group input[type="text"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 100%;
+    max-width: 300px;
+}
+
+/* Consultório */
+.status-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 20px 0;
+    justify-content: center;
+}
+.status-bar span {
+    font-weight: bold;
+    margin-right: 10px;
+}
+.progress {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.progress label {
+    font-size: 0.9rem;
+}
+
+.progress progress {
+    width: 150px;
+}

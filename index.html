@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Médico: Pronto‑Socorro</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Tela de capa -->
+    <div id="cover-screen" class="screen">
+        <img src="images/cover.png" alt="Capa do jogo" class="cover-img">
+        <button id="start-button" class="primary-btn">Iniciar</button>
+        <p class="notice">Este jogo tem fins educativos. Decisões erradas podem levar o paciente ao óbito.</p>
+    </div>
+
+    <!-- Tela de seleção de avatar e nome -->
+    <div id="avatar-screen" class="screen hidden">
+        <h1>Escolha seu avatar</h1>
+        <form id="avatar-form">
+            <div class="avatar-grid">
+                <label class="avatar-option">
+                    <input type="radio" name="avatar" value="avatar1" required>
+                    <img src="images/avatar1.png" alt="Avatar 1">
+                </label>
+                <label class="avatar-option">
+                    <input type="radio" name="avatar" value="avatar2">
+                    <img src="images/avatar2.png" alt="Avatar 2">
+                </label>
+                <label class="avatar-option">
+                    <input type="radio" name="avatar" value="avatar3">
+                    <img src="images/avatar3.png" alt="Avatar 3">
+                </label>
+                <label class="avatar-option">
+                    <input type="radio" name="avatar" value="avatar4">
+                    <img src="images/avatar4.png" alt="Avatar 4">
+                </label>
+                <label class="avatar-option">
+                    <input type="radio" name="avatar" value="avatar5">
+                    <img src="images/avatar5.png" alt="Avatar 5">
+                </label>
+                <label class="avatar-option">
+                    <input type="radio" name="avatar" value="avatar6">
+                    <img src="images/avatar6.png" alt="Avatar 6">
+                </label>
+            </div>
+            <div class="form-group">
+                <label for="player-name">Seu nome:</label>
+                <input type="text" id="player-name" name="player-name" placeholder="Digite seu nome" required>
+            </div>
+            <button type="submit" class="primary-btn">Continuar</button>
+        </form>
+    </div>
+
+    <!-- Tela do consultório (esqueleto para demonstração) -->
+    <div id="office-screen" class="screen hidden">
+        <h1 id="welcome-message"></h1>
+        <div class="status-bar">
+            <span id="rank">Residente</span>
+            <div class="progress">
+                <label>Prestígio:</label>
+                <progress id="prestige" value="0" max="100"></progress>
+            </div>
+            <div class="progress">
+                <label>Acertos:</label>
+                <progress id="successes" value="0" max="100"></progress>
+            </div>
+            <div class="progress">
+                <label>Erros:</label>
+                <progress id="errors" value="0" max="100"></progress>
+            </div>
+        </div>
+        <button id="next-case" class="primary-btn">Próximo caso</button>
+        <p class="notice">Tela demonstrativa: funcionalidade completa implementada no motor de jogo.</p>
+    </div>
+
+    <script>
+        // Manipulação de telas
+        const coverScreen = document.getElementById('cover-screen');
+        const avatarScreen = document.getElementById('avatar-screen');
+        const officeScreen = document.getElementById('office-screen');
+
+        document.getElementById('start-button').addEventListener('click', () => {
+            coverScreen.classList.add('hidden');
+            avatarScreen.classList.remove('hidden');
+        });
+
+        document.getElementById('avatar-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('player-name').value;
+            const selectedAvatar = document.querySelector('input[name="avatar"]:checked');
+            if (selectedAvatar && name) {
+                avatarScreen.classList.add('hidden');
+                officeScreen.classList.remove('hidden');
+                document.getElementById('welcome-message').textContent = `Bem-vindo(a), Dr(a). ${name}!`;
+            }
+        });
+    </script>
+</body>
+</html>
