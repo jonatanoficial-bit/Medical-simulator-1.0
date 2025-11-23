@@ -1,119 +1,155 @@
-/* Estilos básicos para o Simulador Médico */
+/* Estilos gerais */
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(180deg, #e0f1f5, #ffffff);
-    color: #333;
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f5f5f5;
+  color: #333;
 }
 
 .screen {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-    text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  text-align: center;
+  padding: 20px;
 }
 
 .hidden {
-    display: none;
+  display: none;
 }
 
-.cover-img {
-    max-width: 90%;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+.cover {
+  max-width: 600px;
+  width: 90%;
+  border-radius: 8px;
+  margin-bottom: 20px;
 }
 
-.primary-btn {
-    background-color: #0077b6;
-    color: #fff;
-    border: none;
-    padding: 12px 24px;
-    margin-top: 20px;
-    border-radius: 4px;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.primary-btn:hover {
-    background-color: #005f8c;
+.primary, .secondary {
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  margin-top: 10px;
+  border-radius: 4px;
+  font-size: 1rem;
 }
 
-.notice {
-    margin-top: 15px;
-    font-size: 0.9rem;
-    color: #555;
+.primary {
+  background: #0078D4;
+  color: #fff;
 }
 
-/* Avatar selection */
-.avatar-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 10px;
-    margin-bottom: 20px;
-}
-.avatar-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-.avatar-option img {
-    width: 100px;
-    height: 140px;
-    object-fit: cover;
-    border-radius: 8px;
-    border: 2px solid transparent;
-    transition: border-color 0.3s;
-}
-.avatar-option input[type="radio"] {
-    margin-top: 8px;
-}
-.avatar-option input[type="radio"]:checked + img,
-.avatar-option img:hover {
-    border-color: #0077b6;
+.secondary {
+  background: #E1E1E1;
+  color: #333;
 }
 
-.form-group {
-    margin-bottom: 20px;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 4px;
-}
-.form-group input[type="text"] {
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    width: 100%;
-    max-width: 300px;
+.disclaimer {
+  font-size: 0.8rem;
+  margin-top: 15px;
+  max-width: 600px;
 }
 
-/* Consultório */
-.status-bar {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 20px 0;
-    justify-content: center;
-}
-.status-bar span {
-    font-weight: bold;
-    margin-right: 10px;
-}
-.progress {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-}
-.progress label {
-    font-size: 0.9rem;
+.avatars {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 20px 0;
 }
 
-.progress progress {
-    width: 150px;
+.avatars img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid transparent;
+  cursor: pointer;
+}
+
+.avatars img.selected {
+  border-color: #0078D4;
+}
+
+.background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1;
+}
+
+.overlay {
+  background: rgba(0,0,0,0.6);
+  padding: 20px;
+  border-radius: 8px;
+  color: #fff;
+  max-width: 600px;
+}
+
+.consult-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.avatar-large {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.metrics {
+  text-align: left;
+}
+
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.option {
+  background: #E1E1E1;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.option.selected {
+  background: #0078D4;
+  color: #fff;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px;
+  max-width: 800px;
+  border-radius: 8px;
+  position: relative;
+}
+
+.modal .close {
+  position: absolute;
+  right: 10px;
+  top: 5px;
+  font-size: 1.5rem;
+  cursor: pointer;
 }
