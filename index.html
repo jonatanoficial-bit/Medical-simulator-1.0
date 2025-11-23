@@ -1,111 +1,162 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Simulador Médico – Emergência</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Simulador Político 6.0 Plus</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <!-- Modal de Ajuda -->
-  <div id="help-modal" class="modal hidden">
-    <div class="modal-content">
-      <span id="close-help" class="close">&times;</span>
-      <h2>Manual de Procedimentos e Diagnóstico</h2>
-      <p>
-        Este manual é um guia de referência para estudantes de medicina e usuários gerais.
-        Você encontrará resumos de doenças, procedimentos diagnósticos, anatomia básica e
-        um glossário de termos médicos. Por exemplo, pneumonia causa tosse, respiração rápida e
-        opacidade em radiografia, e deve ser investigada com anamnese, ausculta e oximetria【569315069305613†L254-L334】.
-        Ataques cardíacos podem apresentar dor torácica ou desconforto no peito, fraqueza, dor no braço ou mandíbula e
-        falta de ar【187398400686526†L126-L139】; exames como ECG e marcadores cardíacos auxiliam no diagnóstico【71693362814209†L390-L473】.
-        Utilize o botão de ajuda sempre que precisar relembrar sintomas, exames e tratamentos.
+  <!-- TELA DE CAPA -->
+  <section id="start-screen" class="screen active">
+    <div class="screen-overlay"></div>
+    <div class="card start-card">
+      <h1>Simulador Político 6.0 Plus</h1>
+      <p class="subtitle">
+        Viva a experiência da política brasileira de forma realista.
       </p>
-    </div>
-  </div>
-
-  <!-- Tela inicial -->
-  <div id="start-screen" class="screen">
-    <!--
-      A capa pode estar em diferentes formatos (cover.png ou capa.jpg). Para garantir
-      que a imagem sempre apareça independentemente da extensão, utilizamos a
-      propriedade onerror para definir uma segunda opção caso a primeira não exista.
-    -->
-    <img id="cover-image" src="images/cover.png" alt="Capa do Jogo"
-         onerror="this.onerror=null;this.src='images/capa.jpg';" class="cover">
-    <button id="start-button" class="primary">Iniciar</button>
-    <p class="disclaimer">
-      Este é um jogo educativo que simula situações reais de emergência. As decisões podem levar à cura
-      ou ao óbito do paciente. Não substitui formação profissional.
-    </p>
-  </div>
-
-  <!-- Tela de nome e avatar -->
-  <div id="name-screen" class="screen hidden">
-    <h2>Informe seu nome e escolha seu avatar</h2>
-    <input type="text" id="player-name" placeholder="Seu nome">
-    <div id="avatar-selection" class="avatars">
-      <!-- Avatares adicionados via JS -->
-    </div>
-    <button id="continue-button" class="primary">Continuar</button>
-  </div>
-
-  <!-- Tela do diretor -->
-  <div id="director-screen" class="screen hidden">
-    <img src="images/hospital_corridor.jpg" alt="Hospital" class="background">
-    <div class="overlay">
-      <p id="director-text"></p>
-      <button id="go-to-consult" class="primary">Ir para o consultório</button>
-    </div>
-  </div>
-
-  <!-- Consultório -->
-  <div id="consult-screen" class="screen hidden">
-    <!-- Fundo do consultório: utiliza a imagem "consultorio.jpg" para dar mais imersão -->
-    <img src="images/consultorio.jpg" alt="Consultório" class="background">
-    <div class="consult-header">
-      <img id="doctor-avatar" class="avatar-large" alt="Avatar do Doutor">
-      <div class="metrics">
-        <p>Prestígio: <span id="prestige">0</span></p>
-        <p>Acertos: <span id="correct">0</span></p>
-        <p>Erros: <span id="errors">0</span></p>
-        <p>Nível: <span id="level">Residente</span></p>
-        <p>Diagnósticos corretos: <span id="diag-correct">0</span></p>
-        <p>Exames corretos: <span id="exam-correct">0</span></p>
-        <p>Medicações corretas: <span id="med-correct">0</span></p>
-      </div>
-      <button id="help-button" class="secondary">Ajuda</button>
-    </div>
-    <button id="next-case" class="primary">Próximo Caso</button>
-  </div>
-
-  <!-- Tela de cada caso -->
-  <div id="case-screen" class="screen hidden">
-    <div class="case-header">
-      <img id="patient-image" class="avatar-large" alt="Foto do Paciente">
-      <div class="patient-info">
-        <h3 id="patient-name"></h3>
-        <p id="patient-symptoms"></p>
-        <p id="patient-history"></p>
+      <div class="start-buttons">
+        <button id="new-game-btn" class="btn primary">Novo jogo</button>
+        <button id="continue-btn" class="btn secondary" style="display:none;">
+          Continuar jogo
+        </button>
       </div>
     </div>
-    <div class="case-actions">
-      <h4>Diagnósticos Possíveis</h4>
-      <div id="diagnosis-options" class="options"></div>
-      <h4>Exames Disponíveis</h4>
-      <div id="test-options" class="options"></div>
-      <h4>Medicações</h4>
-      <div id="medication-options" class="options"></div>
+  </section>
+
+  <!-- TELA DE SELEÇÃO DE PARTIDO / NOME -->
+  <section id="selection-screen" class="screen">
+    <div class="card selection-card">
+      <h2>Escolha seu partido</h2>
+
+      <div id="party-list" class="party-list">
+        <!-- Preenchido pelo JS -->
+      </div>
+
+      <div class="field">
+        <label for="player-name">Seu nome</label>
+        <input id="player-name" type="text" placeholder="Digite seu nome" />
+      </div>
+
+      <div class="selection-actions">
+        <button id="confirm-selection-btn" class="btn primary">
+          Confirmar
+        </button>
+        <button id="back-to-start-btn" class="btn ghost">
+          Voltar
+        </button>
+      </div>
     </div>
-    <button id="finalize-case" class="primary">Confirmar Diagnóstico</button>
+  </section>
+
+  <!-- TELA PRINCIPAL DO JOGO -->
+  <section id="game-screen" class="screen">
+    <div class="screen-overlay game-overlay"></div>
+
+    <div class="game-container">
+      <header class="game-header">
+        <div class="player-info">
+          <span id="player-info-text"></span>
+          <span id="office-text"></span>
+        </div>
+        <div class="stats">
+          <span>Popularidade: <strong id="stat-popularity">0</strong>%</span>
+          <span>Fundos: <strong id="stat-funds">0</strong></span>
+          <span>Integridade: <strong id="stat-integrity">0</strong>%</span>
+        </div>
+        <div class="header-actions">
+          <button id="reset-btn" class="btn small ghost">
+            Novo jogo
+          </button>
+        </div>
+      </header>
+
+      <main class="game-main">
+        <div id="actions" class="actions"></div>
+
+        <section id="feed" class="feed">
+          <!-- Log do jogo -->
+        </section>
+      </main>
+    </div>
+  </section>
+
+  <!-- TELA DE ELEIÇÃO / URNA -->
+  <section id="election-screen" class="screen">
+    <div class="election-bg"></div>
+
+    <div class="card election-card">
+      <h2 id="election-title">Contagem de votos</h2>
+      <p id="election-subtitle">Apuração dos votos em andamento...</p>
+
+      <div class="vote-bars">
+        <div class="vote-bar">
+          <span class="label">Você</span>
+          <div class="bar-outer">
+            <div id="candidate-bar" class="bar-inner"></div>
+          </div>
+          <span id="candidate-percent" class="percent-label">0%</span>
+        </div>
+        <div class="vote-bar">
+          <span class="label">Oponente</span>
+          <div class="bar-outer">
+            <div id="opponent-bar" class="bar-inner opponent"></div>
+          </div>
+          <span id="opponent-percent" class="percent-label">0%</span>
+        </div>
+      </div>
+
+      <p id="election-result-text" class="result-text"></p>
+
+      <button id="election-continue-btn" class="btn primary" disabled>
+        Continuar
+      </button>
+    </div>
+  </section>
+
+  <!-- MODAL GENÉRICO -->
+  <div id="modal-overlay" class="overlay hidden">
+    <div class="overlay-backdrop"></div>
+    <div class="card modal-card">
+      <h3 id="modal-title"></h3>
+      <p id="modal-text"></p>
+      <div id="modal-options" class="modal-options">
+        <!-- Botões criados via JS -->
+      </div>
+    </div>
   </div>
 
-  <!-- Tela de exame -->
-  <div id="exam-screen" class="screen hidden">
-    <img id="exam-bg" class="background" alt="">
-    <div class="overlay">
-      <h3 id="exam-name"></h3>
-      <p id="exam-result"></p>
-      <button id="back-to-case" class="primary">Voltar ao consultório</button>
+  <!-- MODAL DE CAMPANHA -->
+  <div id="campaign-overlay" class="overlay hidden">
+    <div class="overlay-backdrop"></div>
+    <div class="card modal-card">
+      <h3>Planejar campanha</h3>
+      <p class="small-text">
+        Escolha o tom do discurso e o principal tema da campanha:
+      </p>
+
+      <div class="campaign-section">
+        <h4>Tom do discurso</h4>
+        <div id="tone-options" class="chip-group">
+          <!-- via JS -->
+        </div>
+      </div>
+
+      <div class="campaign-section">
+        <h4>Tema principal</h4>
+        <div id="theme-options" class="chip-group">
+          <!-- via JS -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button id="start-campaign-btn" class="btn primary">
+          Iniciar campanha
+        </button>
+        <button id="cancel-campaign-btn" class="btn ghost">
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
 
