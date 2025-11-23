@@ -154,7 +154,7 @@ body {
   cursor: pointer;
 }
 
-/* Correção: oculta o modal quando ele tiver a classe hidden */
+/* Correção: oculta o modal quando tiver a classe hidden */
 .modal.hidden {
   display: none !important;
 }
