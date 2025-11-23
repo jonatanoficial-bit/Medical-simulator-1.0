@@ -1,52 +1,277 @@
 /* Dados do jogo */
 
-// Avatares (ajuste os nomes conforme as imagens que você possui na pasta assets)
+// Avatares (use os arquivos que estão em images/)
 const avatars = [
-  { id: 'avatar1', name: 'Doutor 1', src: 'assets/avatar1.png' },
-  { id: 'avatar2', name: 'Doutor 2', src: 'assets/avatar2.png' },
-  { id: 'avatar3', name: 'Doutora 1', src: 'assets/avatar3.png' },
-  { id: 'avatar4', name: 'Doutora 2', src: 'assets/avatar4.png' },
-  { id: 'avatar5', name: 'Doutor 3', src: 'assets/avatar5.png' },
-  { id: 'avatar6', name: 'Doutora 3', src: 'assets/avatar6.png' }
+  { id: 'avatar1', name: 'Doutor 1', src: 'images/avatar1.png' },
+  { id: 'avatar2', name: 'Doutor 2', src: 'images/avatar2.png' },
+  { id: 'avatar3', name: 'Doutora 1', src: 'images/avatar3.png' },
+  { id: 'avatar4', name: 'Doutora 2', src: 'images/avatar4.png' },
+  { id: 'avatar5', name: 'Doutor 3', src: 'images/avatar5.png' },
+  { id: 'avatar6', name: 'Doutora 3', src: 'images/avatar6.png' }
 ];
 
-// Casos clínicos – adicione quantos casos quiser seguindo este formato
+// Casos clínicos. Incluí 14 exemplos para abranger várias emergências.
+// Para adicionar mais casos, repita o padrão.
 const cases = [
   {
-    patientName: 'Sr. José',
-    patientImage: 'assets/patient1.png',
-    symptoms: 'Dor no peito, sudorese e falta de ar.',
-    history: 'Hipertenso, fumante. Dor iniciou há 30 minutos.',
+    patientName: 'José Almeida',
+    patientImage: 'images/avatar1.png',
+    symptoms: 'Dor no peito, sudorese, falta de ar.',
+    history: 'Hipertenso e fumante; dor começou há 30 minutos.',
     diagnoses: ['Infarto agudo do miocárdio', 'Pneumonia', 'Colecistite'],
     correctDiagnosis: 'Infarto agudo do miocárdio',
-    tests: ['ECG', 'Raio X de tórax', 'Tomografia abdominal'],
-    correctTests: ['ECG'],
+    tests: ['ECG', 'Raio X de tórax', 'Tomografia abdominal', 'Exame de sangue'],
+    correctTests: ['ECG', 'Exame de sangue'],
     testResults: {
-      'ECG': 'Mostra supradesnível do segmento ST em derivações inferiores.',
+      'ECG': 'Mostra supradesnível do segmento ST.',
       'Raio X de tórax': 'Sem alterações significativas.',
-      'Tomografia abdominal': 'Sem alterações.'
+      'Tomografia abdominal': 'Sem alterações.',
+      'Exame de sangue': 'Troponina elevada.'
     },
-    medications: ['Aspirina', 'Nitroglicerina', 'Amoxicilina'],
+    medications: ['Aspirina', 'Nitroglicerina', 'Amoxicilina', 'MorfinA'],
     correctMeds: ['Aspirina', 'Nitroglicerina']
   },
   {
-    patientName: 'Dona Maria',
-    patientImage: 'assets/patient2.png',
-    symptoms: 'Febre, tosse produtiva e dor torácica ao respirar.',
-    history: 'Diabética, começou com tosse há 3 dias.',
-    diagnoses: ['Pneumonia', 'Asma', 'Infarto agudo do miocárdio'],
+    patientName: 'Maria dos Santos',
+    patientImage: 'images/avatar2.png',
+    symptoms: 'Febre, tosse com catarro, dor ao respirar.',
+    history: 'Diabética; tosse há 3 dias; sem alergias conhecidas.',
+    diagnoses: ['Pneumonia', 'Asma', 'Bronquite'],
     correctDiagnosis: 'Pneumonia',
-    tests: ['Raio X de tórax', 'Gasometria arterial', 'ECG'],
-    correctTests: ['Raio X de tórax', 'Gasometria arterial'],
+    tests: ['Raio X de tórax', 'Gasometria arterial', 'ECG', 'Hemograma'],
+    correctTests: ['Raio X de tórax', 'Gasometria arterial', 'Hemograma'],
     testResults: {
-      'Raio X de tórax': 'Infiltrado lobar direito compatível com pneumonia.',
+      'Raio X de tórax': 'Infiltrado lobar direito.',
       'Gasometria arterial': 'Hipoxemia moderada.',
-      'ECG': 'Normal.'
+      'ECG': 'Normal.',
+      'Hemograma': 'Leucocitose.'
     },
-    medications: ['Amoxicilina', 'Salbutamol', 'Morfina'],
-    correctMeds: ['Amoxicilina']
+    medications: ['Amoxicilina', 'Salbutamol', 'Morfina', 'Ceftriaxona'],
+    correctMeds: ['Amoxicilina', 'Ceftriaxona']
   },
-  // Adicione mais objetos para criar um jogo mais longo.
+  {
+    patientName: 'Carlos Pereira',
+    patientImage: 'images/avatar3.png',
+    symptoms: 'Dor abdominal intensa no quadrante inferior direito, febre leve.',
+    history: 'Início súbito; sem doenças prévias; náuseas e perda de apetite.',
+    diagnoses: ['Apendicite', 'Cólica Renal', 'Gastrite'],
+    correctDiagnosis: 'Apendicite',
+    tests: ['Ultrassom abdominal', 'Tomografia abdominal', 'Exame de urina'],
+    correctTests: ['Ultrassom abdominal', 'Tomografia abdominal'],
+    testResults: {
+      'Ultrassom abdominal': 'Apendice inflamado com diâmetro aumentado.',
+      'Tomografia abdominal': 'Inflamação periapendicular.',
+      'Exame de urina': 'Sem alterações.'
+    },
+    medications: ['Ceftriaxona', 'Metamizol', 'Hidratação intravenosa'],
+    correctMeds: ['Ceftriaxona', 'Hidratação intravenosa']
+  },
+  {
+    patientName: 'Ana Oliveira',
+    patientImage: 'images/avatar4.png',
+    symptoms: 'Dor de cabeça súbita, dificuldade para falar, paralisia facial à direita.',
+    history: 'Hipertensa; tomou medicamento pela manhã; sem traumas recentes.',
+    diagnoses: ['Acidente vascular cerebral (AVC)', 'Enxaqueca', 'Hipoglicemia'],
+    correctDiagnosis: 'Acidente vascular cerebral (AVC)',
+    tests: ['TC de crânio', 'ECG', 'Glicemia capilar'],
+    correctTests: ['TC de crânio', 'Glicemia capilar'],
+    testResults: {
+      'TC de crânio': 'Área hipodensa compatível com AVC isquêmico.',
+      'ECG': 'Fibrilação atrial.',
+      'Glicemia capilar': 'Nível de glicose normal.'
+    },
+    medications: ['AAS', 'Anticoagulante', 'Insulina'],
+    correctMeds: ['AAS', 'Anticoagulante']
+  },
+  {
+    patientName: 'Ricardo Souza',
+    patientImage: 'images/avatar5.png',
+    symptoms: 'Sede extrema, urina frequente, dor abdominal, respiração rápida.',
+    history: 'Portador de diabetes tipo 1; não aplicou insulina há 2 dias.',
+    diagnoses: ['Cetoacidose diabética', 'Hipoglicemia', 'Gastrite'],
+    correctDiagnosis: 'Cetoacidose diabética',
+    tests: ['Glicemia capilar', 'Gasometria arterial', 'Hemograma', 'Cetonúria'],
+    correctTests: ['Glicemia capilar', 'Gasometria arterial', 'Cetonúria'],
+    testResults: {
+      'Glicemia capilar': 'Acima de 350 mg/dL.',
+      'Gasometria arterial': 'pH baixo, bicarbonato reduzido.',
+      'Hemograma': 'Hematócrito elevado.',
+      'Cetonúria': 'Presença de corpos cetônicos.'
+    },
+    medications: ['Insulina IV', 'Reposição de potássio', 'Soro fisiológico', 'Metoclopramida'],
+    correctMeds: ['Insulina IV', 'Reposição de potássio', 'Soro fisiológico']
+  },
+  {
+    patientName: 'Fernanda Lima',
+    patientImage: 'images/avatar6.png',
+    symptoms: 'Febre alta, tremores, respiração rápida, confusão mental.',
+    history: 'Infecção urinária recente não tratada adequadamente.',
+    diagnoses: ['Sepse', 'Gripe', 'Desidratação'],
+    correctDiagnosis: 'Sepse',
+    tests: ['Hemocultura', 'Hemograma', 'Gasometria arterial', 'Lactato sérico'],
+    correctTests: ['Hemocultura', 'Hemograma', 'Lactato sérico'],
+    testResults: {
+      'Hemocultura': 'Crescimento de bactéria gram-negativa.',
+      'Hemograma': 'Leucocitose com desvio à esquerda.',
+      'Gasometria arterial': 'Acidose metabólica.',
+      'Lactato sérico': 'Elevado.'
+    },
+    medications: ['Antibiótico de amplo espectro', 'Vasopressor', 'Soro fisiológico', 'Ibuprofeno'],
+    correctMeds: ['Antibiótico de amplo espectro', 'Vasopressor', 'Soro fisiológico']
+  },
+  {
+    patientName: 'Cláudio Menezes',
+    patientImage: 'images/avatar1.png',
+    symptoms: 'Tosse seca, febre, perda de olfato e paladar.',
+    history: 'Sintomas iniciaram há 4 dias; contato com caso positivo de COVID-19.',
+    diagnoses: ['COVID-19', 'Pneumonia viral', 'Alergia respiratória'],
+    correctDiagnosis: 'COVID-19',
+    tests: ['Teste PCR', 'Hemograma', 'Raio X de tórax'],
+    correctTests: ['Teste PCR', 'Raio X de tórax'],
+    testResults: {
+      'Teste PCR': 'Positivo.',
+      'Hemograma': 'Linfopenia.',
+      'Raio X de tórax': 'Vidro fosco bilateral.'
+    },
+    medications: ['Analgesia leve', 'Antivirais', 'Hidratação oral', 'Corticóide sistêmico'],
+    correctMeds: ['Analgesia leve', 'Hidratação oral', 'Corticóide sistêmico']
+  },
+  {
+    patientName: 'Sônia Braga',
+    patientImage: 'images/avatar2.png',
+    symptoms: 'Dor lombar intensa, hematuria, náuseas.',
+    history: 'Episódios prévios de cólica renal; sem febre.',
+    diagnoses: ['Cólica renal por cálculo', 'Pielonefrite', 'Apendicite'],
+    correctDiagnosis: 'Cólica renal por cálculo',
+    tests: ['Ultrassom renal', 'Tomografia abdominal', 'Exame de urina'],
+    correctTests: ['Ultrassom renal', 'Exame de urina'],
+    testResults: {
+      'Ultrassom renal': 'Cálculo em ureter distal.',
+      'Tomografia abdominal': 'Cálculo ureteral evidenciado.',
+      'Exame de urina': 'Hemácias numerosas.'
+    },
+    medications: ['Hidratação intravenosa', 'Analgesia (Diclofenaco)', 'Antibiótico', 'Tansulosina'],
+    correctMeds: ['Hidratação intravenosa', 'Analgesia (Diclofenaco)', 'Tansulosina']
+  },
+  {
+    patientName: 'Luciana Barros',
+    patientImage: 'images/avatar3.png',
+    symptoms: 'Rash cutâneo, urticária, dificuldade para respirar, inchaço em lábios.',
+    history: 'Ingestão de camarão há 30 minutos; sem histórico de alergias graves.',
+    diagnoses: ['Reação alérgica grave (anafilaxia)', 'Dermatite', 'Bronquite'],
+    correctDiagnosis: 'Reação alérgica grave (anafilaxia)',
+    tests: ['Oximetria', 'Exame de sangue', 'Gasometria arterial'],
+    correctTests: ['Oximetria', 'Gasometria arterial'],
+    testResults: {
+      'Oximetria': 'Saturação de O2 em 88%.',
+      'Exame de sangue': 'Histamina elevada.',
+      'Gasometria arterial': 'Hipoxemia.'
+    },
+    medications: ['Adrenalina IM', 'Antihistamínico', 'Corticóide sistêmico', 'Insulina'],
+    correctMeds: ['Adrenalina IM', 'Antihistamínico', 'Corticóide sistêmico']
+  },
+  {
+    patientName: 'Paulo Ribeiro',
+    patientImage: 'images/avatar4.png',
+    symptoms: 'Náuseas, vômito com sangue, dor epigástrica em queimação.',
+    history: 'Hábito de consumir álcool; uso de anti-inflamatórios; jejum prolongado.',
+    diagnoses: ['Úlcera gástrica', 'Gastrite', 'Pancreatite'],
+    correctDiagnosis: 'Úlcera gástrica',
+    tests: ['Endoscopia digestiva alta', 'Exame de fezes', 'Ultrassom abdominal'],
+    correctTests: ['Endoscopia digestiva alta'],
+    testResults: {
+      'Endoscopia digestiva alta': 'Lesão ulcerada no antro gástrico.',
+      'Exame de fezes': 'Positivo para sangue oculto.',
+      'Ultrassom abdominal': 'Normal.'
+    },
+    medications: ['Omeprazol', 'Sucralfato', 'Hidratação oral', 'Antibiótico'],
+    correctMeds: ['Omeprazol', 'Sucralfato']
+  },
+  {
+    patientName: 'Vitória Silva',
+    patientImage: 'images/avatar5.png',
+    symptoms: 'Queda, dor intensa no braço, deformidade visível.',
+    history: 'Sofreu queda ao escorregar; sem doenças prévias.',
+    diagnoses: ['Fratura de rádio', 'Luxação de ombro', 'Contusão'],
+    correctDiagnosis: 'Fratura de rádio',
+    tests: ['Raio X de braço', 'Ressonância magnética', 'Hemograma'],
+    correctTests: ['Raio X de braço'],
+    testResults: {
+      'Raio X de braço': 'Fratura transversal em rádio distal.',
+      'Ressonância magnética': 'Confirma fratura sem lesões adicionais.',
+      'Hemograma': 'Normal.'
+    },
+    medications: ['Imobilização', 'Analgesia (Paracetamol)', 'Antibiótico', 'AAS'],
+    correctMeds: ['Imobilização', 'Analgesia (Paracetamol)']
+  },
+  {
+    patientName: 'Felipe Souza',
+    patientImage: 'images/avatar6.png',
+    symptoms: 'Fome, fraqueza, sudorese fria, confusão mental.',
+    history: 'Diabético tipo 2; tomou insulina pela manhã, sem café da manhã.',
+    diagnoses: ['Hipoglicemia', 'Hiperglicemia', 'Hipotensão'],
+    correctDiagnosis: 'Hipoglicemia',
+    tests: ['Glicemia capilar', 'ECG', 'Hemograma'],
+    correctTests: ['Glicemia capilar'],
+    testResults: {
+      'Glicemia capilar': '50 mg/dL.',
+      'ECG': 'Normal.',
+      'Hemograma': 'Normal.'
+    },
+    medications: ['Glicose oral', 'Glicose IV', 'Adrenalina', 'Insulina'],
+    correctMeds: ['Glicose oral', 'Glicose IV']
+  },
+  {
+    patientName: 'Roberta Pereira',
+    patientImage: 'images/avatar1.png',
+    symptoms: 'Dificuldade para respirar, chiado no peito, tosse seca.',
+    history: 'Crises anteriores de asma; utiliza broncodilatador frequentemente.',
+    diagnoses: ['Crise asmática', 'Pneumonite química', 'Bronquite crônica'],
+    correctDiagnosis: 'Crise asmática',
+    tests: ['Oximetria', 'Gasometria arterial', 'Raio X de tórax'],
+    correctTests: ['Oximetria', 'Gasometria arterial'],
+    testResults: {
+      'Oximetria': 'Saturação de O2 em 90%.',
+      'Gasometria arterial': 'CO2 elevado, pH baixo.',
+      'Raio X de tórax': 'Sem infiltrado.'
+    },
+    medications: ['Salbutamol inalatório', 'Corticóide inalatório', 'Antibiótico', 'Loratadina'],
+    correctMeds: ['Salbutamol inalatório', 'Corticóide inalatório']
+  },
+  {
+    patientName: 'Marcos Vieira',
+    patientImage: 'images/avatar2.png',
+    symptoms: 'Vertigem intensa, náuseas, nistagmo, zumbido.',
+    history: 'Sem histórico de trauma; relatando sintoma ao girar a cabeça.',
+    diagnoses: ['Labirintite', 'AVC', 'Infecção de ouvido'],
+    correctDiagnosis: 'Labirintite',
+    tests: ['Avaliação clínica', 'Ressonância magnética', 'Audiometria'],
+    correctTests: ['Avaliação clínica', 'Audiometria'],
+    testResults: {
+      'Avaliação clínica': 'Testes de Dix-Hallpike positivos para vertigem.',
+      'Ressonância magnética': 'Sem alterações significativas.',
+      'Audiometria': 'Perda auditiva leve em alta frequência.'
+    },
+    medications: ['Meclizina', 'Dimenidrinato', 'Antibiótico', 'Glicose IV'],
+    correctMeds: ['Meclizina', 'Dimenidrinato']
+  },
+  {
+    patientName: 'Helena Castro',
+    patientImage: 'images/avatar3.png',
+    symptoms: 'Dor torácica aguda ao inspirar profundamente, falta de ar, ansiedade.',
+    history: 'Recém saída de cirurgia abdominal; toma anticoagulante.',
+    diagnoses: ['Embolia pulmonar', 'Pneumotórax', 'Costocondrite'],
+    correctDiagnosis: 'Embolia pulmonar',
+    tests: ['Angiotomografia pulmonar', 'Raio X de tórax', 'D-dímero'],
+    correctTests: ['Angiotomografia pulmonar', 'D-dímero'],
+    testResults: {
+      'Angiotomografia pulmonar': 'Obstrução parcial de artéria pulmonar.',
+      'Raio X de tórax': 'Sem colapso pulmonar.',
+      'D-dímero': 'Elevado.'
+    },
+    medications: ['Heparina', 'Oxigênio suplementar', 'Morfina', 'Omeprazol'],
+    correctMeds: ['Heparina', 'Oxigênio suplementar']
+  }
 ];
 
 /* Variáveis de estado */
@@ -72,7 +297,6 @@ document.getElementById('start-button').addEventListener('click', () => {
   populateAvatars();
 });
 
-// Preenche a seleção de avatares
 function populateAvatars() {
   const container = document.getElementById('avatar-selection');
   container.innerHTML = '';
@@ -102,7 +326,6 @@ document.getElementById('continue-button').addEventListener('click', () => {
   runDirectorDialogue();
 });
 
-// Efeito de máquina de escrever para a fala do diretor
 function runDirectorDialogue() {
   const text = `Bem-vindo(a) Dr(a). ${playerName}! Temos várias emergências chegando e precisamos que assuma seu posto imediatamente. Boa sorte!`;
   const p = document.getElementById('director-text');
@@ -122,7 +345,6 @@ document.getElementById('go-to-consult').addEventListener('click', () => {
   loadMetrics();
 });
 
-// Carrega as métricas na tela de consultório
 function loadMetrics() {
   document.getElementById('prestige').textContent = prestige;
   document.getElementById('correct').textContent = correctCount;
@@ -130,7 +352,6 @@ function loadMetrics() {
   document.getElementById('level').textContent = level;
 }
 
-// Exibe ajuda
 document.getElementById('help-button').addEventListener('click', () => {
   helpModal.classList.remove('hidden');
 });
@@ -138,7 +359,6 @@ document.getElementById('close-help').addEventListener('click', () => {
   helpModal.classList.add('hidden');
 });
 
-// Próximo caso
 document.getElementById('next-case').addEventListener('click', () => {
   if (currentCaseIndex >= cases.length) {
     alert('Parabéns! Você atendeu todos os casos disponíveis.');
@@ -149,7 +369,6 @@ document.getElementById('next-case').addEventListener('click', () => {
   displayCase(cases[currentCaseIndex]);
 });
 
-// Exibe o caso atual
 function displayCase(c) {
   document.getElementById('patient-name').textContent = c.patientName;
   document.getElementById('patient-image').src = c.patientImage;
@@ -180,7 +399,6 @@ function displayCase(c) {
         btn.classList.remove('selected');
       } else {
         btn.classList.add('selected');
-        // Exibe resultado imediatamente
         alert('Resultado de ' + test + ': ' + c.testResults[test]);
       }
     });
@@ -200,7 +418,6 @@ function displayCase(c) {
   });
 }
 
-// Finaliza o caso e pontua
 document.getElementById('finalize-case').addEventListener('click', () => {
   const c = cases[currentCaseIndex];
   const chosenDiag = document.querySelector('#diagnosis-options .option.selected');
@@ -215,12 +432,10 @@ document.getElementById('finalize-case').addEventListener('click', () => {
   let correct = true;
   if (chosenDiag.textContent !== c.correctDiagnosis) correct = false;
 
-  // Verifica exames corretos
   c.correctTests.forEach(t => {
     if (!selectedTests.includes(t)) correct = false;
   });
 
-  // Verifica medicamentos corretos
   c.correctMeds.forEach(m => {
     if (!selectedMeds.includes(m)) correct = false;
   });
@@ -234,7 +449,7 @@ document.getElementById('finalize-case').addEventListener('click', () => {
     prestige = Math.max(0, prestige - 5);
     alert('Diagnóstico incorreto.');
   }
-  // Atualiza nível
+
   if (correctCount >= 5 && level === 'Residente') level = 'Titular';
   if (correctCount >= 10 && level === 'Titular') level = 'Pleno';
 
