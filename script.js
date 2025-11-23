@@ -1,11 +1,13 @@
 /* Dados do jogo */
 
-// Avatares (substitua os arquivos por suas próprias imagens na pasta assets)
+// Avatares (ajuste os nomes conforme as imagens que você possui na pasta assets)
 const avatars = [
   { id: 'avatar1', name: 'Doutor 1', src: 'assets/avatar1.png' },
   { id: 'avatar2', name: 'Doutor 2', src: 'assets/avatar2.png' },
   { id: 'avatar3', name: 'Doutora 1', src: 'assets/avatar3.png' },
-  { id: 'avatar4', name: 'Doutora 2', src: 'assets/avatar4.png' }
+  { id: 'avatar4', name: 'Doutora 2', src: 'assets/avatar4.png' },
+  { id: 'avatar5', name: 'Doutor 3', src: 'assets/avatar5.png' },
+  { id: 'avatar6', name: 'Doutora 3', src: 'assets/avatar6.png' }
 ];
 
 // Casos clínicos – adicione quantos casos quiser seguindo este formato
@@ -44,7 +46,7 @@ const cases = [
     medications: ['Amoxicilina', 'Salbutamol', 'Morfina'],
     correctMeds: ['Amoxicilina']
   },
-  // Você pode adicionar mais objetos para criar um jogo longo.
+  // Adicione mais objetos para criar um jogo mais longo.
 ];
 
 /* Variáveis de estado */
