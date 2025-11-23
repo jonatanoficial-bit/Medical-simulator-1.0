@@ -153,3 +153,8 @@ body {
   font-size: 1.5rem;
   cursor: pointer;
 }
+
+/* Correção: oculta o modal quando ele tiver a classe hidden */
+.modal.hidden {
+  display: none !important;
+}
