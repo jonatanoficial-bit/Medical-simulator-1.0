@@ -1,536 +1,844 @@
-/* Dados do jogo */
+// ===== CONFIGURAÇÃO BÁSICA =====
 
-// Avatares (use os arquivos que estão em images/)
-const avatars = [
-  { id: 'avatar1', name: 'Doutor 1', src: 'images/avatar1.png' },
-  { id: 'avatar2', name: 'Doutor 2', src: 'images/avatar2.png' },
-  { id: 'avatar3', name: 'Doutora 1', src: 'images/avatar3.png' },
-  { id: 'avatar4', name: 'Doutora 2', src: 'images/avatar4.png' },
-  { id: 'avatar5', name: 'Doutor 3', src: 'images/avatar5.png' },
-  { id: 'avatar6', name: 'Doutora 3', src: 'images/avatar6.png' }
-];
+const STORAGE_KEY = "simuladorPoliticoSave_v6";
 
-// Mapeamento de exames para imagens de fundo
-const examBackgrounds = {
-  'ECG': 'labs.jpg',
-  'Raio X de tórax': 'xray.jpg',
-  'Raio X de braço': 'xray.jpg',
-  'Tomografia abdominal': 'mri.jpg',
-  'Tomografia de crânio': 'mri.jpg',
-  'Ultrassom abdominal': 'mri.jpg',
-  'Ultrassom renal': 'mri.jpg',
-  'TC de crânio': 'mri.jpg',
-  'Gasometria arterial': 'labs.jpg',
-  'Glicemia capilar': 'labs.jpg',
-  'Exame de sangue': 'labs.jpg',
-  'Exame de urina': 'labs.jpg',
-  'Hemograma': 'labs.jpg',
-  'Hemocultura': 'labs.jpg',
-  'Lactato sérico': 'labs.jpg',
-  'Teste PCR': 'labs.jpg',
-  'Endoscopia digestiva alta': 'labs.jpg',
-  'Angiotomografia pulmonar': 'mri.jpg',
-  'Audiometria': 'labs.jpg',
-  'Avaliação clínica': 'labs.jpg',
-  'Ressonância magnética': 'mri.jpg'
+// Estado do jogo
+let state = {
+  name: "",
+  party: null,
+  officeIndex: 0,
+  popularity: 50,
+  funds: 50,
+  integrity: 50,
 };
 
-// Casos clínicos. Utilize "patient_male.png" ou "patient_female.png" como avatares genéricos para pacientes.
-const cases = [
+// Cargos e fundos de tela
+const offices = [
+  { name: "Vereador", bg: "assets/municipal.png", type: "legislative" },
   {
-    patientName: 'José Almeida',
-    patientImage: 'images/patient_male.png',
-    symptoms: 'Dor no peito, sudorese, falta de ar.',
-    history: 'Hipertenso e fumante; dor começou há 30 minutos.',
-    diagnoses: ['Infarto agudo do miocárdio', 'Pneumonia', 'Colecistite'],
-    correctDiagnosis: 'Infarto agudo do miocárdio',
-    tests: ['ECG', 'Raio X de tórax', 'Tomografia abdominal', 'Exame de sangue'],
-    correctTests: ['ECG', 'Exame de sangue'],
-    testResults: {
-      'ECG': 'Mostra supradesnível do segmento ST.',
-      'Raio X de tórax': 'Sem alterações significativas.',
-      'Tomografia abdominal': 'Sem alterações.',
-      'Exame de sangue': 'Troponina elevada.'
-    },
-    medications: ['Aspirina', 'Nitroglicerina', 'Amoxicilina', 'Morfina'],
-    correctMeds: ['Aspirina', 'Nitroglicerina']
+    name: "Deputado Estadual",
+    bg: "assets/assembly.png",
+    type: "legislative",
   },
   {
-    patientName: 'Maria dos Santos',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Febre, tosse com catarro, dor ao respirar.',
-    history: 'Diabética; tosse há 3 dias; sem alergias conhecidas.',
-    diagnoses: ['Pneumonia', 'Asma', 'Bronquite'],
-    correctDiagnosis: 'Pneumonia',
-    tests: ['Raio X de tórax', 'Gasometria arterial', 'ECG', 'Hemograma'],
-    correctTests: ['Raio X de tórax', 'Gasometria arterial', 'Hemograma'],
-    testResults: {
-      'Raio X de tórax': 'Infiltrado lobar direito.',
-      'Gasometria arterial': 'Hipoxemia moderada.',
-      'ECG': 'Normal.',
-      'Hemograma': 'Leucocitose.'
-    },
-    medications: ['Amoxicilina', 'Salbutamol', 'Morfina', 'Ceftriaxona'],
-    correctMeds: ['Amoxicilina', 'Ceftriaxona']
+    name: "Deputado Federal",
+    bg: "assets/federal.png",
+    type: "legislative",
   },
-  {
-    patientName: 'Carlos Pereira',
-    patientImage: 'images/patient_male.png',
-    symptoms: 'Dor abdominal intensa no quadrante inferior direito, febre leve.',
-    history: 'Início súbito; sem doenças prévias; náuseas e perda de apetite.',
-    diagnoses: ['Apendicite', 'Cólica Renal', 'Gastrite'],
-    correctDiagnosis: 'Apendicite',
-    tests: ['Ultrassom abdominal', 'Tomografia abdominal', 'Exame de urina'],
-    correctTests: ['Ultrassom abdominal', 'Tomografia abdominal'],
-    testResults: {
-      'Ultrassom abdominal': 'Apendice inflamado com diâmetro aumentado.',
-      'Tomografia abdominal': 'Inflamação periapendicular.',
-      'Exame de urina': 'Sem alterações.'
-    },
-    medications: ['Ceftriaxona', 'Metamizol', 'Hidratação intravenosa'],
-    correctMeds: ['Ceftriaxona', 'Hidratação intravenosa']
-  },
-  {
-    patientName: 'Ana Oliveira',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Dor de cabeça súbita, dificuldade para falar, paralisia facial à direita.',
-    history: 'Hipertensa; tomou medicamento pela manhã; sem traumas recentes.',
-    diagnoses: ['Acidente vascular cerebral (AVC)', 'Enxaqueca', 'Hipoglicemia'],
-    correctDiagnosis: 'Acidente vascular cerebral (AVC)',
-    tests: ['TC de crânio', 'ECG', 'Glicemia capilar'],
-    correctTests: ['TC de crânio', 'Glicemia capilar'],
-    testResults: {
-      'TC de crânio': 'Área hipodensa compatível com AVC isquêmico.',
-      'ECG': 'Fibrilação atrial.',
-      'Glicemia capilar': 'Nível de glicose normal.'
-    },
-    medications: ['AAS', 'Anticoagulante', 'Insulina'],
-    correctMeds: ['AAS', 'Anticoagulante']
-  },
-  {
-    patientName: 'Ricardo Souza',
-    patientImage: 'images/patient_male.png',
-    symptoms: 'Sede extrema, urina frequente, dor abdominal, respiração rápida.',
-    history: 'Portador de diabetes tipo 1; não aplicou insulina há 2 dias.',
-    diagnoses: ['Cetoacidose diabética', 'Hipoglicemia', 'Gastrite'],
-    correctDiagnosis: 'Cetoacidose diabética',
-    tests: ['Glicemia capilar', 'Gasometria arterial', 'Hemograma', 'Cetonúria'],
-    correctTests: ['Glicemia capilar', 'Gasometria arterial', 'Cetonúria'],
-    testResults: {
-      'Glicemia capilar': 'Acima de 350 mg/dL.',
-      'Gasometria arterial': 'pH baixo, bicarbonato reduzido.',
-      'Hemograma': 'Hematócrito elevado.',
-      'Cetonúria': 'Presença de corpos cetônicos.'
-    },
-    medications: ['Insulina IV', 'Reposição de potássio', 'Soro fisiológico', 'Metoclopramida'],
-    correctMeds: ['Insulina IV', 'Reposição de potássio', 'Soro fisiológico']
-  },
-  {
-    patientName: 'Fernanda Lima',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Febre alta, tremores, respiração rápida, confusão mental.',
-    history: 'Infecção urinária recente não tratada adequadamente.',
-    diagnoses: ['Sepse', 'Gripe', 'Desidratação'],
-    correctDiagnosis: 'Sepse',
-    tests: ['Hemocultura', 'Hemograma', 'Gasometria arterial', 'Lactato sérico'],
-    correctTests: ['Hemocultura', 'Hemograma', 'Lactato sérico'],
-    testResults: {
-      'Hemocultura': 'Crescimento de bactéria gram-negativa.',
-      'Hemograma': 'Leucocitose com desvio à esquerda.',
-      'Gasometria arterial': 'Acidose metabólica.',
-      'Lactato sérico': 'Elevado.'
-    },
-    medications: ['Antibiótico de amplo espectro', 'Vasopressor', 'Soro fisiológico', 'Ibuprofeno'],
-    correctMeds: ['Antibiótico de amplo espectro', 'Vasopressor', 'Soro fisiológico']
-  },
-  {
-    patientName: 'Cláudio Menezes',
-    patientImage: 'images/patient_male.png',
-    symptoms: 'Tosse seca, febre, perda de olfato e paladar.',
-    history: 'Sintomas iniciaram há 4 dias; contato com caso positivo de COVID-19.',
-    diagnoses: ['COVID-19', 'Pneumonia viral', 'Alergia respiratória'],
-    correctDiagnosis: 'COVID-19',
-    tests: ['Teste PCR', 'Hemograma', 'Raio X de tórax'],
-    correctTests: ['Teste PCR', 'Raio X de tórax'],
-    testResults: {
-      'Teste PCR': 'Positivo.',
-      'Hemograma': 'Linfopenia.',
-      'Raio X de tórax': 'Vidro fosco bilateral.'
-    },
-    medications: ['Analgesia leve', 'Antivirais', 'Hidratação oral', 'Corticóide sistêmico'],
-    correctMeds: ['Analgesia leve', 'Hidratação oral', 'Corticóide sistêmico']
-  },
-  {
-    patientName: 'Sônia Braga',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Dor lombar intensa, hematuria, náuseas.',
-    history: 'Episódios prévios de cólica renal; sem febre.',
-    diagnoses: ['Cólica renal por cálculo', 'Pielonefrite', 'Apendicite'],
-    correctDiagnosis: 'Cólica renal por cálculo',
-    tests: ['Ultrassom renal', 'Tomografia abdominal', 'Exame de urina'],
-    correctTests: ['Ultrassom renal', 'Exame de urina'],
-    testResults: {
-      'Ultrassom renal': 'Cálculo em ureter distal.',
-      'Tomografia abdominal': 'Cálculo ureteral evidenciado.',
-      'Exame de urina': 'Hemácias numerosas.'
-    },
-    medications: ['Hidratação intravenosa', 'Analgesia (Diclofenaco)', 'Antibiótico', 'Tansulosina'],
-    correctMeds: ['Hidratação intravenosa', 'Analgesia (Diclofenaco)', 'Tansulosina']
-  },
-  {
-    patientName: 'Luciana Barros',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Rash cutâneo, urticária, dificuldade para respirar, inchaço em lábios.',
-    history: 'Ingestão de camarão há 30 minutos; sem histórico de alergias graves.',
-    diagnoses: ['Reação alérgica grave (anafilaxia)', 'Dermatite', 'Bronquite'],
-    correctDiagnosis: 'Reação alérgica grave (anafilaxia)',
-    tests: ['Oximetria', 'Exame de sangue', 'Gasometria arterial'],
-    correctTests: ['Oximetria', 'Gasometria arterial'],
-    testResults: {
-      'Oximetria': 'Saturação de O2 em 88%.',
-      'Exame de sangue': 'Histamina elevada.',
-      'Gasometria arterial': 'Hipoxemia.'
-    },
-    medications: ['Adrenalina IM', 'Antihistamínico', 'Corticóide sistêmico', 'Insulina'],
-    correctMeds: ['Adrenalina IM', 'Antihistamínico', 'Corticóide sistêmico']
-  },
-  {
-    patientName: 'Paulo Ribeiro',
-    patientImage: 'images/patient_male.png',
-    symptoms: 'Náuseas, vômito com sangue, dor epigástrica em queimação.',
-    history: 'Hábito de consumir álcool; uso de anti-inflamatórios; jejum prolongado.',
-    diagnoses: ['Úlcera gástrica', 'Gastrite', 'Pancreatite'],
-    correctDiagnosis: 'Úlcera gástrica',
-    tests: ['Endoscopia digestiva alta', 'Exame de fezes', 'Ultrassom abdominal'],
-    correctTests: ['Endoscopia digestiva alta'],
-    testResults: {
-      'Endoscopia digestiva alta': 'Lesão ulcerada no antro gástrico.',
-      'Exame de fezes': 'Positivo para sangue oculto.',
-      'Ultrassom abdominal': 'Normal.'
-    },
-    medications: ['Omeprazol', 'Sucralfato', 'Hidratação oral', 'Antibiótico'],
-    correctMeds: ['Omeprazol', 'Sucralfato']
-  },
-  {
-    patientName: 'Vitória Silva',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Queda, dor intensa no braço, deformidade visível.',
-    history: 'Sofreu queda ao escorregar; sem doenças prévias.',
-    diagnoses: ['Fratura de rádio', 'Luxação de ombro', 'Contusão'],
-    correctDiagnosis: 'Fratura de rádio',
-    tests: ['Raio X de braço', 'Ressonância magnética', 'Hemograma'],
-    correctTests: ['Raio X de braço'],
-    testResults: {
-      'Raio X de braço': 'Fratura transversal em rádio distal.',
-      'Ressonância magnética': 'Confirma fratura sem lesões adicionais.',
-      'Hemograma': 'Normal.'
-    },
-    medications: ['Imobilização', 'Analgesia (Paracetamol)', 'Antibiótico', 'AAS'],
-    correctMeds: ['Imobilização', 'Analgesia (Paracetamol)']
-  },
-  {
-    patientName: 'Felipe Souza',
-    patientImage: 'images/patient_male.png',
-    symptoms: 'Fome, fraqueza, sudorese fria, confusão mental.',
-    history: 'Diabético tipo 2; tomou insulina pela manhã, sem café da manhã.',
-    diagnoses: ['Hipoglicemia', 'Hiperglicemia', 'Hipotensão'],
-    correctDiagnosis: 'Hipoglicemia',
-    tests: ['Glicemia capilar', 'ECG', 'Hemograma'],
-    correctTests: ['Glicemia capilar'],
-    testResults: {
-      'Glicemia capilar': '50 mg/dL.',
-      'ECG': 'Normal.',
-      'Hemograma': 'Normal.'
-    },
-    medications: ['Glicose oral', 'Glicose IV', 'Adrenalina', 'Insulina'],
-    correctMeds: ['Glicose oral', 'Glicose IV']
-  },
-  {
-    patientName: 'Roberta Pereira',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Dificuldade para respirar, chiado no peito, tosse seca.',
-    history: 'Crises anteriores de asma; utiliza broncodilatador frequentemente.',
-    diagnoses: ['Crise asmática', 'Pneumonite química', 'Bronquite crônica'],
-    correctDiagnosis: 'Crise asmática',
-    tests: ['Oximetria', 'Gasometria arterial', 'Raio X de tórax'],
-    correctTests: ['Oximetria', 'Gasometria arterial'],
-    testResults: {
-      'Oximetria': 'Saturação de O2 em 90%.',
-      'Gasometria arterial': 'CO2 elevado, pH baixo.',
-      'Raio X de tórax': 'Sem infiltrado.'
-    },
-    medications: ['Salbutamol inalatório', 'Corticóide inalatório', 'Antibiótico', 'Loratadina'],
-    correctMeds: ['Salbutamol inalatório', 'Corticóide inalatório']
-  },
-  {
-    patientName: 'Marcos Vieira',
-    patientImage: 'images/patient_male.png',
-    symptoms: 'Vertigem intensa, náuseas, nistagmo, zumbido.',
-    history: 'Sem histórico de trauma; relatando sintoma ao girar a cabeça.',
-    diagnoses: ['Labirintite', 'AVC', 'Infecção de ouvido'],
-    correctDiagnosis: 'Labirintite',
-    tests: ['Avaliação clínica', 'Ressonância magnética', 'Audiometria'],
-    correctTests: ['Avaliação clínica', 'Audiometria'],
-    testResults: {
-      'Avaliação clínica': 'Testes de Dix-Hallpike positivos para vertigem.',
-      'Ressonância magnética': 'Sem alterações significativas.',
-      'Audiometria': 'Perda auditiva leve em alta frequência.'
-    },
-    medications: ['Meclizina', 'Dimenidrinato', 'Antibiótico', 'Glicose IV'],
-    correctMeds: ['Meclizina', 'Dimenidrinato']
-  },
-  {
-    patientName: 'Helena Castro',
-    patientImage: 'images/patient_female.png',
-    symptoms: 'Dor torácica aguda ao inspirar profundamente, falta de ar, ansiedade.',
-    history: 'Recém saída de cirurgia abdominal; toma anticoagulante.',
-    diagnoses: ['Embolia pulmonar', 'Pneumotórax', 'Costocondrite'],
-    correctDiagnosis: 'Embolia pulmonar',
-    tests: ['Angiotomografia pulmonar', 'Raio X de tórax', 'D-dímero'],
-    correctTests: ['Angiotomografia pulmonar', 'D-dímero'],
-    testResults: {
-      'Angiotomografia pulmonar': 'Obstrução parcial de artéria pulmonar.',
-      'Raio X de tórax': 'Sem colapso pulmonar.',
-      'D-dímero': 'Elevado.'
-    },
-    medications: ['Heparina', 'Oxigênio suplementar', 'Morfina', 'Omeprazol'],
-    correctMeds: ['Heparina', 'Oxigênio suplementar']
-  }
+  { name: "Senador", bg: "assets/senate.png", type: "legislative" },
+  { name: "Prefeito", bg: "assets/mayor.png", type: "executive" },
+  { name: "Governador", bg: "assets/governor.png", type: "executive" },
+  { name: "Presidente", bg: "assets/president.png", type: "executive" },
 ];
 
-/* Variáveis de estado */
-let playerName = '';
-let selectedAvatar = null;
-let prestige = 0;
-let correctCount = 0;
-let errorCount = 0;
-let level = 'Residente';
-let currentCaseIndex = 0;
+const parties = [
+  {
+    id: "PRP",
+    label: "PRP",
+    name: "Partido Renovador Popular",
+    className: "party-prp",
+  },
+  {
+    id: "PSLB",
+    label: "PSLB",
+    name: "Partido Social Liberal do Brasil",
+    className: "party-pslb",
+  },
+  {
+    id: "PTM",
+    label: "PTM",
+    name: "Partido Trabalhista Moderno",
+    className: "party-ptm",
+  },
+  {
+    id: "PVG",
+    label: "PVG",
+    name: "Partido Verde Global",
+    className: "party-pvg",
+  },
+  {
+    id: "MDBR",
+    label: "MDBR",
+    name: "Movimento Democrático Brasileiro",
+    className: "party-mdbr",
+  },
+];
 
-// Métricas específicas
-let correctDiagnosisCount = 0;
-let correctProceduresCount = 0;
-let correctMedicationCount = 0;
+// Tons de discurso e temas para campanha
+const tones = [
+  {
+    id: "populista",
+    label: "Populista",
+    popularity: +8,
+    integrity: -6,
+    description: "Fala para as massas, promete muito.",
+  },
+  {
+    id: "progressista",
+    label: "Progressista",
+    popularity: +5,
+    integrity: +1,
+    description: "Defende pautas sociais e direitos.",
+  },
+  {
+    id: "conservador",
+    label: "Conservador",
+    popularity: +3,
+    integrity: +2,
+    description: "Foco em segurança e valores tradicionais.",
+  },
+  {
+    id: "tecnico",
+    label: "Técnico",
+    popularity: +2,
+    integrity: +5,
+    description: "Discurso baseado em dados e gestão.",
+  },
+];
 
-/* Elementos da DOM */
-const startScreen = document.getElementById('start-screen');
-const nameScreen = document.getElementById('name-screen');
-const directorScreen = document.getElementById('director-screen');
-const consultScreen = document.getElementById('consult-screen');
-const caseScreen = document.getElementById('case-screen');
-const helpModal = document.getElementById('help-modal');
-const examScreen = document.getElementById('exam-screen');
-const examBg = document.getElementById('exam-bg');
-const examNameEl = document.getElementById('exam-name');
-const examResultEl = document.getElementById('exam-result');
+const themes = [
+  { id: "economia", label: "Economia", effect: +4 },
+  { id: "saude", label: "Saúde", effect: +3 },
+  { id: "educacao", label: "Educação", effect: +3 },
+  { id: "seguranca", label: "Segurança", effect: +4 },
+  { id: "meio-ambiente", label: "Meio Ambiente", effect: +2 },
+];
 
-document.getElementById('start-button').addEventListener('click', () => {
-  startScreen.classList.add('hidden');
-  nameScreen.classList.remove('hidden');
-  populateAvatars();
-});
+// ===== ELEMENTOS =====
 
-function populateAvatars() {
-  const container = document.getElementById('avatar-selection');
-  container.innerHTML = '';
-  avatars.forEach(av => {
-    const img = document.createElement('img');
-    img.src = av.src;
-    img.alt = av.name;
-    img.dataset.id = av.id;
-    img.addEventListener('click', () => {
-      document.querySelectorAll('#avatar-selection img').forEach(i => i.classList.remove('selected'));
-      img.classList.add('selected');
-      selectedAvatar = av;
-    });
-    container.appendChild(img);
+const screens = {
+  start: document.getElementById("start-screen"),
+  selection: document.getElementById("selection-screen"),
+  game: document.getElementById("game-screen"),
+  election: document.getElementById("election-screen"),
+};
+
+const newGameBtn = document.getElementById("new-game-btn");
+const continueBtn = document.getElementById("continue-btn");
+const backToStartBtn = document.getElementById("back-to-start-btn");
+const confirmSelectionBtn = document.getElementById("confirm-selection-btn");
+
+const partyListDiv = document.getElementById("party-list");
+const playerNameInput = document.getElementById("player-name");
+
+const gameScreen = document.getElementById("game-screen");
+const playerInfoText = document.getElementById("player-info-text");
+const officeText = document.getElementById("office-text");
+const statPopularity = document.getElementById("stat-popularity");
+const statFunds = document.getElementById("stat-funds");
+const statIntegrity = document.getElementById("stat-integrity");
+const actionsDiv = document.getElementById("actions");
+const feedDiv = document.getElementById("feed");
+const resetBtn = document.getElementById("reset-btn");
+
+// Modal genérico
+const modalOverlay = document.getElementById("modal-overlay");
+const modalTitle = document.getElementById("modal-title");
+const modalText = document.getElementById("modal-text");
+const modalOptionsDiv = document.getElementById("modal-options");
+
+// Campanha
+const campaignOverlay = document.getElementById("campaign-overlay");
+const toneOptionsDiv = document.getElementById("tone-options");
+const themeOptionsDiv = document.getElementById("theme-options");
+const startCampaignBtn = document.getElementById("start-campaign-btn");
+const cancelCampaignBtn = document.getElementById("cancel-campaign-btn");
+
+// Eleição
+const electionTitle = document.getElementById("election-title");
+const electionSubtitle = document.getElementById("election-subtitle");
+const candidateBar = document.getElementById("candidate-bar");
+const opponentBar = document.getElementById("opponent-bar");
+const candidatePercentSpan = document.getElementById("candidate-percent");
+const opponentPercentSpan = document.getElementById("opponent-percent");
+const electionResultText = document.getElementById("election-result-text");
+const electionContinueBtn = document.getElementById("election-continue-btn");
+
+// ===== FUNÇÕES DE TELA =====
+
+function showScreen(name) {
+  Object.values(screens).forEach((s) => s.classList.remove("active"));
+  screens[name].classList.add("active");
+}
+
+function updateGameBackground() {
+  const office = offices[state.officeIndex];
+  gameScreen.style.setProperty(
+    "--bg-image",
+    `url("${office.bg}")`
+  );
+  // Usando pseudo-elemento ::before via CSS
+  gameScreen.style.setProperty(
+    "backgroundImage",
+    `url("${office.bg}")`
+  );
+}
+
+// ===== SALVAMENTO =====
+
+function saveGame() {
+  const data = {
+    ...state,
+  };
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+function loadGame() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    // validação simples
+    if (!parsed.name || parsed.officeIndex == null) return null;
+    state = { ...state, ...parsed };
+    return state;
+  } catch (e) {
+    console.error("Erro ao carregar save:", e);
+    return null;
+  }
+}
+
+function clearSave() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+// ===== FEED =====
+
+function addFeed(message) {
+  const p = document.createElement("p");
+  p.textContent = message;
+  feedDiv.prepend(p);
+}
+
+// ===== STATS =====
+
+function clamp(value, min = 0, max = 100) {
+  return Math.max(min, Math.min(max, value));
+}
+
+function applyDelta(pop = 0, funds = 0, integ = 0, logText = "") {
+  state.popularity = clamp(state.popularity + pop, 0, 100);
+  state.funds = clamp(state.funds + funds, 0, 100);
+  state.integrity = clamp(state.integrity + integ, 0, 100);
+  updateHeader();
+  if (logText) addFeed(logText);
+  saveGame();
+}
+
+function updateHeader() {
+  const office = offices[state.officeIndex];
+  playerInfoText.textContent = `${state.name} — Partido ${state.party?.id ?? ""}`;
+  officeText.textContent = office.name;
+
+  statPopularity.textContent = state.popularity;
+  statFunds.textContent = state.funds;
+  statIntegrity.textContent = state.integrity;
+
+  // Fundo do plenário (pseudo)
+  gameScreen.style.setProperty(
+    "backgroundImage",
+    `url("${office.bg}")`
+  );
+}
+
+// ===== AÇÕES POR CARGO =====
+
+function getActionsForOffice(office) {
+  if (office.type === "legislative") {
+    return [
+      {
+        id: "votar-projeto",
+        label: "Votar projeto",
+        handler: actionVoteProject,
+      },
+      {
+        id: "propor-lei",
+        label: "Propor lei",
+        handler: actionProposeLaw,
+      },
+      {
+        id: "fiscalizar",
+        label: "Fiscalizar",
+        handler: actionInspect,
+      },
+      {
+        id: "discurso",
+        label: "Discurso",
+        handler: actionSpeech,
+      },
+      {
+        id: "campanha",
+        label: "Campanha",
+        handler: openCampaignModal,
+      },
+    ];
+  } else {
+    // Executivo
+    return [
+      {
+        id: "sancionar",
+        label: "Sancionar / Vetar",
+        handler: actionSanction,
+      },
+      {
+        id: "crise",
+        label: "Gerenciar crise",
+        handler: actionCrisis,
+      },
+      {
+        id: "orcamento",
+        label: "Orçamento",
+        handler: actionBudget,
+      },
+      {
+        id: "discurso",
+        label: "Discurso",
+        handler: actionSpeech,
+      },
+      {
+        id: "campanha",
+        label: "Campanha",
+        handler: openCampaignModal,
+      },
+    ];
+  }
+}
+
+function renderActions() {
+  const office = offices[state.officeIndex];
+  const actions = getActionsForOffice(office);
+  actionsDiv.innerHTML = "";
+  actions.forEach((a) => {
+    const btn = document.createElement("button");
+    btn.className = "btn secondary";
+    btn.textContent = a.label;
+    btn.addEventListener("click", () => a.handler());
+    actionsDiv.appendChild(btn);
   });
 }
 
-document.getElementById('continue-button').addEventListener('click', () => {
-  const nameInput = document.getElementById('player-name').value.trim();
-  if (!nameInput || !selectedAvatar) {
-    alert('Informe seu nome e escolha um avatar.');
-    return;
-  }
-  playerName = nameInput;
-  nameScreen.classList.add('hidden');
-  directorScreen.classList.remove('hidden');
-  runDirectorDialogue();
-});
+// ===== MODAL GENÉRICO =====
 
-function runDirectorDialogue() {
-  const text = `Bem-vindo(a) Dr(a). ${playerName}! Temos várias emergências chegando e precisamos que assuma seu posto imediatamente. Boa sorte!`;
-  const p = document.getElementById('director-text');
-  p.textContent = '';
-  let idx = 0;
-  const interval = setInterval(() => {
-    p.textContent += text[idx];
-    idx++;
-    if (idx >= text.length) clearInterval(interval);
-  }, 50);
-}
-
-document.getElementById('go-to-consult').addEventListener('click', () => {
-  directorScreen.classList.add('hidden');
-  consultScreen.classList.remove('hidden');
-  document.getElementById('doctor-avatar').src = selectedAvatar.src;
-  loadMetrics();
-});
-
-function loadMetrics() {
-  document.getElementById('prestige').textContent = prestige;
-  document.getElementById('correct').textContent = correctCount;
-  document.getElementById('errors').textContent = errorCount;
-  document.getElementById('level').textContent = level;
-  document.getElementById('diag-correct').textContent = correctDiagnosisCount;
-  document.getElementById('exam-correct').textContent = correctProceduresCount;
-  document.getElementById('med-correct').textContent = correctMedicationCount;
-}
-
-document.getElementById('help-button').addEventListener('click', () => {
-  helpModal.classList.remove('hidden');
-});
-document.getElementById('close-help').addEventListener('click', () => {
-  helpModal.classList.add('hidden');
-});
-
-document.getElementById('next-case').addEventListener('click', () => {
-  if (currentCaseIndex >= cases.length) {
-    alert('Parabéns! Você atendeu todos os casos disponíveis.');
-    return;
-  }
-  consultScreen.classList.add('hidden');
-  caseScreen.classList.remove('hidden');
-  displayCase(cases[currentCaseIndex]);
-});
-
-function showExamScreen(testName, result) {
-  examNameEl.textContent = testName;
-  examResultEl.textContent = result;
-  // define background
-  const bgFile = examBackgrounds[testName] || 'labs.jpg';
-  examBg.src = 'images/' + bgFile;
-  caseScreen.classList.add('hidden');
-  examScreen.classList.remove('hidden');
-}
-
-document.getElementById('back-to-case').addEventListener('click', () => {
-  examScreen.classList.add('hidden');
-  caseScreen.classList.remove('hidden');
-});
-
-// Exibe o caso atual
-function displayCase(c) {
-  // salva referência ao caso atual para uso no exame
-  window.currentDisplayedCase = c;
-  document.getElementById('patient-name').textContent = c.patientName;
-  document.getElementById('patient-image').src = c.patientImage;
-  document.getElementById('patient-symptoms').textContent = 'Sintomas: ' + c.symptoms;
-  document.getElementById('patient-history').textContent = 'Histórico: ' + c.history;
-  // Diagnósticos
-  const diagContainer = document.getElementById('diagnosis-options');
-  diagContainer.innerHTML = '';
-  c.diagnoses.forEach(diag => {
-    const btn = document.createElement('div');
-    btn.textContent = diag;
-    btn.className = 'option';
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#diagnosis-options .option').forEach(o => o.classList.remove('selected'));
-      btn.classList.add('selected');
+function openModal(title, text, options = []) {
+  modalTitle.textContent = title;
+  modalText.textContent = text;
+  modalOptionsDiv.innerHTML = "";
+  options.forEach((opt) => {
+    const btn = document.createElement("button");
+    btn.className = `btn ${opt.type || "secondary"}`;
+    btn.textContent = opt.label;
+    btn.addEventListener("click", () => {
+      closeModal();
+      opt.onClick && opt.onClick();
     });
-    diagContainer.appendChild(btn);
+    modalOptionsDiv.appendChild(btn);
   });
-  // Exames
-  const testContainer = document.getElementById('test-options');
-  testContainer.innerHTML = '';
-  c.tests.forEach(test => {
-    const btn = document.createElement('div');
-    btn.textContent = test;
-    btn.className = 'option';
-    btn.addEventListener('click', () => {
-      // se já está selecionado, alterna
-      if (btn.classList.contains('selected')) {
-        btn.classList.remove('selected');
+
+  modalOverlay.classList.remove("hidden");
+}
+
+function closeModal() {
+  modalOverlay.classList.add("hidden");
+}
+
+// ===== AÇÕES LEGISLATIVAS =====
+
+function actionVoteProject() {
+  openModal(
+    "Votar projeto",
+    "Projeto em pauta: Reforma de segurança nas escolas. Qual é o seu voto?",
+    [
+      {
+        label: "Sim",
+        type: "primary",
+        onClick: () => {
+          const approved = Math.random() < 0.55;
+          if (approved) {
+            applyDelta(+3, 0, +1, "Você votou SIM e o projeto foi aprovado. Popularidade aumentou.");
+          } else {
+            applyDelta(-2, 0, -2, "Você votou SIM, mas o projeto foi rejeitado. Você é visto como ineficaz.");
+          }
+        },
+      },
+      {
+        label: "Não",
+        type: "secondary",
+        onClick: () => {
+          const approved = Math.random() < 0.4;
+          if (approved) {
+            applyDelta(-2, 0, +2, "Você votou NÃO, mas o projeto foi aprovado. Integridade subiu, popularidade caiu.");
+          } else {
+            applyDelta(0, 0, +1, "Você votou NÃO e o projeto foi rejeitado. Integridade levemente maior.");
+          }
+        },
+      },
+    ]
+  );
+}
+
+function actionProposeLaw() {
+  const topics = [
+    {
+      name: "Projeto de Saúde",
+      successPop: +5,
+      successInteg: +1,
+      failPop: -3,
+      failInteg: -2,
+    },
+    {
+      name: "Projeto de Mobilidade Urbana",
+      successPop: +4,
+      successInteg: +1,
+      failPop: -2,
+      failInteg: -2,
+    },
+    {
+      name: "Projeto de Educação Integral",
+      successPop: +6,
+      successInteg: +2,
+      failPop: -3,
+      failInteg: -1,
+    },
+  ];
+
+  const chosen = topics[Math.floor(Math.random() * topics.length)];
+  const cost = 4;
+
+  if (state.funds < cost) {
+    addFeed("Você não tem fundos suficientes para apresentar um novo projeto.");
+    return;
+  }
+
+  openModal(
+    "Propor lei",
+    `Deseja apresentar o ${chosen.name}? (custará ${cost} fundos)`,
+    [
+      {
+        label: "Apresentar",
+        type: "primary",
+        onClick: () => {
+          state.funds = clamp(state.funds - cost, 0, 100);
+          const approved = Math.random() < 0.6;
+          if (approved) {
+            applyDelta(
+              chosen.successPop,
+              0,
+              chosen.successInteg,
+              `${chosen.name} foi aprovado! Popularidade e integridade aumentaram.`
+            );
+          } else {
+            applyDelta(
+              chosen.failPop,
+              0,
+              chosen.failInteg,
+              `${chosen.name} foi rejeitado. Você perdeu apoio.`
+            );
+          }
+        },
+      },
+      {
+        label: "Cancelar",
+        type: "secondary",
+      },
+    ]
+  );
+}
+
+function actionInspect() {
+  openModal(
+    "Fiscalização",
+    "Você iniciou uma fiscalização de obras públicas. Encontrou irregularidades?",
+    [
+      {
+        label: "Denunciar",
+        type: "primary",
+        onClick: () => {
+          applyDelta(+4, -2, +4, "Você denunciou irregularidades e ganhou crédito com a população.");
+        },
+      },
+      {
+        label: "Nada encontrado",
+        type: "secondary",
+        onClick: () => {
+          applyDelta(-2, 0, -1, "A fiscalização não encontrou problemas, mas perdeu tempo precioso.");
+        },
+      },
+    ]
+  );
+}
+
+function actionSpeech() {
+  openModal(
+    "Discurso",
+    "Escolha o tom do discurso:",
+    [
+      {
+        label: "Motivador",
+        type: "primary",
+        onClick: () =>
+          applyDelta(+3, 0, +1, "Você fez um discurso motivador e inspirou confiança."),
+      },
+      {
+        label: "Técnico",
+        type: "secondary",
+        onClick: () =>
+          applyDelta(+1, 0, +3, "Discurso técnico aumentou a percepção de competência."),
+      },
+      {
+        label: "Polarizador",
+        type: "secondary",
+        onClick: () =>
+          applyDelta(+4, 0, -4, "Discurso polarizador mobilizou sua base, mas reduziu a integridade percebida."),
+      },
+    ]
+  );
+}
+
+// ===== AÇÕES EXECUTIVAS =====
+
+function actionSanction() {
+  openModal(
+    "Sancionar / Vetar",
+    "Chegou um projeto polêmico para sanção. Qual sua decisão?",
+    [
+      {
+        label: "Sancionar",
+        type: "primary",
+        onClick: () => {
+          applyDelta(+3, 0, -2, "Você sancionou o projeto e foi visto como pragmático, mas parte da opinião pública criticou.");
+        },
+      },
+      {
+        label: "Vetar",
+        type: "secondary",
+        onClick: () => {
+          applyDelta(-2, 0, +4, "Você vetou o projeto por princípio. Integridade subiu, mas perdeu algum apoio.");
+        },
+      },
+    ]
+  );
+}
+
+function actionCrisis() {
+  openModal(
+    "Gerenciar crise",
+    "Uma crise estourou na imprensa. Como você responde?",
+    [
+      {
+        label: "Coletiva de imprensa",
+        type: "primary",
+        onClick: () =>
+          applyDelta(+2, -3, +1, "Você enfrentou a crise de frente, gastando recursos, mas manteve boa imagem."),
+      },
+      {
+        label: "Negar tudo",
+        type: "secondary",
+        onClick: () =>
+          applyDelta(+1, 0, -5, "Você negou tudo. No curto prazo funcionou, mas sua integridade caiu."),
+      },
+    ]
+  );
+}
+
+function actionBudget() {
+  openModal(
+    "Orçamento",
+    "Você precisa decidir a prioridade do orçamento.",
+    [
+      {
+        label: "Cortar gastos",
+        type: "secondary",
+        onClick: () =>
+          applyDelta(-2, +7, +2, "Você cortou gastos, equilibrando o caixa, mas perdeu um pouco de popularidade."),
+      },
+      {
+        label: "Investir em programas sociais",
+        type: "primary",
+        onClick: () =>
+          applyDelta(+5, -6, +1, "Você investiu em programas sociais. Popularidade subiu, mas gastos aumentaram."),
+      },
+    ]
+  );
+}
+
+// ===== CAMPANHA =====
+
+let selectedToneId = null;
+let selectedThemeId = null;
+
+function renderCampaignOptions() {
+  toneOptionsDiv.innerHTML = "";
+  tones.forEach((t) => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.textContent = t.label;
+    chip.title = t.description;
+    chip.addEventListener("click", () => {
+      selectedToneId = t.id;
+      [...toneOptionsDiv.children].forEach((c) =>
+        c.classList.remove("selected")
+      );
+      chip.classList.add("selected");
+    });
+    toneOptionsDiv.appendChild(chip);
+  });
+
+  themeOptionsDiv.innerHTML = "";
+  themes.forEach((th) => {
+    const chip = document.createElement("button");
+    chip.className = "chip";
+    chip.textContent = th.label;
+    chip.addEventListener("click", () => {
+      selectedThemeId = th.id;
+      [...themeOptionsDiv.children].forEach((c) =>
+        c.classList.remove("selected")
+      );
+      chip.classList.add("selected");
+    });
+    themeOptionsDiv.appendChild(chip);
+  });
+
+  selectedToneId = null;
+  selectedThemeId = null;
+}
+
+function openCampaignModal() {
+  renderCampaignOptions();
+  campaignOverlay.classList.remove("hidden");
+}
+
+function closeCampaignModal() {
+  campaignOverlay.classList.add("hidden");
+}
+
+startCampaignBtn.addEventListener("click", () => {
+  if (!selectedToneId || !selectedThemeId) {
+    alert("Selecione o tom do discurso e o tema principal.");
+    return;
+  }
+
+  const tone = tones.find((t) => t.id === selectedToneId);
+  const theme = themes.find((th) => th.id === selectedThemeId);
+
+  // custo financeiro
+  const cost = 8;
+  if (state.funds < cost) {
+    addFeed("Você não possui fundos suficientes para uma campanha robusta.");
+    return;
+  }
+
+  state.funds = clamp(state.funds - cost, 0, 100);
+  state.popularity = clamp(state.popularity + tone.popularity + theme.effect, 0, 100);
+  state.integrity = clamp(state.integrity + tone.integrity, 0, 100);
+
+  addFeed(
+    `Você lançou campanha com tom ${tone.label} e foco em ${theme.label}. Popularidade e integridade foram ajustadas.`
+  );
+
+  saveGame();
+  closeCampaignModal();
+  startElection();
+});
+
+cancelCampaignBtn.addEventListener("click", () => {
+  closeCampaignModal();
+});
+
+// ===== ELEIÇÃO =====
+
+function startElection() {
+  // carregar tela de eleição
+  showScreen("election");
+
+  const office = offices[state.officeIndex];
+  electionTitle.textContent = `Contagem de votos para ${office.name}`;
+  electionSubtitle.textContent = "Apuração em andamento...";
+
+  candidateBar.style.width = "0%";
+  opponentBar.style.width = "0%";
+  candidatePercentSpan.textContent = "0%";
+  opponentPercentSpan.textContent = "0%";
+  electionResultText.textContent = "";
+  electionContinueBtn.disabled = true;
+
+  // cálculo de chance baseado nas métricas
+  const baseChance =
+    state.popularity * 0.5 + state.integrity * 0.3 + state.funds * 0.2;
+  // converte para percentual vs oponente
+  let candidatePercent = clamp(baseChance + (Math.random() * 20 - 10), 5, 95);
+  let opponentPercent = 100 - candidatePercent;
+
+  setTimeout(() => {
+    candidateBar.style.width = `${candidatePercent}%`;
+    opponentBar.style.width = `${opponentPercent}%`;
+    candidatePercentSpan.textContent = `${candidatePercent.toFixed(1)}%`;
+    opponentPercentSpan.textContent = `${opponentPercent.toFixed(1)}%`;
+
+    setTimeout(() => {
+      const won = candidatePercent > opponentPercent;
+      if (won) {
+        electionResultText.textContent = `Você venceu a eleição com ${candidatePercent.toFixed(
+          1
+        )}% dos votos!`;
       } else {
-        btn.classList.add('selected');
-        showExamScreen(test, c.testResults[test]);
+        electionResultText.textContent = `Você perdeu a eleição. Conseguiu apenas ${candidatePercent.toFixed(
+          1
+        )}% dos votos.`;
       }
+      electionContinueBtn.disabled = false;
+
+      electionContinueBtn.onclick = () => {
+        if (won) {
+          advanceOffice();
+        } else {
+          // penalidade após derrota
+          applyDelta(-5, -5, 0, "A derrota abalou sua carreira política.");
+          // permanece no mesmo cargo
+          showScreen("game");
+        }
+      };
+    }, 1300);
+  }, 400);
+}
+
+function advanceOffice() {
+  if (state.officeIndex < offices.length - 1) {
+    state.officeIndex += 1;
+    state.popularity = 50;
+    state.funds = 40;
+    state.integrity = clamp(state.integrity, 30, 100);
+    addFeed(
+      `Parabéns! Você foi eleito ${offices[state.officeIndex].name}. Um novo mandato começa.`
+    );
+    saveGame();
+    beginMandate();
+  } else {
+    // Já é presidente
+    addFeed(
+      "Você alcançou a presidência e manteve-se no poder. Fim de jogo (por enquanto)!"
+    );
+    saveGame();
+    showScreen("game");
+  }
+}
+
+// ===== INÍCIO DE MANDATO =====
+
+function beginMandate() {
+  showScreen("game");
+  feedDiv.innerHTML = "";
+  updateHeader();
+  renderActions();
+  addFeed(
+    `Iniciando mandato como ${offices[state.officeIndex].name}. Boa sorte!`
+  );
+  saveGame();
+}
+
+// ===== SELEÇÃO DE PARTIDO =====
+
+function renderParties() {
+  partyListDiv.innerHTML = "";
+  let selectedId = state.party?.id ?? null;
+
+  parties.forEach((p) => {
+    const btn = document.createElement("button");
+    btn.className = `party-btn ${p.className}`;
+    btn.innerHTML = `<strong>${p.label}</strong><span>${p.name}</span>`;
+    if (p.id === selectedId) btn.classList.add("selected");
+
+    btn.addEventListener("click", () => {
+      selectedId = p.id;
+      state.party = p;
+      [...partyListDiv.children].forEach((b) =>
+        b.classList.remove("selected")
+      );
+      btn.classList.add("selected");
     });
-    testContainer.appendChild(btn);
-  });
-  // Medicações
-  const medContainer = document.getElementById('medication-options');
-  medContainer.innerHTML = '';
-  c.medications.forEach(med => {
-    const btn = document.createElement('div');
-    btn.textContent = med;
-    btn.className = 'option';
-    btn.addEventListener('click', () => {
-      btn.classList.toggle('selected');
-    });
-    medContainer.appendChild(btn);
+
+    partyListDiv.appendChild(btn);
   });
 }
 
-// Finaliza o caso e pontua
-document.getElementById('finalize-case').addEventListener('click', () => {
-  const c = cases[currentCaseIndex];
-  const chosenDiag = document.querySelector('#diagnosis-options .option.selected');
-  const selectedTests = Array.from(document.querySelectorAll('#test-options .option.selected')).map(e => e.textContent);
-  const selectedMeds = Array.from(document.querySelectorAll('#medication-options .option.selected')).map(e => e.textContent);
+// ===== BOTÕES DE NAVEGAÇÃO =====
 
-  if (!chosenDiag) {
-    alert('Selecione um diagnóstico.');
+newGameBtn.addEventListener("click", () => {
+  // reset parcial
+  state = {
+    name: "",
+    party: null,
+    officeIndex: 0,
+    popularity: 50,
+    funds: 50,
+    integrity: 50,
+  };
+  clearSave();
+  playerNameInput.value = "";
+  renderParties();
+  showScreen("selection");
+});
+
+continueBtn.addEventListener("click", () => {
+  const loaded = loadGame();
+  if (!loaded) {
+    alert("Nenhum jogo salvo encontrado.");
     return;
   }
-
-  // Avaliação
-  let diagnosisCorrect = false;
-  let procedureCorrect = false;
-  let medicationCorrect = false;
-
-  if (chosenDiag.textContent === c.correctDiagnosis) {
-    diagnosisCorrect = true;
-  }
-  // Procedimentos: todos exames corretos e nenhum extra
-  const correctSet = new Set(c.correctTests);
-  if (selectedTests.length === c.correctTests.length && selectedTests.every(t => correctSet.has(t))) {
-    procedureCorrect = true;
-  }
-  // Medicações: todas medicações corretas e nenhuma extra
-  const correctMedsSet = new Set(c.correctMeds);
-  if (selectedMeds.length === c.correctMeds.length && selectedMeds.every(m => correctMedsSet.has(m))) {
-    medicationCorrect = true;
-  }
-  // Pontuação e contadores
-  if (diagnosisCorrect) {
-    prestige += 5;
-    correctDiagnosisCount++;
-    correctCount++;
-  } else {
-    errorCount++;
-  }
-  if (procedureCorrect) {
-    prestige += 3;
-    correctProceduresCount++;
-  } else {
-    errorCount++;
-  }
-  if (medicationCorrect) {
-    prestige += 2;
-    correctMedicationCount++;
-  } else {
-    errorCount++;
-  }
-  // Atualiza nível com base no prestígio
-  if (prestige >= 60) {
-    level = 'Pleno';
-  } else if (prestige >= 30) {
-    level = 'Titular';
-  }
-  currentCaseIndex++;
-  loadMetrics();
-  caseScreen.classList.add('hidden');
-  consultScreen.classList.remove('hidden');
+  beginMandate();
 });
+
+backToStartBtn.addEventListener("click", () => {
+  showScreen("start");
+});
+
+confirmSelectionBtn.addEventListener("click", () => {
+  if (!state.party) {
+    alert("Selecione um partido.");
+    return;
+  }
+  const name = playerNameInput.value.trim();
+  if (!name) {
+    alert("Digite seu nome.");
+    return;
+  }
+  state.name = name;
+  state.officeIndex = 0;
+  state.popularity = 50;
+  state.funds = 50;
+  state.integrity = 50;
+  saveGame();
+  beginMandate();
+});
+
+resetBtn.addEventListener("click", () => {
+  if (confirm("Deseja iniciar um novo jogo? O progresso salvo será apagado.")) {
+    clearSave();
+    state = {
+      name: "",
+      party: null,
+      officeIndex: 0,
+      popularity: 50,
+      funds: 50,
+      integrity: 50,
+    };
+    playerNameInput.value = "";
+    renderParties();
+    showScreen("start");
+    // mostrar botão continuar como oculto, pois save apagou
+    updateContinueVisibility();
+  }
+});
+
+// ===== INICIALIZAÇÃO =====
+
+function updateContinueVisibility() {
+  const hasSave = !!localStorage.getItem(STORAGE_KEY);
+  continueBtn.style.display = hasSave ? "inline-block" : "none";
+}
+
+function init() {
+  renderParties();
+  updateContinueVisibility();
+}
+
+document.addEventListener("DOMContentLoaded", init);
