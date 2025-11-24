@@ -3,33 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <title>Simulador Médico – Pronto Socorro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- POP-UP DE AJUDA (MANUAL) -->
+  <!-- POP-UP DE AJUDA / MANUAL -->
   <div id="help-popup" class="help-popup hidden">
     <div class="help-box">
       <button id="close-help" class="close-btn">X</button>
       <h2>Manual de Procedimentos e Diagnóstico</h2>
       <p>
         Este manual é um guia de referência para estudantes de medicina e usuários gerais.
-        Você encontrará resumos de doenças, procedimentos diagnósticos, anatomia básica e
-        um glossário de termos médicos. Utilize o botão de ajuda sempre que precisar
-        relembrar sintomas, exames e tratamentos. As decisões tomadas no jogo podem levar
-        à melhora ou à piora do paciente, simulando a realidade de um pronto socorro.
+        Ele não substitui a formação profissional, mas ajuda a compreender sintomas, exames
+        e condutas de forma simplificada e educativa. Use sempre o botão de ajuda se tiver dúvidas.
       </p>
     </div>
   </div>
 
   <!-- TELA INICIAL -->
   <div id="start-screen" class="screen">
-    <!-- tenta usar cover.png, se você preferir usar capa.jpg, troque aqui -->
     <img src="images/cover.png" alt="Capa do Jogo" class="cover">
     <button id="start-button" class="primary">Iniciar</button>
     <p class="disclaimer">
-      Este é um jogo educativo que simula situações reais de emergência.
-      As decisões podem levar à cura ou ao óbito do paciente. Não substitui formação profissional.
+      Este é um jogo educativo de simulação de pronto socorro. As decisões podem levar à
+      melhora ou à piora do paciente, inclusive óbito, de forma simulada. Não utilize o jogo
+      como orientação real de tratamento médico.
     </p>
   </div>
 
@@ -79,6 +78,7 @@
       <img id="patient-image" class="avatar-large" alt="Paciente">
       <div class="patient-info">
         <h3 id="patient-name"></h3>
+        <p id="patient-specialty"></p>
         <p id="patient-symptoms"></p>
         <p id="patient-history"></p>
       </div>
@@ -89,7 +89,7 @@
       <div id="diagnosis-options" class="options"></div>
 
       <h4>Exames Disponíveis</h4>
-      <p class="hint">Toque em um exame para ver a sala e o resultado. Você pode selecionar vários.</p>
+      <p class="hint">Clique em um exame para ver o resultado. Você pode selecionar vários exames antes de finalizar.</p>
       <div id="test-options" class="options"></div>
 
       <h4>Medicações</h4>
