@@ -2,92 +2,111 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Simulador Médico – Emergência</title>
+  <title>Simulador Médico – Pronto Socorro</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Modal de Ajuda -->
-  <div id="help-modal" class="modal hidden">
-    <div class="modal-content">
-      <span id="close-help" class="close">&times;</span>
+
+  <!-- POP-UP DE AJUDA (MANUAL) -->
+  <div id="help-popup" class="help-popup hidden">
+    <div class="help-box">
+      <button id="close-help" class="close-btn">X</button>
       <h2>Manual de Procedimentos e Diagnóstico</h2>
       <p>
         Este manual é um guia de referência para estudantes de medicina e usuários gerais.
         Você encontrará resumos de doenças, procedimentos diagnósticos, anatomia básica e
-        um glossário de termos médicos. Por exemplo, pneumonia causa tosse, respiração rápida e
-        opacidade em radiografia, e deve ser investigada com anamnese, ausculta e oximetria0.
-        Ataques cardíacos podem apresentar dor torácica ou desconforto no peito, fraqueza, dor no braço ou mandíbula e
-        falta de ar1; exames como ECG e marcadores cardíacos auxiliam no diagnóstico2.
-        Utilize o botão de ajuda sempre que precisar relembrar sintomas, exames e tratamentos.
+        um glossário de termos médicos. Utilize o botão de ajuda sempre que precisar
+        relembrar sintomas, exames e tratamentos. As decisões tomadas no jogo podem levar
+        à melhora ou à piora do paciente, simulando a realidade de um pronto socorro.
       </p>
     </div>
   </div>
 
-  <!-- Tela inicial -->
+  <!-- TELA INICIAL -->
   <div id="start-screen" class="screen">
-    <!-- Escolha qual usar: cover.png ou capa.jpg. Use o nome correspondente em images/. -->
+    <!-- tenta usar cover.png, se você preferir usar capa.jpg, troque aqui -->
     <img src="images/cover.png" alt="Capa do Jogo" class="cover">
     <button id="start-button" class="primary">Iniciar</button>
     <p class="disclaimer">
-      Este é um jogo educativo que simula situações reais de emergência. As decisões podem levar à cura
-      ou ao óbito do paciente. Não substitui formação profissional.
+      Este é um jogo educativo que simula situações reais de emergência.
+      As decisões podem levar à cura ou ao óbito do paciente. Não substitui formação profissional.
     </p>
   </div>
 
-  <!-- Tela de nome e avatar -->
+  <!-- TELA DE NOME + AVATAR -->
   <div id="name-screen" class="screen hidden">
     <h2>Informe seu nome e escolha seu avatar</h2>
     <input type="text" id="player-name" placeholder="Seu nome">
-    <div id="avatar-selection" class="avatars">
-      <!-- Avatares adicionados via JS -->
-    </div>
+    <div id="avatar-selection" class="avatars"></div>
     <button id="continue-button" class="primary">Continuar</button>
   </div>
 
-  <!-- Tela do diretor -->
+  <!-- TELA DO DIRETOR -->
   <div id="director-screen" class="screen hidden">
-    <!-- Pode usar images/hospital_corridor.jpg ou images/fundo.jpg como fundo -->
-    <img src="images/hospital_corridor.jpg" alt="Hospital" class="background">
+    <img src="images/hospital_corridor.jpg" alt="Corredor do Hospital" class="background">
     <div class="overlay">
       <p id="director-text"></p>
       <button id="go-to-consult" class="primary">Ir para o consultório</button>
     </div>
   </div>
 
-  <!-- Consultório -->
+  <!-- CONSULTÓRIO -->
   <div id="consult-screen" class="screen hidden">
-    <div class="consult-header">
-      <img id="doctor-avatar" class="avatar-large" alt="Avatar do Doutor">
-      <div class="metrics">
-        <p>Prestígio: <span id="prestige">0</span></p>
-        <p>Acertos: <span id="correct">0</span></p>
-        <p>Erros: <span id="errors">0</span></p>
-        <p>Nível: <span id="level">Residente</span></p>
+    <img src="images/consultorio.jpg" alt="Consultório Médico" class="background">
+    <div class="consult-overlay">
+      <div class="consult-header">
+        <img id="doctor-avatar" class="avatar-large" alt="Avatar do Doutor">
+        <div class="metrics">
+          <p>Prestígio: <span id="prestige">0</span></p>
+          <p>Casos corretos: <span id="correct-cases">0</span></p>
+          <p>Casos errados: <span id="wrong-cases">0</span></p>
+          <p>Nível: <span id="level">Residente</span></p>
+        </div>
+        <div class="metrics">
+          <p>Diagnóstico (C/E): <span id="diag-stats">0 / 0</span></p>
+          <p>Exames (C/E): <span id="test-stats">0 / 0</span></p>
+          <p>Medicação (C/E): <span id="med-stats">0 / 0</span></p>
+        </div>
+        <button id="help-button" class="secondary">Ajuda</button>
       </div>
-      <button id="help-button" class="secondary">Ajuda</button>
+      <button id="next-case" class="primary big">Próximo Caso</button>
     </div>
-    <button id="next-case" class="primary">Próximo Caso</button>
   </div>
 
-  <!-- Tela de cada caso -->
+  <!-- TELA DO CASO -->
   <div id="case-screen" class="screen hidden">
     <div class="case-header">
-      <img id="patient-image" class="avatar-large" alt="Foto do Paciente">
+      <img id="patient-image" class="avatar-large" alt="Paciente">
       <div class="patient-info">
         <h3 id="patient-name"></h3>
         <p id="patient-symptoms"></p>
         <p id="patient-history"></p>
       </div>
     </div>
+
     <div class="case-actions">
       <h4>Diagnósticos Possíveis</h4>
       <div id="diagnosis-options" class="options"></div>
+
       <h4>Exames Disponíveis</h4>
+      <p class="hint">Toque em um exame para ver a sala e o resultado. Você pode selecionar vários.</p>
       <div id="test-options" class="options"></div>
+
       <h4>Medicações</h4>
       <div id="medication-options" class="options"></div>
     </div>
-    <button id="finalize-case" class="primary">Confirmar Diagnóstico</button>
+
+    <button id="finalize-case" class="primary big">Confirmar Diagnóstico e Tratamento</button>
+  </div>
+
+  <!-- TELA DO EXAME -->
+  <div id="exam-screen" class="screen hidden">
+    <img id="exam-background" class="background" alt="Sala de Exame">
+    <div class="overlay exam-overlay">
+      <h2 id="exam-title"></h2>
+      <p id="exam-result"></p>
+      <button id="back-to-case" class="primary">Voltar ao caso</button>
+    </div>
   </div>
 
   <script src="script.js"></script>
