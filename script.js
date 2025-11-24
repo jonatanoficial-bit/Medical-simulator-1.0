@@ -54,6 +54,155 @@ const cases = [
     medications: ['Amoxicilina', 'Salbutamol', 'Morfina', 'Ceftriaxona'],
     correctMeds: ['Amoxicilina', 'Ceftriaxona']
   },
+  {
+gender: "M",
+patientName: "José Almeida",
+symptoms: "Dor no peito intensa, sudorese e falta de ar.",
+history: "Hipertensão e tabagismo. Dor iniciou há 30 minutos, irradiando para braço esquerdo.",
+diagnoses: ["Infarto agudo do miocárdio", "Pneumonia", "Crise de ansiedade"],
+correctDiagnosis: "Infarto agudo do miocárdio",
+exams: ["ECG", "Exame de sangue (troponina)", "Raio X de tórax"],
+correctExams: ["ECG", "Exame de sangue (troponina)"],
+medications: ["AAS", "Clopidogrel", "Morfina", "Oxigênio"],
+correctMedications: ["AAS", "Clopidogrel", "Oxigênio"],
+outcome: "O paciente foi estabilizado após conduta adequada.",
+image: "patient_male.png"
+},
+
+{
+gender: "F",
+patientName: "Maria Fernanda Silva",
+symptoms: "Febre, tosse produtiva e dor no peito ao respirar.",
+history: "Quadro iniciado há 3 dias. Relata cansaço e falta de apetite.",
+diagnoses: ["Pneumonia", "Tuberculose", "Asma"],
+correctDiagnosis: "Pneumonia",
+exams: ["Raio X de tórax", "Exame de sangue", "Oximetria"],
+correctExams: ["Raio X de tórax", "Exame de sangue"],
+medications: ["Amoxicilina", "Azitromicina", "Hidratação"],
+correctMedications: ["Amoxicilina", "Hidratação"],
+outcome: "Paciente respondeu bem ao tratamento inicial.",
+image: "patient_female.png"
+},
+
+{
+gender: "M",
+patientName: "Carlos Pontes",
+symptoms: "Dor abdominal intensa no lado direito, febre e náuseas.",
+history: "Dor começou há 8 horas e vem piorando.",
+diagnoses: ["Apendicite", "Gastrite", "Cólica renal"],
+correctDiagnosis: "Apendicite",
+exams: ["Ultrassom abdominal", "Exame de sangue", "Tomografia"],
+correctExams: ["Exame de sangue", "Ultrassom abdominal"],
+medications: ["Dipirona", "Tramadol", "Ceftriaxona"],
+correctMedications: ["Dipirona", "Ceftriaxona"],
+outcome: "Paciente encaminhado para cirurgia.",
+image: "patient_male.png"
+},
+
+{
+gender: "F",
+patientName: "Patrícia Nogueira",
+symptoms: "Crises de falta de ar, chiado no peito e tosse.",
+history: "Histórico de asma. Piora após exposição ao clima seco.",
+diagnoses: ["Crise asmática", "Pneumonia", "Ansiedade"],
+correctDiagnosis: "Crise asmática",
+exams: ["Oximetria", "Raio X de tórax"],
+correctExams: ["Oximetria"],
+medications: ["Salbutamol", "Prednisona"],
+correctMedications: ["Salbutamol", "Prednisona"],
+outcome: "Paciente melhorou após broncodilatador.",
+image: "patient_female.png"
+},
+
+{
+gender: "M",
+patientName: "Eduardo Reis",
+symptoms: "Vômitos, diarreia e tontura.",
+history: "Comeu comida suspeita em restaurante.",
+diagnoses: ["Gastroenterite", "Intoxicação medicamentosa", "Apendicite"],
+correctDiagnosis: "Gastroenterite",
+exams: ["Exame de sangue", "Hidratação venosa"],
+correctExams: ["Exame de sangue"],
+medications: ["Soro", "Plasil"],
+correctMedications: ["Soro", "Plasil"],
+outcome: "Paciente reidratado e estável.",
+image: "patient_male.png"
+},
+
+{
+gender: "F",
+patientName: "Letícia Moura",
+symptoms: "Dor lombar forte que irradia para a virilha.",
+history: "Início súbito há 2 horas.",
+diagnoses: ["Cólica renal", "Apendicite", "Infecção urinária"],
+correctDiagnosis: "Cólica renal",
+exams: ["Ultrassom renal", "Urina tipo 1"],
+correctExams: ["Ultrassom renal", "Urina tipo 1"],
+medications: ["Tramadol", "Cetoprofeno"],
+correctMedications: ["Cetoprofeno"],
+outcome: "Cálculo identificado, orientado tratamento.",
+image: "patient_female.png"
+},
+
+{
+gender: "M",
+patientName: "Rafael Batista",
+symptoms: "Dor no peito ao respirar, febre e cansaço.",
+history: "Ex-morador de rua, tosse prolongada.",
+diagnoses: ["Tuberculose", "Pneumonia", "Asma"],
+correctDiagnosis: "Tuberculose",
+exams: ["Raio X", "Escarro BAAR"],
+correctExams: ["Raio X", "Escarro BAAR"],
+medications: ["Rifampicina", "Isoniazida"],
+correctMedications: ["Rifampicina", "Isoniazida"],
+outcome: "Encaminhado ao serviço especializado.",
+image: "patient_male.png"
+},
+
+{
+gender: "F",
+patientName: "Juliana Ramos",
+symptoms: "Desmaio, tontura e palidez.",
+history: "Menstruação intensa nos últimos dias.",
+diagnoses: ["Anemia", "Hipoglicemia", "Arritmia"],
+correctDiagnosis: "Anemia",
+exams: ["Hemograma completo"],
+correctExams: ["Hemograma completo"],
+medications: ["Sulfato ferroso"],
+correctMedications: ["Sulfato ferroso"],
+outcome: "Reposição adequada iniciada.",
+image: "patient_female.png"
+},
+
+{
+gender: "M",
+patientName: "Pedro Carvalho",
+symptoms: "Dor de cabeça intensa, febre alta, manchas vermelhas.",
+history: "Mora em área com casos de dengue.",
+diagnoses: ["Dengue", "Zika", "COVID"],
+correctDiagnosis: "Dengue",
+exams: ["Hemograma", "Plaquetas"],
+correctExams: ["Hemograma", "Plaquetas"],
+medications: ["Soro", "Dipirona"],
+correctMedications: ["Soro"],
+outcome: "Risco de dengue grave monitorado.",
+image: "patient_male.png"
+},
+
+{
+gender: "F",
+patientName: "Aline Torres",
+symptoms: "Dor ao urinar, febre leve, urina turva.",
+history: "Sintomas começaram ontem.",
+diagnoses: ["Infecção urinária", "Cólica renal", "Cistite crônica"],
+correctDiagnosis: "Infecção urinária",
+exams: ["Urina tipo 1", "Urocultura"],
+correctExams: ["Urina tipo 1"],
+medications: ["Nitrofurantoína"],
+correctMedications: ["Nitrofurantoína"],
+outcome: "Tratamento iniciado com antibiótico.",
+image: "patient_female.png"
+}
   // (... aqui você pode copiar e colar todos os outros casos que criamos antes ...)
 ];
 
