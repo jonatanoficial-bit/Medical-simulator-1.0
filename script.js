@@ -68,7 +68,6 @@ correctMedications: ["AAS", "Clopidogrel", "Oxigênio"],
 outcome: "O paciente foi estabilizado após conduta adequada.",
 image: "patient_male.png"
 },
-
 {
 gender: "F",
 patientName: "Maria Fernanda Silva",
@@ -83,7 +82,6 @@ correctMedications: ["Amoxicilina", "Hidratação"],
 outcome: "Paciente respondeu bem ao tratamento inicial.",
 image: "patient_female.png"
 },
-
 {
 gender: "M",
 patientName: "Carlos Pontes",
@@ -98,7 +96,6 @@ correctMedications: ["Dipirona", "Ceftriaxona"],
 outcome: "Paciente encaminhado para cirurgia.",
 image: "patient_male.png"
 },
-
 {
 gender: "F",
 patientName: "Patrícia Nogueira",
@@ -113,7 +110,6 @@ correctMedications: ["Salbutamol", "Prednisona"],
 outcome: "Paciente melhorou após broncodilatador.",
 image: "patient_female.png"
 },
-
 {
 gender: "M",
 patientName: "Eduardo Reis",
@@ -128,7 +124,6 @@ correctMedications: ["Soro", "Plasil"],
 outcome: "Paciente reidratado e estável.",
 image: "patient_male.png"
 },
-
 {
 gender: "F",
 patientName: "Letícia Moura",
@@ -143,7 +138,6 @@ correctMedications: ["Cetoprofeno"],
 outcome: "Cálculo identificado, orientado tratamento.",
 image: "patient_female.png"
 },
-
 {
 gender: "M",
 patientName: "Rafael Batista",
@@ -158,7 +152,6 @@ correctMedications: ["Rifampicina", "Isoniazida"],
 outcome: "Encaminhado ao serviço especializado.",
 image: "patient_male.png"
 },
-
 {
 gender: "F",
 patientName: "Juliana Ramos",
@@ -173,7 +166,6 @@ correctMedications: ["Sulfato ferroso"],
 outcome: "Reposição adequada iniciada.",
 image: "patient_female.png"
 },
-
 {
 gender: "M",
 patientName: "Pedro Carvalho",
@@ -188,7 +180,6 @@ correctMedications: ["Soro"],
 outcome: "Risco de dengue grave monitorado.",
 image: "patient_male.png"
 },
-
 {
 gender: "F",
 patientName: "Aline Torres",
@@ -204,429 +195,6 @@ outcome: "Tratamento iniciado com antibiótico.",
 image: "patient_female.png"
 }
   {
-  gender: 'M',
-  patientName: 'José Almeida',
-  symptoms: 'Dor no peito intensa, sudorese e falta de ar.',
-  history: 'Hipertenso e fumante. Dor iniciou há 30 minutos e irradia para o braço esquerdo.',
-  diagnoses: ['Infarto agudo do miocárdio', 'Pneumonia', 'Crise de ansiedade'],
-  correctDiagnosis: 'Infarto agudo do miocárdio',
-  tests: ['ECG', 'Exame de sangue (troponina)', 'Raio X de tórax'],
-  correctTests: ['ECG', 'Exame de sangue (troponina)'],
-  testResults: {
-    'ECG': 'Supradesnível de ST em derivações inferiores.',
-    'Exame de sangue (troponina)': 'Troponina significativamente elevada.',
-    'Raio X de tórax': 'Sem alterações significativas.'
-  },
-  medications: ['AAS', 'Clopidogrel', 'Morfina', 'Oxigênio'],
-  correctMeds: ['AAS', 'Clopidogrel', 'Oxigênio']
-},
-
-{
-  gender: 'F',
-  patientName: 'Maria Fernanda Silva',
-  symptoms: 'Febre, tosse com catarro e dor ao respirar fundo.',
-  history: 'Quadro iniciado há 3 dias, com cansaço e perda de apetite.',
-  diagnoses: ['Pneumonia', 'Tuberculose', 'Asma'],
-  correctDiagnosis: 'Pneumonia',
-  tests: ['Raio X de tórax', 'Hemograma', 'Oximetria'],
-  correctTests: ['Raio X de tórax', 'Hemograma'],
-  testResults: {
-    'Raio X de tórax': 'Infiltrado pulmonar em lobo inferior direito.',
-    'Hemograma': 'Leucocitose com desvio à esquerda.',
-    'Oximetria': 'Saturação em 93% em ar ambiente.'
-  },
-  medications: ['Amoxicilina', 'Ceftriaxona', 'Hidratação venosa'],
-  correctMeds: ['Amoxicilina', 'Hidratação venosa']
-},
-
-{
-  gender: 'M',
-  patientName: 'Carlos Pontes',
-  symptoms: 'Dor abdominal intensa no quadrante inferior direito, febre e náuseas.',
-  history: 'Dor iniciou há 8 horas e vem piorando lentamente.',
-  diagnoses: ['Apendicite aguda', 'Gastrite', 'Cólica renal'],
-  correctDiagnosis: 'Apendicite aguda',
-  tests: ['Hemograma', 'Ultrassom abdominal', 'Tomografia abdominal'],
-  correctTests: ['Hemograma', 'Ultrassom abdominal'],
-  testResults: {
-    'Hemograma': 'Leucocitose com desvio à esquerda.',
-    'Ultrassom abdominal': 'Apendice medindo 9 mm, espessado, com inflamação ao redor.',
-    'Tomografia abdominal': 'Espessamento apendicular com sinais de inflamação local.'
-  },
-  medications: ['Dipirona', 'Ceftriaxona', 'Metronidazol'],
-  correctMeds: ['Dipirona', 'Ceftriaxona', 'Metronidazol']
-},
-
-{
-  gender: 'F',
-  patientName: 'Patrícia Nogueira',
-  symptoms: 'Falta de ar, chiado no peito e sensação de aperto torácico.',
-  history: 'Histórico de asma desde a infância. Piora após exposição a poeira.',
-  diagnoses: ['Crise asmática', 'Pneumonia', 'Crise de pânico'],
-  correctDiagnosis: 'Crise asmática',
-  tests: ['Oximetria', 'Gasometria arterial', 'Raio X de tórax'],
-  correctTests: ['Oximetria', 'Gasometria arterial'],
-  testResults: {
-    'Oximetria': 'Saturação em 90% em ar ambiente.',
-    'Gasometria arterial': 'Hipercapnia com acidose respiratória.',
-    'Raio X de tórax': 'Sem infiltrados claros, hiperinsuflação discreta.'
-  },
-  medications: ['Salbutamol inalatório', 'Corticosteroide sistêmico', 'Antibiótico'],
-  correctMeds: ['Salbutamol inalatório', 'Corticosteroide sistêmico']
-},
-
-{
-  gender: 'M',
-  patientName: 'Eduardo Reis',
-  symptoms: 'Vômitos, diarreia aquosa e tontura.',
-  history: 'Ingestão de alimento suspeito em restaurante de rua há 12 horas.',
-  diagnoses: ['Gastroenterite infecciosa', 'Intoxicação medicamentosa', 'Apendicite'],
-  correctDiagnosis: 'Gastroenterite infecciosa',
-  tests: ['Hemograma', 'Ionograma', 'Hidratação venosa'],
-  correctTests: ['Hemograma', 'Ionograma'],
-  testResults: {
-    'Hemograma': 'Hemoconcentração leve.',
-    'Ionograma': 'Sódio e potássio discretamente alterados.',
-    'Hidratação venosa': 'Melhora clínica após reposição volêmica.'
-  },
-  medications: ['Soro venoso', 'Antiemético (ondansetrona)', 'Antibiótico'],
-  correctMeds: ['Soro venoso', 'Antiemético (ondansetrona)']
-},
-
-{
-  gender: 'F',
-  patientName: 'Letícia Moura',
-  symptoms: 'Dor lombar intensa irradiando para a virilha, dificuldade para ficar parada.',
-  history: 'Início súbito há 2 horas, sem febre.',
-  diagnoses: ['Cólica renal', 'Apendicite', 'Infecção urinária'],
-  correctDiagnosis: 'Cólica renal',
-  tests: ['Urina tipo 1', 'Ultrassom de rins e vias urinárias', 'Tomografia sem contraste'],
-  correctTests: ['Urina tipo 1', 'Ultrassom de rins e vias urinárias'],
-  testResults: {
-    'Urina tipo 1': 'Hemácias em grande quantidade, sem leucócitos significativos.',
-    'Ultrassom de rins e vias urinárias': 'Cálculo em ureter distal direito com discreta dilatação.',
-    'Tomografia sem contraste': 'Confirma cálculo ureteral pequeno.'
-  },
-  medications: ['Anti-inflamatório (cetoprofeno)', 'Analgesia opióide', 'Hidratação'],
-  correctMeds: ['Anti-inflamatório (cetoprofeno)', 'Hidratação']
-},
-
-{
-  gender: 'M',
-  patientName: 'Rafael Batista',
-  symptoms: 'Tosse crônica, emagrecimento e sudorese noturna.',
-  history: 'Ex-morador de rua, vive em abrigo comunitário; tosse há mais de 1 mês.',
-  diagnoses: ['Tuberculose pulmonar', 'Pneumonia', 'Bronquite crônica'],
-  correctDiagnosis: 'Tuberculose pulmonar',
-  tests: ['Raio X de tórax', 'Baciloscopia de escarro (BAAR)', 'Hemograma'],
-  correctTests: ['Raio X de tórax', 'Baciloscopia de escarro (BAAR)'],
-  testResults: {
-    'Raio X de tórax': 'Infiltrados em ápice pulmonar com cavitações.',
-    'Baciloscopia de escarro (BAAR)': 'Positiva para bacilos álcool-ácido resistentes.',
-    'Hemograma': 'Leve anemia normocítica.'
-  },
-  medications: ['Rifampicina', 'Isoniazida', 'Pirazinamida', 'Etambutol'],
-  correctMeds: ['Rifampicina', 'Isoniazida', 'Pirazinamida', 'Etambutol']
-},
-
-{
-  gender: 'F',
-  patientName: 'Juliana Ramos',
-  symptoms: 'Tontura, fraqueza, palidez e cansaço aos esforços leves.',
-  history: 'Relata menstruações muito intensas nos últimos meses.',
-  diagnoses: ['Anemia ferropriva', 'Hipoglicemia', 'Arritmia cardíaca'],
-  correctDiagnosis: 'Anemia ferropriva',
-  tests: ['Hemograma completo', 'Ferritina sérica'],
-  correctTests: ['Hemograma completo', 'Ferritina sérica'],
-  testResults: {
-    'Hemograma completo': 'Anemia microcítica hipocrômica.',
-    'Ferritina sérica': 'Reduzida.'
-  },
-  medications: ['Sulfato ferroso', 'Ácido fólico', 'Transfusão (em casos graves)'],
-  correctMeds: ['Sulfato ferroso', 'Ácido fólico']
-},
-
-{
-  gender: 'M',
-  patientName: 'Pedro Carvalho',
-  symptoms: 'Febre alta, dor de cabeça, dor atrás dos olhos e manchas vermelhas pelo corpo.',
-  history: 'Mora em área endêmica para dengue; sintomas há 3 dias.',
-  diagnoses: ['Dengue', 'Zika', 'COVID-19'],
-  correctDiagnosis: 'Dengue',
-  tests: ['Hemograma', 'Plaquetas', 'Teste rápido para dengue'],
-  correctTests: ['Hemograma', 'Plaquetas', 'Teste rápido para dengue'],
-  testResults: {
-    'Hemograma': 'Hemoconcentração e leucopenia.',
-    'Plaquetas': 'Trombocitopenia moderada.',
-    'Teste rápido para dengue': 'Positivo.'
-  },
-  medications: ['Soro venoso', 'Paracetamol', 'AAS'],
-  correctMeds: ['Soro venoso', 'Paracetamol']
-},
-
-{
-  gender: 'F',
-  patientName: 'Aline Torres',
-  symptoms: 'Dor ao urinar, urgência miccional e urina turva.',
-  history: 'Sintomas iniciaram há 24 horas; diz beber pouca água.',
-  diagnoses: ['Infecção urinária baixa (cistite)', 'Cólica renal', 'Vaginite'],
-  correctDiagnosis: 'Infecção urinária baixa (cistite)',
-  tests: ['Urina tipo 1', 'Urocultura'],
-  correctTests: ['Urina tipo 1'],
-  testResults: {
-    'Urina tipo 1': 'Leucócitos numerosos, nitrito positivo.',
-    'Urocultura': 'Coleta enviada para análise.'
-  },
-  medications: ['Nitrofurantoína', 'Hidratação oral', 'AAS'],
-  correctMeds: ['Nitrofurantoína', 'Hidratação oral']
-},
-
-{
-  gender: 'M',
-  patientName: 'Felipe Souza',
-  symptoms: 'Sudorese fria, tremores, confusão e fome intensa.',
-  history: 'Diabético em uso de insulina; refeição atrasada.',
-  diagnoses: ['Hipoglicemia', 'Hiperglicemia', 'Crise de ansiedade'],
-  correctDiagnosis: 'Hipoglicemia',
-  tests: ['Glicemia capilar'],
-  correctTests: ['Glicemia capilar'],
-  testResults: {
-    'Glicemia capilar': '45 mg/dL.'
-  },
-  medications: ['Glicose oral', 'Glicose venosa', 'Insulina'],
-  correctMeds: ['Glicose oral', 'Glicose venosa']
-},
-
-{
-  gender: 'F',
-  patientName: 'Roberta Pereira',
-  symptoms: 'Falta de ar, chiado no peito, aperto torácico.',
-  history: 'História de asma; esqueceu bombinha hoje.',
-  diagnoses: ['Crise asmática', 'Pneumonia', 'Infarto'],
-  correctDiagnosis: 'Crise asmática',
-  tests: ['Oximetria', 'Gasometria arterial', 'Raio X de tórax'],
-  correctTests: ['Oximetria', 'Gasometria arterial'],
-  testResults: {
-    'Oximetria': 'Saturação em 91%.',
-    'Gasometria arterial': 'Retenção de CO₂ com acidose respiratória.',
-    'Raio X de tórax': 'Sem infiltrados aparentes.'
-  },
-  medications: ['Salbutamol inalatório', 'Corticosteroide sistêmico', 'Antibiótico'],
-  correctMeds: ['Salbutamol inalatório', 'Corticosteroide sistêmico']
-},
-
-{
-  gender: 'M',
-  patientName: 'Marcos Vieira',
-  symptoms: 'Tontura intensa, sensação de que tudo gira, náuseas.',
-  history: 'Sintomas surgem ao virar a cabeça; sem déficits neurológicos.',
-  diagnoses: ['Vertigem periférica (labirintite)', 'AVC', 'Hipotensão'],
-  correctDiagnosis: 'Vertigem periférica (labirintite)',
-  tests: ['Avaliação clínica', 'Manobra de Dix-Hallpike', 'Audiometria'],
-  correctTests: ['Avaliação clínica', 'Manobra de Dix-Hallpike'],
-  testResults: {
-    'Avaliação clínica': 'Sem sinais de déficit focal.',
-    'Manobra de Dix-Hallpike': 'Vertigem e nistagmo compatíveis com vertigem posicional.',
-    'Audiometria': 'Perda auditiva leve em alta frequência.'
-  },
-  medications: ['Antivertiginoso', 'Antiemético', 'Antibiótico'],
-  correctMeds: ['Antivertiginoso', 'Antiemético']
-},
-
-{
-  gender: 'F',
-  patientName: 'Helena Castro',
-  symptoms: 'Dor torácica súbita ao respirar, falta de ar e ansiedade.',
-  history: 'Uso de anticoncepcional oral e viagem longa recente.',
-  diagnoses: ['Embolia pulmonar', 'Pneumotórax espontâneo', 'Crise de pânico'],
-  correctDiagnosis: 'Embolia pulmonar',
-  tests: ['D-dímero', 'Angiotomografia pulmonar', 'Raio X de tórax'],
-  correctTests: ['D-dímero', 'Angiotomografia pulmonar'],
-  testResults: {
-    'D-dímero': 'Elevado.',
-    'Angiotomografia pulmonar': 'Defeito de enchimento em ramo de artéria pulmonar.',
-    'Raio X de tórax': 'Sem colapso pulmonar evidente.'
-  },
-  medications: ['Heparina', 'Oxigenoterapia', 'Analgesia leve'],
-  correctMeds: ['Heparina', 'Oxigenoterapia']
-},
-
-{
-  gender: 'F',
-  patientName: 'Patrícia Nunes',
-  symptoms: 'Dor pélvica intensa, sangramento vaginal e tontura.',
-  history: 'Atraso menstrual de 6 semanas, relações sem proteção.',
-  diagnoses: ['Gravidez ectópica rota', 'Abortamento incompleto', 'Cólica menstrual'],
-  correctDiagnosis: 'Gravidez ectópica rota',
-  tests: ['Beta-hCG', 'Ultrassom transvaginal', 'Hemograma'],
-  correctTests: ['Beta-hCG', 'Ultrassom transvaginal', 'Hemograma'],
-  testResults: {
-    'Beta-hCG': 'Positivo em valores compatíveis com gestação.',
-    'Ultrassom transvaginal': 'Massa anexial e líquido livre em cavidade.',
-    'Hemograma': 'Anemia e sinais de perda sanguínea.'
-  },
-  medications: ['Estabilização hemodinâmica', 'Preparar para cirurgia', 'Analgésico'],
-  correctMeds: ['Estabilização hemodinâmica', 'Preparar para cirurgia']
-},
-
-{
-  gender: 'M',
-  patientName: 'João Batista',
-  symptoms: 'Febre alta, dor de cabeça intensa e rigidez de nuca.',
-  history: 'Sintomas iniciados há 24 horas, piorando.',
-  diagnoses: ['Meningite bacteriana', 'Enxaqueca', 'Sinusite'],
-  correctDiagnosis: 'Meningite bacteriana',
-  tests: ['Tomografia de crânio', 'Punção lombar', 'Hemocultura'],
-  correctTests: ['Punção lombar', 'Hemocultura'],
-  testResults: {
-    'Tomografia de crânio': 'Sem sinais de hipertensão intracraniana grave.',
-    'Punção lombar': 'Líquor turvo, com aumento de leucócitos e proteínas.',
-    'Hemocultura': 'Bactéria gram-positiva isolada.'
-  },
-  medications: ['Antibiótico intravenoso precoce', 'Corticosteroide', 'Analgésico'],
-  correctMeds: ['Antibiótico intravenoso precoce', 'Corticosteroide']
-},
-
-{
-  gender: 'F',
-  patientName: 'Bruna Teixeira',
-  symptoms: 'Palpitações, perda de peso, tremores e intolerância ao calor.',
-  history: 'Sintomas há alguns meses, sem tratamento.',
-  diagnoses: ['Tireotoxicose (hipertireoidismo)', 'Crise de pânico', 'Anemia'],
-  correctDiagnosis: 'Tireotoxicose (hipertireoidismo)',
-  tests: ['TSH', 'T4 livre', 'ECG'],
-  correctTests: ['TSH', 'T4 livre', 'ECG'],
-  testResults: {
-    'TSH': 'Suprimido.',
-    'T4 livre': 'Elevado.',
-    'ECG': 'Taquicardia sinusal.'
-  },
-  medications: ['Betabloqueador', 'Antitireoidiano', 'Ansiolítico isolado'],
-  correctMeds: ['Betabloqueador', 'Antitireoidiano']
-},
-
-{
-  gender: 'M',
-  patientName: 'Rafael Gomes',
-  symptoms: 'Dor e inchaço em panturrilha unilateral, calor local.',
-  history: 'Cirurgia ortopédica recente com imobilização prolongada.',
-  diagnoses: ['Trombose venosa profunda', 'Distensão muscular', 'Celulite'],
-  correctDiagnosis: 'Trombose venosa profunda',
-  tests: ['D-dímero', 'Ultrassom Doppler venoso', 'Hemograma'],
-  correctTests: ['D-dímero', 'Ultrassom Doppler venoso'],
-  testResults: {
-    'D-dímero': 'Elevado.',
-    'Ultrassom Doppler venoso': 'Trombo em veia profunda do membro inferior.',
-    'Hemograma': 'Sem alterações importantes.'
-  },
-  medications: ['Anticoagulante', 'Analgesia', 'Antibiótico'],
-  correctMeds: ['Anticoagulante', 'Analgesia']
-},
-
-{
-  gender: 'M',
-  patientName: 'Lucas Andrade',
-  symptoms: 'Dor de cabeça súbita e intensa, vômitos, sonolência.',
-  history: 'Hipertenso; não faz uso regular de medicação.',
-  diagnoses: ['AVC hemorrágico', 'Enxaqueca', 'Crise hipertensiva simples'],
-  correctDiagnosis: 'AVC hemorrágico',
-  tests: ['TC de crânio', 'Pressão arterial', 'Hemograma'],
-  correctTests: ['TC de crânio'],
-  testResults: {
-    'TC de crânio': 'Sangramento intracerebral em região gangliobasal.',
-    'Pressão arterial': 'Valores persistentemente elevados.',
-    'Hemograma': 'Sem alterações relevantes.'
-  },
-  medications: ['Controle rigoroso da pressão', 'Suporte em UTI', 'Analgésico'],
-  correctMeds: ['Controle rigoroso da pressão', 'Suporte em UTI']
-},
-
-{
-  gender: 'F',
-  patientName: 'Camila Duarte',
-  symptoms: 'Dor torácica em aperto, desencadeada por esforço físico, aliviada em repouso.',
-  history: 'Sedentária, tabagista, colesterol elevado.',
-  diagnoses: ['Angina estável', 'Refluxo gastroesofágico', 'Costocondrite'],
-  correctDiagnosis: 'Angina estável',
-  tests: ['ECG em repouso', 'Teste ergométrico', 'Perfil lipídico'],
-  correctTests: ['ECG em repouso', 'Teste ergométrico'],
-  testResults: {
-    'ECG em repouso': 'Alterações discretas de repolarização.',
-    'Teste ergométrico': 'Alterações isquêmicas desencadeadas ao esforço.',
-    'Perfil lipídico': 'LDL elevado.'
-  },
-  medications: ['AAS', 'Nitrato sublingual', 'Estatina'],
-  correctMeds: ['AAS', 'Nitrato sublingual', 'Estatina']
-},
-
-{
-  gender: 'M',
-  patientName: 'André Lima',
-  symptoms: 'Dor epigástrica em queimação, pior à noite e em jejum.',
-  history: 'Uso crônico de anti-inflamatórios, etilista.',
-  diagnoses: ['Úlcera gástrica', 'Gastrite leve', 'Refluxo'],
-  correctDiagnosis: 'Úlcera gástrica',
-  tests: ['Endoscopia digestiva alta', 'Hemograma'],
-  correctTests: ['Endoscopia digestiva alta'],
-  testResults: {
-    'Endoscopia digestiva alta': 'Lesão ulcerada em antro gástrico.',
-    'Hemograma': 'Anemia leve.'
-  },
-  medications: ['Inibidor de bomba de prótons (IBP)', 'Suspender AINE', 'Antiácido simples'],
-  correctMeds: ['Inibidor de bomba de prótons (IBP)', 'Suspender AINE']
-},
-
-{
-  gender: 'F',
-  patientName: 'Daniela Costa',
-  symptoms: 'Dor no punho após queda, edema local e dificuldade de movimentar.',
-  history: 'Queda da própria altura ao escorregar.',
-  diagnoses: ['Fratura distal de rádio', 'Entorse simples', 'Luxação de ombro'],
-  correctDiagnosis: 'Fratura distal de rádio',
-  tests: ['Raio X de punho'],
-  correctTests: ['Raio X de punho'],
-  testResults: {
-    'Raio X de punho': 'Fratura distal de rádio com desvio.'
-  },
-  medications: ['Imobilização adequada', 'Analgesia simples', 'Gesso ou tala'],
-  correctMeds: ['Imobilização adequada', 'Analgesia simples', 'Gesso ou tala']
-},
-
-{
-  gender: 'M',
-  patientName: 'Bruno Ferreira',
-  symptoms: 'Febre alta, tosse seca, perda de olfato e paladar.',
-  history: 'Contato recente com colega com COVID-19.',
-  diagnoses: ['COVID-19', 'Gripe comum', 'Alergia respiratória'],
-  correctDiagnosis: 'COVID-19',
-  tests: ['Teste PCR', 'Raio X de tórax', 'Hemograma'],
-  correctTests: ['Teste PCR', 'Raio X de tórax'],
-  testResults: {
-    'Teste PCR': 'Positivo para SARS-CoV-2.',
-    'Raio X de tórax': 'Infiltrados em vidro fosco bilaterais.',
-    'Hemograma': 'Linfopenia.'
-  },
-  medications: ['Suporte com hidratação', 'Antipirético', 'Oxigênio se necessário'],
-  correctMeds: ['Suporte com hidratação', 'Antipirético', 'Oxigênio se necessário']
-},
-
-{
-  gender: 'F',
-  patientName: 'Viviane Lopes',
-  symptoms: 'Ansiedade intensa, palpitações, falta de ar e sensação de morte iminente.',
-  history: 'Situação de estresse extremo no trabalho, sem doença cardíaca prévia.',
-  diagnoses: ['Crise de pânico', 'Infarto agudo do miocárdio', 'Arritmia'],
-  correctDiagnosis: 'Crise de pânico',
-  tests: ['ECG', 'Oximetria', 'Anamnese detalhada'],
-  correctTests: ['ECG', 'Anamnese detalhada'],
-  testResults: {
-    'ECG': 'Sem alterações isquêmicas.',
-    'Oximetria': 'Saturação normal.',
-    'Anamnese detalhada': 'Sintomas típicos de crise de pânico sem outros achados.'
-  },
-  medications: ['Benzodiazepínico em dose baixa', 'Psicoterapia (encaminhamento)', 'AAS'],
-  correctMeds: ['Benzodiazepínico em dose baixa', 'Psicoterapia (encaminhamento)']
-                 }
   // (... aqui você podecopiar e colar todos os outros casos que criamos antes ...)
 ];
 
