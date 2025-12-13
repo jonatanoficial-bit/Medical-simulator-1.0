@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const SAVE_KEY = "medical_simulator_save_v2";
+  const SAVE_KEY = "medical_simulator_save_v3";
   const CASES_URL = "cases.json";
   const EXAMS_URL = "exams.json";
 
@@ -48,7 +48,7 @@
 
   function computeRank(score){
     if (score < 250) return "Médico Residente";
-    if (score < 800) return "Médico Titular";
+    if (score < 900) return "Médico Titular";
     return "Médico Pleno";
   }
 
@@ -163,7 +163,7 @@
     hudErrors.textContent = String(state.errors || 0);
     hudDeaths.textContent = String(state.deaths || 0);
 
-    const prestige = Math.max(0, Math.min(100, Math.round((state.score || 0) / 12)));
+    const prestige = Math.max(0, Math.min(100, Math.round((state.score || 0) / 14)));
     const total = (state.hits || 0) + (state.errors || 0) + (state.deaths || 0);
     const perf = total > 0 ? Math.max(0, Math.min(100, Math.round(((state.hits || 0) / total) * 100))) : 0;
 
@@ -175,16 +175,14 @@
   }
 
   // ===== Data-driven content =====
-  let EXAMS = null;          // exams.json
-  let CASES = [];            // cases.json
+  let EXAMS = null;
+  let CASES = [];
 
   async function loadData(){
-    // Carrega exames e casos
     const [examsResp, casesResp] = await Promise.all([
       fetch(EXAMS_URL, { cache: "no-store" }),
       fetch(CASES_URL, { cache: "no-store" })
     ]);
-
     if (!examsResp.ok) throw new Error("Falha ao carregar exams.json");
     if (!casesResp.ok) throw new Error("Falha ao carregar cases.json");
 
@@ -211,12 +209,15 @@
     return finalPool[Math.floor(Math.random() * finalPool.length)];
   }
 
-  // ===== Exam handling (fixed buttons) =====
+  // ===== Exams (fixed buttons, case-specific result or normal fallback) =====
+  function examLabel(examId){
+    const e = EXAMS.exams.find(x => x.id === examId);
+    return e ? e.label : examId;
+  }
+
   function showExamResult(caseObj, examId){
     const map = caseObj.examResults || {};
     const found = map[examId];
-
-    // “Exame fora do caso” => normal fallback
     const fallback = EXAMS.normalFallback || { text: "Resultado normal simulado.", image: null };
 
     const text = (found?.text) ? found.text : fallback.text;
@@ -225,11 +226,6 @@
     let html = `<div><strong>${examLabel(examId)}</strong> — ${text}</div>`;
     if (image) html += `<img class="exam-image" src="${image}" alt="${examLabel(examId)}">`;
     examResultsEl.innerHTML = html;
-  }
-
-  function examLabel(examId){
-    const e = EXAMS.exams.find(x => x.id === examId);
-    return e ? e.label : examId;
   }
 
   // ===== Render case =====
@@ -246,7 +242,7 @@
     patientHistory.textContent = c.history;
     vitalsEl.innerHTML = (c.vitals || []).map(v => `<div>• ${v}</div>`).join("");
 
-    // Perguntas (case-specific)
+    // Perguntas
     questionsEl.innerHTML = "";
     qaEl.textContent = "Selecione uma pergunta para ver a resposta.";
     (c.questions || []).forEach((qq, idx) => {
@@ -261,7 +257,7 @@
       questionsEl.appendChild(b);
     });
 
-    // Exames (FIXOS — sempre o catálogo inteiro)
+    // Exames fixos
     examsEl.innerHTML = "";
     examResultsEl.textContent = "Solicite exames para ver resultados.";
     EXAMS.exams.forEach((exm) => {
@@ -276,7 +272,7 @@
       examsEl.appendChild(b);
     });
 
-    // Diagnóstico (radio)
+    // Diagnóstico
     diagnosisEl.innerHTML = "";
     (c.diagnosis || []).forEach((d, i) => {
       const row = document.createElement("div");
@@ -291,15 +287,16 @@
       diagnosisEl.appendChild(row);
     });
 
-    // Condutas/Medicações (checkbox)
+    // Medicações/condutas
     medicationsEl.innerHTML = "";
     (c.medications || []).forEach((m, i) => {
       const row = document.createElement("div");
       row.className = "opt";
+      const tag = m.essential ? " (ESSENCIAL)" : (m.critical ? " (ERRO CRÍTICO)" : "");
       row.innerHTML = `
         <input type="checkbox" id="med_${i}" value="${i}">
         <label for="med_${i}">
-          <strong>${m.label}</strong>
+          <strong>${m.label}${tag}</strong>
           <small>Impacto simulado • risco: ${m.risk}</small>
         </label>
       `;
@@ -307,21 +304,21 @@
     });
   }
 
-  // ===== Scoring rules =====
+  // ===== Scoring (AAA) =====
   function severityPenalty(sev){
-    if (sev === "leve") return 15;
-    if (sev === "grave") return 45;
-    return 85;
+    if (sev === "leve") return 20;
+    if (sev === "grave") return 55;
+    return 110; // crítico
   }
   function medPenalty(risk){
-    if (risk === "baixa") return 10;
-    if (risk === "media") return 25;
-    return 55;
+    if (risk === "baixa") return 12;
+    if (risk === "media") return 30;
+    return 65;
   }
   function tierBase(tier){
-    if (tier === "pleno") return 140;
-    if (tier === "titular") return 95;
-    return 60;
+    if (tier === "pleno") return 160;
+    if (tier === "titular") return 110;
+    return 70;
   }
 
   function finishCase(){
@@ -329,10 +326,8 @@
     if (!c) return;
 
     const selectedDx = qs('input[name="dx"]:checked');
-    if (!selectedDx){
-      alert("Selecione um diagnóstico.");
-      return;
-    }
+    if (!selectedDx){ alert("Selecione um diagnóstico."); return; }
+
     const dxPick = c.diagnosis[Number(selectedDx.value)];
     const medChecks = qsa('#medications input[type="checkbox"]:checked');
     const medsChosen = medChecks.map(ch => c.medications[Number(ch.value)]);
@@ -340,7 +335,9 @@
     let delta = 0;
     let death = false;
 
-    // Diagnóstico
+    const isRed = c.patient.triage === "Vermelho";
+
+    // 1) Diagnóstico
     if (dxPick.correct){
       delta += tierBase(c.tier);
       state.hits += 1;
@@ -349,52 +346,77 @@
       state.errors += 1;
     }
 
-    // Exames:
-    // - recommendedExams: se pedir, +10 (por exame)
-    // - essentialExams: se NÃO pedir, penaliza -25 cada
-    // - qualquer exame fora de recommendedExams/essentialExams => -10 (inútil)
+    // 2) Exames (AAA)
+    // - recommendedExams: se pedir -> +10
+    // - essentialExams: se NÃO pedir -> -30 cada
+    // - exame fora do contexto -> -12 cada (penaliza “atirar pra todo lado”)
     const rec = new Set([...(c.recommendedExams || [])]);
     const ess = new Set([...(c.essentialExams || [])]);
     const used = new Set([...(state.usedExams || [])]);
 
     used.forEach(exId => {
       if (rec.has(exId) || ess.has(exId)) delta += 10;
-      else delta -= 10; // pediu exame que não faz sentido => normal + penaliza
+      else delta -= 12;
     });
-
     ess.forEach(exId => {
-      if (!used.has(exId)) delta -= 25; // deixou de pedir essencial
+      if (!used.has(exId)) delta -= 30;
     });
 
-    // Condutas
+    // 3) Medicações/condutas (AAA)
+    // - corretas: +12
+    // - erradas: - (por risco)
+    // - erradas críticas: -120 e pode gerar óbito evitável em caso vermelho
+    // - essenciais não feitas: -40 cada
+    // - polifarmácia (excesso): acima de 4 escolhas -> -8 por item extra
+    const essentialMeds = (c.medications || []).filter(m => m.essential);
+    const chosenSet = new Set(medsChosen.map(m => m.label));
+
     medsChosen.forEach(m => {
       if (m.correct) delta += 12;
-      else delta -= medPenalty(m.risk);
+      else {
+        let p = medPenalty(m.risk);
+        if (m.critical) p += 120;
+        delta -= p;
+        if (isRed && m.critical) death = true;
+      }
     });
 
-    // Óbito evitável (caso crítico)
-    const red = c.patient.triage === "Vermelho";
-    const wrongHighRisk = medsChosen.some(m => !m.correct && m.risk === "alta");
-    if (red && !dxPick.correct && (wrongHighRisk || delta <= -80)){
-      death = true;
-      state.deaths += 1;
+    essentialMeds.forEach(m => {
+      if (!chosenSet.has(m.label)) delta -= 40;
+    });
+
+    if (medsChosen.length > 4){
+      delta -= (medsChosen.length - 4) * 8;
     }
 
+    // 4) Óbito evitável (AAA)
+    // - caso vermelho + dx errado + pontuação muito negativa => óbito
+    if (isRed && !dxPick.correct && delta <= -140){
+      death = true;
+    }
+
+    if (death){
+      state.deaths += 1;
+      // punição adicional para reforçar gravidade
+      delta -= 80;
+    }
+
+    // Atualiza estado
     state.score += delta;
     state.casesResolved += 1;
     state.rank = computeRank(state.score);
     saveGame();
     updateHUD();
 
-    // Resultado (texto simples)
+    // Resultado
     let summary = "Atendimento concluído";
     let detail = "Evolução simulada conforme suas decisões.";
     if (death){
       summary = "Óbito evitável";
       detail = "Erro crítico/atraso em cenário de alto risco (simulado).";
-    } else if (dxPick.correct && delta >= 70){
+    } else if (dxPick.correct && delta >= 90){
       summary = "Atendimento bem-sucedido";
-      detail = "Diagnóstico/conduta coerentes (simulado).";
+      detail = "Diagnóstico/conduta coerentes, com exames adequados (simulado).";
     } else if (dxPick.correct || delta > 0){
       summary = "Atendimento parcialmente correto";
       detail = "Houve acertos, mas com excesso/falta de exames ou conduta incompleta (simulado).";
@@ -420,7 +442,7 @@
   });
 
   // ===== Buttons =====
-  btnNew.addEventListener("click", async () => {
+  btnNew.addEventListener("click", () => {
     requestFullscreen();
     resetGame();
     updateContinueButton();
@@ -449,8 +471,9 @@
     const msg =
 `Bem-vindo(a), ${state.name}.
 
-Você terá exames fixos e sempre disponíveis. Se solicitar exames sem sentido para o caso,
-o resultado virá normal e isso impactará negativamente a pontuação.
+Os exames ficam fixos e sempre disponíveis.
+Pedir exame sem sentido retorna resultado normal e reduz pontuação.
+As medicações/condutas incluem opções incorretas e erros críticos.
 
 Assuma seu posto imediatamente.`;
 
@@ -458,11 +481,7 @@ Assuma seu posto imediatamente.`;
     showScreen("screen-briefing");
   });
 
-  btnGoOffice.addEventListener("click", () => {
-    requestFullscreen();
-    updateHUD();
-    showScreen("screen-office");
-  });
+  btnGoOffice.addEventListener("click", () => { requestFullscreen(); updateHUD(); showScreen("screen-office"); });
 
   btnNextCase.addEventListener("click", () => {
     const c = pickCase();
