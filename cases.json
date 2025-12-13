@@ -2,41 +2,761 @@
   "version": 1,
   "cases": [
     {
-      "id": "r_flu_001",
+      "id": "r_viral_001",
       "tier": "residente",
-      "patient": {
-        "name": "Mariana Souza",
-        "age": 22,
-        "sex": "Feminino",
-        "photo": "images/patient_female.jpg",
-        "triage": "Verde"
-      },
+      "patient": { "name": "Mariana Souza", "age": 22, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Verde" },
       "vitals": ["PA: 112/70", "FC: 92", "FR: 18", "SpO2: 98%", "Temp: 38,2°C"],
-      "complaint": "Febre, dor no corpo e tosse há 2 dias.",
+      "complaint": "Febre, mialgia e tosse há 2 dias.",
       "history": "Sem comorbidades. Contato com pessoas gripadas. Sem dispneia importante.",
       "questions": [
-        { "label": "Duração/Progressão", "answer": "Início há 48h, piora leve, alimentando-se parcialmente." },
-        { "label": "Sinais de alarme", "answer": "Nega dispneia intensa, confusão, dor torácica ou cianose." }
+        { "label": "Sinais de alarme", "answer": "Nega dispneia intensa, confusão, cianose ou dor torácica." },
+        { "label": "Evolução", "answer": "Início há 48h, leve piora, mantém hidratação." },
+        { "label": "Vacinação recente", "answer": "Não atualizou vacina sazonal este ano (simulado)." }
       ],
-
       "examResults": {
-        "cbc": { "text": "Leucócitos sem desvio significativo (simulado).", "image": "images/labs.jpg" },
-        "cxr": { "text": "Sem consolidações (simulado).", "image": "images/xray.jpg" }
+        "cbc": { "text": "Hemograma sem leucocitose significativa (simulado).", "image": "images/labs.jpg" },
+        "cxr": { "text": "Sem consolidações ou derrame pleural (simulado).", "image": "images/xray.jpg" }
       },
-
       "recommendedExams": ["cbc"],
       "essentialExams": [],
-
       "diagnosis": [
         { "label": "Síndrome gripal/infecção viral", "correct": true, "severity": "leve" },
         { "label": "Pneumonia comunitária", "correct": false, "severity": "grave" },
+        { "label": "Embolia pulmonar", "correct": false, "severity": "critico" },
+        { "label": "Asma aguda", "correct": false, "severity": "grave" },
+        { "label": "Sinusite bacteriana", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Hidratação, repouso e orientações de retorno", "correct": true, "risk": "baixa" },
+        { "label": "Antitérmico/analgesia conforme prescrição", "correct": true, "risk": "baixa" },
+        { "label": "Radiografia e antibiótico sem critérios", "correct": false, "risk": "media" },
+        { "label": "Corticoide sistêmico sem indicação", "correct": false, "risk": "media" },
+        { "label": "Sedação e alta sem reavaliação", "correct": false, "risk": "alta" },
+        { "label": "Alta com orientação de sinais de alarme", "correct": true, "risk": "baixa" }
+      ]
+    },
+    {
+      "id": "r_asthma_002",
+      "tier": "residente",
+      "patient": { "name": "João Pereira", "age": 19, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 118/74", "FC: 108", "FR: 26", "SpO2: 94%", "Temp: 36,8°C"],
+      "complaint": "Falta de ar e chiado.",
+      "history": "História de asma. Piora após poeira. Sem febre.",
+      "questions": [
+        { "label": "Uso de resgate", "answer": "Usou broncodilatador com melhora parcial (simulado)." },
+        { "label": "Dor torácica em aperto", "answer": "Nega dor típica isquêmica." },
+        { "label": "Gatilhos", "answer": "Poeira e frio agravam (simulado)." }
+      ],
+      "examResults": {
+        "cxr": { "text": "Sem pneumonia evidente; hiperinsuflação discreta (simulado).", "image": "images/xray.jpg" },
+        "abg": { "text": "Sem retenção grave de CO2 (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["abg", "cxr"],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Exacerbação de asma", "correct": true, "severity": "grave" },
+        { "label": "Pneumonia", "correct": false, "severity": "grave" },
+        { "label": "Embolia pulmonar", "correct": false, "severity": "critico" },
+        { "label": "Crise de pânico", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Broncodilatador inalatório conforme protocolo", "correct": true, "risk": "baixa" },
+        { "label": "Corticoide sistêmico conforme avaliação", "correct": true, "risk": "media" },
+        { "label": "Oxigênio se indicado e monitorização", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico sem sinais de infecção", "correct": false, "risk": "media" },
+        { "label": "Sedação e alta rápida com SpO2 baixa", "correct": false, "risk": "alta" },
+        { "label": "Liberar sem observar resposta ao tratamento", "correct": false, "risk": "alta" }
+      ]
+    },
+    {
+      "id": "r_gastro_003",
+      "tier": "residente",
+      "patient": { "name": "Pedro Almeida", "age": 27, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Verde" },
+      "vitals": ["PA: 110/72", "FC: 96", "FR: 18", "SpO2: 99%", "Temp: 37,6°C"],
+      "complaint": "Diarreia e vômitos há 1 dia.",
+      "history": "Sem sangue nas fezes. Dor difusa leve. Alimento suspeito (simulado).",
+      "questions": [
+        { "label": "Sangue nas fezes", "answer": "Nega sangue." },
+        { "label": "Desidratação", "answer": "Boca seca leve, urina presente (simulado)." },
+        { "label": "Antibiótico recente", "answer": "Nega uso recente." }
+      ],
+      "examResults": { "cbc": { "text": "Leve hemoconcentração, sem choque (simulado).", "image": "images/labs.jpg" } },
+      "recommendedExams": ["cbc"],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Gastroenterite aguda", "correct": true, "severity": "leve" },
+        { "label": "Apendicite", "correct": false, "severity": "grave" },
+        { "label": "Pancreatite", "correct": false, "severity": "grave" },
+        { "label": "Sepse abdominal", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Hidratação oral/venosa conforme necessidade", "correct": true, "risk": "baixa" },
+        { "label": "Antiemético conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico sem critérios", "correct": false, "risk": "media" },
+        { "label": "Antidiarreico em caso com sinais de alarme", "correct": false, "risk": "media" },
+        { "label": "Alta sem orientar retorno e hidratação", "correct": false, "risk": "media" }
+      ]
+    },
+    {
+      "id": "r_cystitis_004",
+      "tier": "residente",
+      "patient": { "name": "Ana Ribeiro", "age": 30, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Verde" },
+      "vitals": ["PA: 116/78", "FC: 88", "FR: 16", "SpO2: 99%", "Temp: 37,8°C"],
+      "complaint": "Ardência ao urinar e urgência miccional.",
+      "history": "Sem dor lombar. Sem vômitos. Sem gestação (simulado).",
+      "questions": [
+        { "label": "Dor lombar", "answer": "Nega dor em flanco." },
+        { "label": "Febre alta", "answer": "Nega febre alta." },
+        { "label": "Corrimento", "answer": "Nega." }
+      ],
+      "examResults": {
+        "urinalysis": { "text": "Achados compatíveis com cistite (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["urinalysis"],
+      "essentialExams": ["urinalysis"],
+      "diagnosis": [
+        { "label": "Cistite não complicada", "correct": true, "severity": "leve" },
+        { "label": "Pielonefrite", "correct": false, "severity": "grave" },
+        { "label": "Cólica renal", "correct": false, "severity": "grave" },
+        { "label": "IST/DIP", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Antibiótico conforme diretriz local (sem dose)", "correct": true, "risk": "media" },
+        { "label": "Hidratação e orientações", "correct": true, "risk": "baixa" },
+        { "label": "Corticoide sem indicação", "correct": false, "risk": "media" },
+        { "label": "Alta sem tratar e sem orientação", "correct": false, "risk": "alta" },
+        { "label": "Solicitar antibiótico IV e internação sem critérios", "correct": false, "risk": "media" }
+      ]
+    },
+    {
+      "id": "r_migraine_005",
+      "tier": "residente",
+      "patient": { "name": "Beatriz Costa", "age": 24, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Verde" },
+      "vitals": ["PA: 120/80", "FC: 84", "FR: 16", "SpO2: 99%", "Temp: 36,6°C"],
+      "complaint": "Cefaleia pulsátil com fotofobia.",
+      "history": "História de enxaqueca. Sem déficit neurológico focal (simulado).",
+      "questions": [
+        { "label": "Sinais de alarme", "answer": "Nega rigidez de nuca, febre alta, déficit focal." },
+        { "label": "Início súbito", "answer": "Não foi súbito em trovoada (simulado)." },
+        { "label": "Náuseas", "answer": "Náusea moderada (simulado)." }
+      ],
+      "examResults": {
+        "head_ct": { "text": "Sem hemorragia aguda (simulado).", "image": "images/mri.jpg" }
+      },
+      "recommendedExams": [],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Enxaqueca", "correct": true, "severity": "leve" },
+        { "label": "Hemorragia subaracnoide", "correct": false, "severity": "critico" },
+        { "label": "Meningite", "correct": false, "severity": "critico" },
+        { "label": "AVC isquêmico", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Analgesia e antiemético conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Observação e retorno se sinais de alarme", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico empírico sem sinais infecciosos", "correct": false, "risk": "media" },
+        { "label": "Sedação profunda e alta imediata", "correct": false, "risk": "alta" },
+        { "label": "Solicitar trombólise sem critério", "correct": false, "risk": "alta" }
+      ]
+    },
+    {
+      "id": "r_sprain_006",
+      "tier": "residente",
+      "patient": { "name": "Lucas Martins", "age": 17, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Verde" },
+      "vitals": ["PA: 118/70", "FC: 90", "FR: 16", "SpO2: 99%", "Temp: 36,7°C"],
+      "complaint": "Entorse de tornozelo após esporte.",
+      "history": "Dor e edema moderados. Sem deformidade importante (simulado).",
+      "questions": [
+        { "label": "Apoio", "answer": "Consegue apoiar com dor." },
+        { "label": "Deformidade", "answer": "Sem deformidade grosseira." },
+        { "label": "Trauma de alta energia", "answer": "Não (simulado)." }
+      ],
+      "examResults": {
+        "ankle_xray": { "text": "Sem fratura (simulado).", "image": "images/xray.jpg" }
+      },
+      "recommendedExams": ["ankle_xray"],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Entorse de tornozelo", "correct": true, "severity": "leve" },
+        { "label": "Fratura instável", "correct": false, "severity": "grave" },
+        { "label": "Luxação", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Gelo, elevação e imobilização conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Analgésico conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico profilático sem ferida", "correct": false, "risk": "media" },
+        { "label": "Alta sem orientar sinais de piora", "correct": false, "risk": "media" },
+        { "label": "Sedação e manipulação sem indicação", "correct": false, "risk": "alta" }
+      ]
+    },
+    {
+      "id": "r_allergy_007",
+      "tier": "residente",
+      "patient": { "name": "Paula Nunes", "age": 36, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Verde" },
+      "vitals": ["PA: 122/78", "FC: 82", "FR: 16", "SpO2: 99%", "Temp: 36,5°C"],
+      "complaint": "Urticária e coceira após produto de limpeza.",
+      "history": "Sem falta de ar, sem rouquidão, sem hipotensão (simulado).",
+      "questions": [
+        { "label": "Dispneia/rouquidão", "answer": "Nega dispneia e rouquidão." },
+        { "label": "Edema de face", "answer": "Leve edema local, sem sinais de via aérea." },
+        { "label": "Exposição", "answer": "Contato direto com produto (simulado)." }
+      ],
+      "examResults": {},
+      "recommendedExams": [],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Urticária/dermatite de contato", "correct": true, "severity": "leve" },
+        { "label": "Anafilaxia", "correct": false, "severity": "critico" },
+        { "label": "Celulite bacteriana", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Remover agente causal e orientações", "correct": true, "risk": "baixa" },
+        { "label": "Antialérgico conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Adrenalina sem sinais de anafilaxia", "correct": false, "risk": "alta" },
+        { "label": "Antibiótico sem sinais infecciosos", "correct": false, "risk": "media" },
+        { "label": "Alta sem orientar retorno se piora", "correct": false, "risk": "media" }
+      ]
+    },
+    {
+      "id": "r_otitis_008",
+      "tier": "residente",
+      "patient": { "name": "Rafael Santos", "age": 10, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Verde" },
+      "vitals": ["PA: 100/60", "FC: 98", "FR: 18", "SpO2: 99%", "Temp: 38,1°C"],
+      "complaint": "Dor de ouvido e febre baixa.",
+      "history": "Coriza e tosse leve. Sem rigidez de nuca (simulado).",
+      "questions": [
+        { "label": "Otorréia", "answer": "Sem secreção purulenta (simulado)." },
+        { "label": "Dor intensa persistente", "answer": "Dor moderada, piora à noite." },
+        { "label": "Sinais neurológicos", "answer": "Nega (simulado)." }
+      ],
+      "examResults": { "cbc": { "text": "Sem sinais de sepse; discreta reação inflamatória (simulado).", "image": "images/labs.jpg" } },
+      "recommendedExams": [],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Otite média aguda", "correct": true, "severity": "leve" },
+        { "label": "Meningite", "correct": false, "severity": "critico" },
+        { "label": "Pneumonia", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Analgesia e reavaliação se piora", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico conforme critérios locais (sem dose)", "correct": true, "risk": "media" },
+        { "label": "Corticoide sistêmico sem indicação", "correct": false, "risk": "media" },
+        { "label": "Alta sem orientações", "correct": false, "risk": "media" }
+      ]
+    },
+
+    {
+      "id": "t_appendix_101",
+      "tier": "titular",
+      "patient": { "name": "Fernanda Lima", "age": 34, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 118/76", "FC: 98", "FR: 18", "SpO2: 98%", "Temp: 38,0°C"],
+      "complaint": "Dor em fossa ilíaca direita há 12 horas.",
+      "history": "Dor migratória, náuseas e inapetência (simulado).",
+      "questions": [
+        { "label": "Migração da dor", "answer": "Começou peri-umbilical e migrou para a direita." },
+        { "label": "Apetite", "answer": "Anorexia presente (simulado)." },
+        { "label": "Gestação", "answer": "Nega atraso menstrual importante (simulado)." }
+      ],
+      "examResults": {
+        "cbc": { "text": "Leucocitose com desvio à esquerda (simulado).", "image": "images/labs.jpg" },
+        "abd_us": { "text": "Achados compatíveis com apendicite (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["cbc", "abd_us"],
+      "essentialExams": ["cbc"],
+      "diagnosis": [
+        { "label": "Apendicite aguda", "correct": true, "severity": "grave" },
+        { "label": "Gastroenterite", "correct": false, "severity": "grave" },
+        { "label": "Cólica renal", "correct": false, "severity": "grave" },
+        { "label": "DIP", "correct": false, "severity": "grave" },
+        { "label": "Cisto ovariano roto", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Analgesia/antiemético", "correct": true, "risk": "baixa" },
+        { "label": "Hidratação venosa se indicado", "correct": true, "risk": "baixa" },
+        { "label": "Encaminhar para avaliação cirúrgica", "correct": true, "risk": "baixa" },
+        { "label": "Dar alta sem investigação", "correct": false, "risk": "alta" },
+        { "label": "Sedação e alta para “dormir a dor”", "correct": false, "risk": "alta" },
+        { "label": "Antibiótico sem avaliação de cirurgia/critério", "correct": false, "risk": "media" }
+      ]
+    },
+    {
+      "id": "t_pneumonia_102",
+      "tier": "titular",
+      "patient": { "name": "Roberto Dias", "age": 63, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 130/78", "FC: 104", "FR: 24", "SpO2: 92%", "Temp: 38,6°C"],
+      "complaint": "Tosse, febre e falta de ar.",
+      "history": "Tabagista. Escarro amarelado e dor pleurítica (simulado).",
+      "questions": [
+        { "label": "Início", "answer": "Piora progressiva há 4 dias." },
+        { "label": "Dor pleurítica", "answer": "Dói ao inspirar profundamente (simulado)." },
+        { "label": "Comorbidades", "answer": "HAS e tabagismo (simulado)." }
+      ],
+      "examResults": {
+        "cxr": { "text": "Infiltrado compatível com pneumonia (simulado).", "image": "images/xray.jpg" },
+        "cbc": { "text": "Leucocitose e inflamação aumentada (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["cxr", "cbc"],
+      "essentialExams": ["cxr"],
+      "diagnosis": [
+        { "label": "Pneumonia comunitária", "correct": true, "severity": "grave" },
+        { "label": "Gripe/viral simples", "correct": false, "severity": "grave" },
+        { "label": "Embolia pulmonar", "correct": false, "severity": "critico" },
+        { "label": "Insuficiência cardíaca", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Oxigênio se indicado", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico conforme protocolo (sem dose)", "correct": true, "risk": "media" },
+        { "label": "Hidratação e suporte", "correct": true, "risk": "baixa" },
+        { "label": "Alta com SpO2 baixa sem plano", "correct": false, "risk": "alta" },
+        { "label": "Anticoagulação sem indicação", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" }
+      ]
+    },
+    {
+      "id": "t_renal_colic_103",
+      "tier": "titular",
+      "patient": { "name": "Eduardo Rocha", "age": 41, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 140/88", "FC: 102", "FR: 18", "SpO2: 99%", "Temp: 37,2°C"],
+      "complaint": "Dor intensa em flanco irradiando para virilha.",
+      "history": "Náuseas. Hematúria (simulada). Sem febre alta.",
+      "questions": [
+        { "label": "Febre", "answer": "Nega febre alta." },
+        { "label": "Hematúria", "answer": "Urina rosada (simulado)." },
+        { "label": "História prévia", "answer": "Já teve cálculo renal antes (simulado)." }
+      ],
+      "examResults": {
+        "urinalysis": { "text": "Hematúria compatível com litíase (simulado).", "image": "images/labs.jpg" },
+        "abd_ct": { "text": "Compatível com cálculo ureteral (simulado).", "image": "images/mri.jpg" }
+      },
+      "recommendedExams": ["urinalysis"],
+      "essentialExams": ["urinalysis"],
+      "diagnosis": [
+        { "label": "Cólica renal (litíase)", "correct": true, "severity": "grave" },
+        { "label": "Apendicite", "correct": false, "severity": "grave" },
+        { "label": "Pielonefrite", "correct": false, "severity": "grave" },
+        { "label": "Aneurisma/dissecção", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Analgesia adequada e controle da dor", "correct": true, "risk": "baixa" },
+        { "label": "Hidratação conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico sem sinais de infecção", "correct": false, "risk": "media" },
+        { "label": "Alta sem controle de dor", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar sem reavaliar", "correct": false, "risk": "alta" }
+      ]
+    },
+    {
+      "id": "t_head_injury_104",
+      "tier": "titular",
+      "patient": { "name": "Gustavo Lima", "age": 37, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 128/80", "FC: 88", "FR: 16", "SpO2: 99%", "Temp: 36,6°C"],
+      "complaint": "Queda com trauma craniano, cefaleia e náusea.",
+      "history": "Sem perda prolongada de consciência. Nega anticoagulantes (simulado).",
+      "questions": [
+        { "label": "Perda de consciência", "answer": "Breve, segundos (simulado)." },
+        { "label": "Vômitos", "answer": "Um episódio (simulado)." },
+        { "label": "Anticoagulação", "answer": "Nega." }
+      ],
+      "examResults": { "head_ct": { "text": "Sem hemorragia intracraniana aguda (simulado).", "image": "images/mri.jpg" } },
+      "recommendedExams": ["head_ct"],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Concussão/trauma leve", "correct": true, "severity": "grave" },
+        { "label": "Hemorragia intracraniana", "correct": false, "severity": "critico" },
+        { "label": "AVC isquêmico", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Observação e orientações de sinais de alarme", "correct": true, "risk": "baixa" },
+        { "label": "Analgesia conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Sedação e alta imediata sem orientações", "correct": false, "risk": "alta" },
+        { "label": "Trombólise sem indicação", "correct": false, "risk": "alta" }
+      ]
+    },
+    {
+      "id": "t_cholecystitis_105",
+      "tier": "titular",
+      "patient": { "name": "Sônia Andrade", "age": 52, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 136/84", "FC: 102", "FR: 18", "SpO2: 98%", "Temp: 38,2°C"],
+      "complaint": "Dor em hipocôndrio direito após refeição gordurosa.",
+      "history": "Náuseas e dor localizada. Murphy positivo (simulado).",
+      "questions": [
+        { "label": "Icterícia", "answer": "Nega icterícia evidente (simulado)." },
+        { "label": "Vômitos", "answer": "Vômitos ocasionais." },
+        { "label": "Episódios prévios", "answer": "Dor semelhante leve anteriormente (simulado)." }
+      ],
+      "examResults": {
+        "abd_us": { "text": "Achados compatíveis com colecistite (simulado).", "image": "images/labs.jpg" },
+        "cbc": { "text": "Inflamação aumentada (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["abd_us", "cbc"],
+      "essentialExams": ["abd_us"],
+      "diagnosis": [
+        { "label": "Colecistite aguda", "correct": true, "severity": "grave" },
+        { "label": "Gastrite", "correct": false, "severity": "leve" },
+        { "label": "Pancreatite", "correct": false, "severity": "grave" },
+        { "label": "Apendicite", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Analgesia/antiemético", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico conforme protocolo (sem dose)", "correct": true, "risk": "media" },
+        { "label": "Encaminhar cirurgia/observação conforme gravidade", "correct": true, "risk": "baixa" },
+        { "label": "Alta sem investigação", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" }
+      ]
+    },
+    {
+      "id": "t_stroke_106",
+      "tier": "titular",
+      "patient": { "name": "Alberto Souza", "age": 71, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Vermelho" },
+      "vitals": ["PA: 190/100", "FC: 96", "FR: 20", "SpO2: 96%", "Temp: 36,7°C"],
+      "complaint": "Fraqueza súbita em um lado e fala enrolada.",
+      "history": "Início há 1 hora. HAS (simulado).",
+      "questions": [
+        { "label": "Tempo de início", "answer": "Há cerca de 60 minutos (simulado)." },
+        { "label": "Glicemia", "answer": "Sem hipoglicemia aparente (simulado)." },
+        { "label": "Uso de anticoagulante", "answer": "Informação incerta (simulado)." }
+      ],
+      "examResults": {
+        "glucose": { "text": "Glicemia dentro de faixa segura (simulado).", "image": null },
+        "head_ct": { "text": "Sem hemorragia aguda (simulado).", "image": "images/mri.jpg" }
+      },
+      "recommendedExams": ["glucose"],
+      "essentialExams": ["head_ct", "glucose"],
+      "diagnosis": [
+        { "label": "AVC isquêmico agudo", "correct": true, "severity": "critico" },
+        { "label": "AVC hemorrágico", "correct": false, "severity": "critico" },
+        { "label": "Hipoglicemia", "correct": false, "severity": "grave" },
+        { "label": "Crise de pânico", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Ativar protocolo AVC e suporte/monitorização", "correct": true, "risk": "media" },
+        { "label": "Manter jejum e preparar avaliação especializada", "correct": true, "risk": "baixa" },
+        { "label": "Sedação e alta domiciliar", "correct": false, "risk": "alta" },
+        { "label": "Aguardar horas sem imagem e sem protocolo", "correct": false, "risk": "alta" },
+        { "label": "Antibiótico sem indicação", "correct": false, "risk": "media" }
+      ]
+    },
+    {
+      "id": "t_dka_107",
+      "tier": "titular",
+      "patient": { "name": "Luciano Melo", "age": 29, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Vermelho" },
+      "vitals": ["PA: 92/60", "FC: 124", "FR: 28", "SpO2: 98%", "Temp: 37,0°C"],
+      "complaint": "Vômitos, sede intensa e respiração ofegante.",
+      "history": "DM1. Falha em doses recentes de insulina (simulado).",
+      "questions": [
+        { "label": "Adesão à insulina", "answer": "Falhou doses nos últimos dias (simulado)." },
+        { "label": "Dor abdominal", "answer": "Dor difusa moderada (simulado)." },
+        { "label": "Hálito cetônico", "answer": "Presente (simulado)." }
+      ],
+      "examResults": {
+        "glucose": { "text": "Glicemia muito elevada (simulado).", "image": null },
+        "abg": { "text": "Acidose metabólica (simulado).", "image": "images/labs.jpg" },
+        "bmp": { "text": "Distúrbios eletrolíticos (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["glucose", "abg", "bmp"],
+      "essentialExams": ["glucose", "abg", "bmp"],
+      "diagnosis": [
+        { "label": "Cetoacidose diabética", "correct": true, "severity": "critico" },
+        { "label": "Gastroenterite", "correct": false, "severity": "grave" },
+        { "label": "Sepse", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Fluidoterapia e correções conforme protocolo", "correct": true, "risk": "media" },
+        { "label": "Insulina com monitorização conforme protocolo", "correct": true, "risk": "media" },
+        { "label": "Monitorização e suporte contínuo", "correct": true, "risk": "media" },
+        { "label": "Alta domiciliar após antiemético", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" },
+        { "label": "Ignorar eletrólitos", "correct": false, "risk": "alta" }
+      ]
+    },
+
+    {
+      "id": "p_stemi_201",
+      "tier": "pleno",
+      "patient": { "name": "Carlos Silva", "age": 58, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Vermelho" },
+      "vitals": ["PA: 90/60", "FC: 112", "FR: 24", "SpO2: 92%", "Temp: 36,7°C"],
+      "complaint": "Dor torácica intensa em aperto há 1 hora.",
+      "history": "Irradia para braço esquerdo, sudorese. HAS e tabagismo (simulado).",
+      "questions": [
+        { "label": "Irradiação", "answer": "Braço esquerdo e mandíbula (simulado)." },
+        { "label": "Início", "answer": "Começou há 60 minutos (simulado)." },
+        { "label": "Sintomas associados", "answer": "Sudorese e náusea (simulado)." }
+      ],
+      "examResults": {
+        "ecg": { "text": "Supradesnivelamento de ST compatível com IAM (simulado).", "image": null },
+        "troponin": { "text": "Elevada (simulado).", "image": "images/labs.jpg" },
+        "cxr": { "text": "Sem congestão evidente (simulado).", "image": "images/xray.jpg" }
+      },
+      "recommendedExams": ["troponin", "cxr"],
+      "essentialExams": ["ecg"],
+      "diagnosis": [
+        { "label": "IAM com supra de ST", "correct": true, "severity": "critico" },
+        { "label": "Angina instável", "correct": false, "severity": "grave" },
+        { "label": "Dissecção de aorta", "correct": false, "severity": "critico" },
         { "label": "Embolia pulmonar", "correct": false, "severity": "critico" }
       ],
-
       "medications": [
-        { "label": "Hidratação, repouso e orientações", "correct": true, "risk": "baixa" },
-        { "label": "Antitérmico/analgesia conforme prescrição", "correct": true, "risk": "baixa" },
-        { "label": "Antibiótico empírico sem critérios", "correct": false, "risk": "media" }
+        { "label": "Ativar protocolo IAM e encaminhar conforme fluxo", "correct": true, "risk": "media" },
+        { "label": "Antiagregante/anticoagulação conforme protocolo", "correct": true, "risk": "media" },
+        { "label": "Oxigênio se indicado e suporte", "correct": true, "risk": "media" },
+        { "label": "Dar alta com antiácido", "correct": false, "risk": "alta" },
+        { "label": "Sedação e esperar em casa", "correct": false, "risk": "alta" },
+        { "label": "Antibiótico empírico", "correct": false, "risk": "media" }
+      ]
+    },
+    {
+      "id": "p_sepsis_202",
+      "tier": "pleno",
+      "patient": { "name": "Luciana Barbosa", "age": 47, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Vermelho" },
+      "vitals": ["PA: 82/54", "FC: 128", "FR: 28", "SpO2: 93%", "Temp: 39,4°C"],
+      "complaint": "Febre alta, confusão e hipotensão.",
+      "history": "DM2. Disúria dias antes. Piora rápida (simulado).",
+      "questions": [
+        { "label": "Foco urinário", "answer": "Disúria/urgência previamente (simulado)." },
+        { "label": "Estado mental", "answer": "Sonolenta/confusa (simulado)." },
+        { "label": "Tempo de evolução", "answer": "Piora intensa nas últimas horas (simulado)." }
+      ],
+      "examResults": {
+        "lactate": { "text": "Lactato elevado (simulado).", "image": "images/labs.jpg" },
+        "urinalysis": { "text": "Sugere ITU complicada (simulado).", "image": "images/labs.jpg" },
+        "cbc": { "text": "Leucocitose importante (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["cbc"],
+      "essentialExams": ["lactate", "urinalysis"],
+      "diagnosis": [
+        { "label": "Sepse provável foco urinário", "correct": true, "severity": "critico" },
+        { "label": "Desidratação leve", "correct": false, "severity": "critico" },
+        { "label": "Gastroenterite", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Antibiótico de amplo espectro conforme protocolo", "correct": true, "risk": "media" },
+        { "label": "Fluidoterapia e suporte hemodinâmico", "correct": true, "risk": "media" },
+        { "label": "Monitorização contínua e reavaliação frequente", "correct": true, "risk": "media" },
+        { "label": "Aguardar exames por horas sem tratar", "correct": false, "risk": "alta" },
+        { "label": "Alta domiciliar", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" }
+      ]
+    },
+
+    {
+      "id": "t_angina_108",
+      "tier": "titular",
+      "patient": { "name": "Vera Monteiro", "age": 59, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 150/90", "FC: 98", "FR: 18", "SpO2: 97%", "Temp: 36,8°C"],
+      "complaint": "Dor torácica aos esforços, melhora ao repouso.",
+      "history": "HAS e dislipidemia (simulado).",
+      "questions": [
+        { "label": "Duração", "answer": "Episódios de 5–10 min (simulado)." },
+        { "label": "Sintomas vegetativos", "answer": "Sudorese leve em alguns episódios." },
+        { "label": "Piora recente", "answer": "Mais frequente na última semana (simulado)." }
+      ],
+      "examResults": { "ecg": { "text": "Sem supra agudo (simulado).", "image": null }, "troponin": { "text": "Sem elevação significativa (simulado).", "image": "images/labs.jpg" } },
+      "recommendedExams": ["troponin"],
+      "essentialExams": ["ecg"],
+      "diagnosis": [
+        { "label": "Síndrome coronariana sem supra (suspeita)", "correct": true, "severity": "grave" },
+        { "label": "Refluxo gastroesofágico", "correct": false, "severity": "grave" },
+        { "label": "Embolia pulmonar", "correct": false, "severity": "critico" },
+        { "label": "Pneumonia", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Monitorização e manejo conforme protocolo local", "correct": true, "risk": "media" },
+        { "label": "Avaliar terapia antianginosa/antiagregante conforme fluxo", "correct": true, "risk": "media" },
+        { "label": "Alta imediata sem estratificação", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" },
+        { "label": "Antibiótico empírico", "correct": false, "risk": "media" }
+      ]
+    },
+
+    {
+      "id": "p_pe_203",
+      "tier": "pleno",
+      "patient": { "name": "Helena Prado", "age": 55, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Vermelho" },
+      "vitals": ["PA: 96/60", "FC: 122", "FR: 30", "SpO2: 88%", "Temp: 36,8°C"],
+      "complaint": "Dispneia súbita e dor pleurítica.",
+      "history": "Imobilização recente. Taquicardia e hipoxemia (simulado).",
+      "questions": [
+        { "label": "Imobilização/cirurgia", "answer": "Imobilizada por semanas (simulado)." },
+        { "label": "Hemoptise", "answer": "Nega (simulado)." },
+        { "label": "Dor pleurítica", "answer": "Piora à inspiração (simulado)." }
+      ],
+      "examResults": {
+        "abg": { "text": "Hipoxemia importante (simulado).", "image": "images/labs.jpg" },
+        "cta_chest": { "text": "Compatível com TEP (simulado).", "image": "images/mri.jpg" }
+      },
+      "recommendedExams": ["abg"],
+      "essentialExams": ["cta_chest", "abg"],
+      "diagnosis": [
+        { "label": "Tromboembolismo pulmonar", "correct": true, "severity": "critico" },
+        { "label": "Pneumonia", "correct": false, "severity": "grave" },
+        { "label": "Asma", "correct": false, "severity": "grave" },
+        { "label": "Crise de pânico", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Oxigênio e suporte ventilatório conforme avaliação", "correct": true, "risk": "media" },
+        { "label": "Anticoagulação conforme protocolo", "correct": true, "risk": "media" },
+        { "label": "Alta sem investigação com SpO2 88%", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" },
+        { "label": "Antibiótico sem evidência", "correct": false, "risk": "media" }
+      ]
+    },
+    {
+      "id": "p_anaphylaxis_204",
+      "tier": "pleno",
+      "patient": { "name": "Camila Torres", "age": 33, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Vermelho" },
+      "vitals": ["PA: 80/50", "FC: 132", "FR: 30", "SpO2: 90%", "Temp: 36,8°C"],
+      "complaint": "Urticária, falta de ar e sensação de garganta fechando.",
+      "history": "Início súbito após alimento. Rouquidão e hipotensão (simulado).",
+      "questions": [
+        { "label": "Gatilho", "answer": "Alimento novo (simulado)." },
+        { "label": "Rouquidão", "answer": "Presente (simulado)." },
+        { "label": "Síncope", "answer": "Quase desmaiou (simulado)." }
+      ],
+      "examResults": { "abg": { "text": "Hipoxemia (simulado).", "image": "images/labs.jpg" } },
+      "recommendedExams": [],
+      "essentialExams": [],
+      "diagnosis": [
+        { "label": "Anafilaxia", "correct": true, "severity": "critico" },
+        { "label": "Crise de pânico", "correct": false, "severity": "grave" },
+        { "label": "Asma isolada", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Adrenalina conforme protocolo e via adequada", "correct": true, "risk": "media" },
+        { "label": "Suporte de vias aéreas/oxigênio e fluidos", "correct": true, "risk": "media" },
+        { "label": "Antialérgicos e corticoide como adjuvantes conforme avaliação", "correct": true, "risk": "media" },
+        { "label": "Aguardar sem intervir", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" }
+      ]
+    },
+
+    {
+      "id": "t_pyelo_109",
+      "tier": "titular",
+      "patient": { "name": "Juliana Freitas", "age": 28, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 108/70", "FC: 112", "FR: 20", "SpO2: 98%", "Temp: 39,0°C"],
+      "complaint": "Febre alta, calafrios e dor lombar.",
+      "history": "Disúria anterior. Náuseas (simulado).",
+      "questions": [
+        { "label": "Dor em flanco", "answer": "Sim, dor em flanco direito (simulado)." },
+        { "label": "Vômitos", "answer": "Alguns episódios (simulado)." },
+        { "label": "Gestação", "answer": "Nega (simulado)." }
+      ],
+      "examResults": {
+        "urinalysis": { "text": "Piúria/bacteriúria (simulado).", "image": "images/labs.jpg" },
+        "cbc": { "text": "Leucocitose (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["cbc"],
+      "essentialExams": ["urinalysis"],
+      "diagnosis": [
+        { "label": "Pielonefrite", "correct": true, "severity": "grave" },
+        { "label": "Cistite simples", "correct": false, "severity": "grave" },
+        { "label": "Cólica renal", "correct": false, "severity": "grave" },
+        { "label": "Gastroenterite", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Antibiótico conforme protocolo (sem dose)", "correct": true, "risk": "media" },
+        { "label": "Hidratação e suporte", "correct": true, "risk": "baixa" },
+        { "label": "Antiemético/analgesia conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Alta sem antibiótico", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" }
+      ]
+    },
+
+    {
+      "id": "t_copd_110",
+      "tier": "titular",
+      "patient": { "name": "Nelson Araujo", "age": 67, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 138/84", "FC: 110", "FR: 26", "SpO2: 90%", "Temp: 37,4°C"],
+      "complaint": "Falta de ar progressiva e tosse.",
+      "history": "Tabagista crônico. Sibilos e escarro (simulado).",
+      "questions": [
+        { "label": "Uso de oxigênio domiciliar", "answer": "Não usa (simulado)." },
+        { "label": "Febre", "answer": "Febre baixa (simulado)." },
+        { "label": "Dor torácica", "answer": "Nega dor em aperto." }
+      ],
+      "examResults": {
+        "cxr": { "text": "Sem consolidação franca; sinais de hiperinsuflação (simulado).", "image": "images/xray.jpg" },
+        "abg": { "text": "Hipoxemia moderada (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["cxr", "abg"],
+      "essentialExams": ["abg"],
+      "diagnosis": [
+        { "label": "Exacerbação de DPOC", "correct": true, "severity": "grave" },
+        { "label": "Pneumotórax", "correct": false, "severity": "critico" },
+        { "label": "TEP", "correct": false, "severity": "critico" },
+        { "label": "Asma", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Broncodilatador inalatório conforme protocolo", "correct": true, "risk": "baixa" },
+        { "label": "Oxigênio titulado e monitorização", "correct": true, "risk": "media" },
+        { "label": "Corticoide conforme avaliação", "correct": true, "risk": "media" },
+        { "label": "Sedação e alta com SpO2 90%", "correct": false, "risk": "alta" },
+        { "label": "Trombólise sem diagnóstico", "correct": false, "risk": "alta" }
+      ]
+    },
+
+    {
+      "id": "t_gi_bleed_111",
+      "tier": "titular",
+      "patient": { "name": "Sérgio Ramos", "age": 66, "sex": "Masculino", "photo": "images/patient_male.jpg", "triage": "Vermelho" },
+      "vitals": ["PA: 88/56", "FC: 130", "FR: 24", "SpO2: 95%", "Temp: 36,4°C"],
+      "complaint": "Vômito com sangue e tontura.",
+      "history": "Uso frequente de anti-inflamatórios. Melena (simulada).",
+      "questions": [
+        { "label": "Melena", "answer": "Fezes escuras (simulado)." },
+        { "label": "Uso de AINE", "answer": "Uso frequente (simulado)." },
+        { "label": "Síncope", "answer": "Quase desmaiou (simulado)." }
+      ],
+      "examResults": {
+        "cbc": { "text": "Anemia/queda de hemoglobina (simulado).", "image": "images/labs.jpg" },
+        "bmp": { "text": "Função renal limítrofe por hipovolemia (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["bmp"],
+      "essentialExams": ["cbc"],
+      "diagnosis": [
+        { "label": "Hemorragia digestiva alta", "correct": true, "severity": "critico" },
+        { "label": "Gastroenterite", "correct": false, "severity": "grave" },
+        { "label": "Pancreatite", "correct": false, "severity": "grave" }
+      ],
+      "medications": [
+        { "label": "Acesso venoso, reposição volêmica e suporte", "correct": true, "risk": "media" },
+        { "label": "Preparar hemocomponentes conforme fluxo", "correct": true, "risk": "media" },
+        { "label": "Encaminhar para endoscopia conforme protocolo", "correct": true, "risk": "media" },
+        { "label": "Alta domiciliar", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" },
+        { "label": "AINE para dor", "correct": false, "risk": "alta" }
+      ]
+    },
+
+    {
+      "id": "t_pregnancy_112",
+      "tier": "titular",
+      "patient": { "name": "Carolina Mendes", "age": 26, "sex": "Feminino", "photo": "images/patient_female.jpg", "triage": "Amarelo" },
+      "vitals": ["PA: 110/70", "FC: 102", "FR: 18", "SpO2: 99%", "Temp: 36,9°C"],
+      "complaint": "Dor pélvica e atraso menstrual.",
+      "history": "Sangramento vaginal leve (simulado).",
+      "questions": [
+        { "label": "Atraso", "answer": "Atraso de ~6 semanas (simulado)." },
+        { "label": "Sangramento", "answer": "Pequena quantidade (simulado)." },
+        { "label": "Tontura", "answer": "Leve (simulado)." }
+      ],
+      "examResults": {
+        "pregnancy": { "text": "Teste positivo (simulado).", "image": "images/labs.jpg" },
+        "abd_us": { "text": "Gestação de localização incerta (simulado).", "image": "images/labs.jpg" }
+      },
+      "recommendedExams": ["abd_us"],
+      "essentialExams": ["pregnancy"],
+      "diagnosis": [
+        { "label": "Gestação inicial com sangramento (avaliar)", "correct": true, "severity": "grave" },
+        { "label": "Cistite", "correct": false, "severity": "grave" },
+        { "label": "Apendicite", "correct": false, "severity": "grave" },
+        { "label": "Gravidez ectópica rota", "correct": false, "severity": "critico" }
+      ],
+      "medications": [
+        { "label": "Avaliação obstétrica e monitorização", "correct": true, "risk": "media" },
+        { "label": "Analgesia segura conforme avaliação", "correct": true, "risk": "baixa" },
+        { "label": "Alta sem confirmar gestação", "correct": false, "risk": "alta" },
+        { "label": "Sedação e liberar", "correct": false, "risk": "alta" },
+        { "label": "Antibiótico sem critério", "correct": false, "risk": "media" }
       ]
     }
   ]
