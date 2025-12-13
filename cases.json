@@ -1,0 +1,43 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "r_flu_001",
+      "tier": "residente",
+      "patient": {
+        "name": "Mariana Souza",
+        "age": 22,
+        "sex": "Feminino",
+        "photo": "images/patient_female.jpg",
+        "triage": "Verde"
+      },
+      "vitals": ["PA: 112/70", "FC: 92", "FR: 18", "SpO2: 98%", "Temp: 38,2°C"],
+      "complaint": "Febre, dor no corpo e tosse há 2 dias.",
+      "history": "Sem comorbidades. Contato com pessoas gripadas. Sem dispneia importante.",
+      "questions": [
+        { "label": "Duração/Progressão", "answer": "Início há 48h, piora leve, alimentando-se parcialmente." },
+        { "label": "Sinais de alarme", "answer": "Nega dispneia intensa, confusão, dor torácica ou cianose." }
+      ],
+
+      "examResults": {
+        "cbc": { "text": "Leucócitos sem desvio significativo (simulado).", "image": "images/labs.jpg" },
+        "cxr": { "text": "Sem consolidações (simulado).", "image": "images/xray.jpg" }
+      },
+
+      "recommendedExams": ["cbc"],
+      "essentialExams": [],
+
+      "diagnosis": [
+        { "label": "Síndrome gripal/infecção viral", "correct": true, "severity": "leve" },
+        { "label": "Pneumonia comunitária", "correct": false, "severity": "grave" },
+        { "label": "Embolia pulmonar", "correct": false, "severity": "critico" }
+      ],
+
+      "medications": [
+        { "label": "Hidratação, repouso e orientações", "correct": true, "risk": "baixa" },
+        { "label": "Antitérmico/analgesia conforme prescrição", "correct": true, "risk": "baixa" },
+        { "label": "Antibiótico empírico sem critérios", "correct": false, "risk": "media" }
+      ]
+    }
+  ]
+}
