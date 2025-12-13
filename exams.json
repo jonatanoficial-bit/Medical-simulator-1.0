@@ -1,0 +1,26 @@
+{
+  "version": 1,
+  "exams": [
+    { "id": "ecg", "label": "ECG", "time": 5, "image": null },
+    { "id": "glucose", "label": "Glicemia capilar", "time": 3, "image": null },
+    { "id": "cbc", "label": "Hemograma", "time": 25, "image": "images/labs.jpg" },
+    { "id": "bmp", "label": "Eletrólitos / Função renal", "time": 30, "image": "images/labs.jpg" },
+    { "id": "crp", "label": "PCR / Inflamação", "time": 30, "image": "images/labs.jpg" },
+    { "id": "troponin", "label": "Troponina", "time": 35, "image": "images/labs.jpg" },
+    { "id": "lactate", "label": "Lactato", "time": 25, "image": "images/labs.jpg" },
+    { "id": "abg", "label": "Gasometria", "time": 20, "image": "images/labs.jpg" },
+    { "id": "urinalysis", "label": "EAS (urina)", "time": 25, "image": "images/labs.jpg" },
+    { "id": "pregnancy", "label": "β-hCG (gravidez)", "time": 25, "image": "images/labs.jpg" },
+
+    { "id": "cxr", "label": "Raio-X de tórax", "time": 25, "image": "images/xray.jpg" },
+    { "id": "ankle_xray", "label": "Raio-X de tornozelo", "time": 25, "image": "images/xray.jpg" },
+    { "id": "head_ct", "label": "TC de crânio", "time": 45, "image": "images/mri.jpg" },
+    { "id": "abd_us", "label": "Ultrassom de abdome", "time": 40, "image": "images/labs.jpg" },
+    { "id": "abd_ct", "label": "TC de abdome", "time": 60, "image": "images/mri.jpg" },
+    { "id": "cta_chest", "label": "Angio-TC de tórax", "time": 70, "image": "images/mri.jpg" }
+  ],
+  "normalFallback": {
+    "text": "Sem alterações relevantes para este caso (resultado normal simulado).",
+    "image": null
+  }
+}
