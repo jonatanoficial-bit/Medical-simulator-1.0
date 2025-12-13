@@ -1,111 +1,278 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Emergency Doctor Simulator</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <title>Emergency Doctor Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
 
-<header class="top-bar">
-  <span>Emergency Doctor Simulator</span>
-  <button id="helpBtn">Ajuda</button>
-</header>
-
-<!-- TELA CAPA -->
-<section id="screen-start" class="screen active">
-  <div class="overlay">
-    <h1>Emergency Doctor Simulator</h1>
-    <p>Simulador educacional de pronto-socorro</p>
-    <div class="warning">
-      Este jogo é educativo e simula situações médicas reais.
-      Não substitui atendimento médico real.
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-title">Emergency Doctor Simulator</div>
+      <div class="brand-sub">Simulador educacional de pronto-socorro</div>
     </div>
-    <button id="newGame">Novo Jogo</button>
-    <button id="continueGame">Continuar</button>
-  </div>
-</section>
+    <button id="btnHelp" class="btn btn-secondary">Ajuda</button>
+  </header>
 
-<!-- TELA AVATAR -->
-<section id="screen-avatar" class="screen">
-  <div class="panel">
-    <h2>Crie seu Médico</h2>
-    <input id="doctorName" placeholder="Nome do médico">
-    <div id="avatarGrid" class="grid">
-      <img src="assets/avatars/doc_m1.jpg">
-      <img src="assets/avatars/doc_m2.jpg">
-      <img src="assets/avatars/doc_f1.jpg">
-      <img src="assets/avatars/doc_f2.jpg">
+  <!-- SCREEN: START / CAPA -->
+  <section id="screenStart" class="screen active screen-cover">
+    <div class="cover-overlay">
+      <div class="cover-card">
+        <h1 class="cover-title">Emergency Doctor Simulator</h1>
+        <p class="cover-desc">
+          Treinamento simulado com tomada de decisão clínica, exames e conduta.
+        </p>
+
+        <div class="disclaimer">
+          <strong>Aviso:</strong> Este jogo é uma simulação educativa e não substitui
+          avaliação médica real, protocolos institucionais ou orientação profissional.
+          Em situações reais, procure um serviço de saúde.
+        </div>
+
+        <div class="cover-actions">
+          <button id="btnNew" class="btn btn-primary">Novo Jogo</button>
+          <button id="btnContinue" class="btn btn-outline">Continuar</button>
+        </div>
+      </div>
     </div>
-    <button id="startGame">Iniciar</button>
-  </div>
-</section>
+  </section>
 
-<!-- TELA BRIEFING -->
-<section id="screen-briefing" class="screen">
-  <div class="panel wide">
-    <img src="assets/director/director01.jpg" class="director">
-    <p id="briefingText"></p>
-    <button id="goOffice">Ir ao consultório</button>
-  </div>
-</section>
+  <!-- SCREEN: AVATAR + NAME -->
+  <section id="screenProfile" class="screen">
+    <div class="panel">
+      <h2>Crie seu perfil</h2>
+      <p class="muted">Digite seu nome e escolha um avatar.</p>
 
-<!-- TELA CONSULTÓRIO -->
-<section id="screen-office" class="screen">
-  <div class="office">
-    <div class="left">
-      <img id="docAvatar">
-      <h3 id="docName"></h3>
-      <p id="docRank"></p>
-      <p>Pontuação: <span id="score">0</span></p>
-      <p>Casos: <span id="cases">0</span></p>
-      <button id="nextCase">Próximo Caso</button>
+      <label class="label" for="inputName">Nome do médico(a)</label>
+      <input id="inputName" class="input" type="text" placeholder="Ex.: Dr(a). Jonatan" />
+
+      <div class="divider"></div>
+
+      <h3>Escolha seu avatar</h3>
+      <p class="muted small">Selecione 1 opção. (Avatares do seu repositório em <strong>images/</strong>)</p>
+
+      <div id="avatarGrid" class="avatar-grid">
+        <button class="avatar-card" data-avatar="images/avatar1.png" data-gender="M">
+          <img src="images/avatar1.png" alt="Avatar 1" />
+          <span>Avatar 1</span>
+        </button>
+        <button class="avatar-card" data-avatar="images/avatar2.png" data-gender="M">
+          <img src="images/avatar2.png" alt="Avatar 2" />
+          <span>Avatar 2</span>
+        </button>
+        <button class="avatar-card" data-avatar="images/avatar3.png" data-gender="M">
+          <img src="images/avatar3.png" alt="Avatar 3" />
+          <span>Avatar 3</span>
+        </button>
+        <button class="avatar-card" data-avatar="images/avatar4.png" data-gender="F">
+          <img src="images/avatar4.png" alt="Avatar 4" />
+          <span>Avatar 4</span>
+        </button>
+        <button class="avatar-card" data-avatar="images/avatar5.png" data-gender="F">
+          <img src="images/avatar5.png" alt="Avatar 5" />
+          <span>Avatar 5</span>
+        </button>
+        <button class="avatar-card" data-avatar="images/avatar6.png" data-gender="F">
+          <img src="images/avatar6.png" alt="Avatar 6" />
+          <span>Avatar 6</span>
+        </button>
+      </div>
+
+      <div class="panel-actions">
+        <button id="btnProfileNext" class="btn btn-primary">Continuar</button>
+      </div>
     </div>
-    <div class="right"></div>
-  </div>
-</section>
+  </section>
 
-<!-- TELA CASO -->
-<section id="screen-case" class="screen">
-  <div class="case">
-    <div class="patient">
-      <img id="patientImg">
-      <h3 id="patientName"></h3>
-      <p id="patientData"></p>
-      <p id="complaint"></p>
-      <p id="history"></p>
+  <!-- SCREEN: BRIEFING -->
+  <section id="screenBriefing" class="screen screen-briefing">
+    <div class="briefing-overlay">
+      <div class="panel wide">
+        <div class="briefing-row">
+          <div class="briefing-director">
+            <div class="director-badge">Diretor do Hospital</div>
+            <div class="director-text" id="briefingText"></div>
+          </div>
+        </div>
+
+        <div class="panel-actions right">
+          <button id="btnGoOffice" class="btn btn-primary">Assumir posto</button>
+        </div>
+      </div>
     </div>
+  </section>
 
-    <div class="actions">
-      <h4>Perguntas</h4>
-      <div id="questions"></div>
+  <!-- SCREEN: OFFICE -->
+  <section id="screenOffice" class="screen screen-office">
+    <div class="office-shell">
+      <aside class="hud">
+        <div class="hud-profile">
+          <img id="hudAvatar" class="hud-avatar" src="images/avatar1.png" alt="Avatar médico" />
+          <div>
+            <div id="hudName" class="hud-name">Médico(a)</div>
+            <div id="hudRank" class="hud-rank">Rank: Médico Residente</div>
+          </div>
+        </div>
 
-      <h4>Exames</h4>
-      <div id="exams"></div>
-      <div id="examResults"></div>
+        <div class="hud-stats">
+          <div class="stat-row"><span>Pontuação</span><strong id="hudScore">0</strong></div>
+          <div class="stat-row"><span>Casos resolvidos</span><strong id="hudCases">0</strong></div>
+          <div class="stat-row"><span>Acertos</span><strong id="hudHits">0</strong></div>
+          <div class="stat-row"><span>Erros graves</span><strong id="hudErrors">0</strong></div>
+          <div class="stat-row"><span>Óbitos evitáveis</span><strong id="hudDeaths">0</strong></div>
+        </div>
 
-      <h4>Diagnóstico</h4>
-      <div id="diagnosis"></div>
+        <div class="meters">
+          <div class="meter-block">
+            <div class="meter-head"><span>Prestígio</span><span id="hudPrestigeTxt">0%</span></div>
+            <div class="meter"><div id="hudPrestige" class="meter-fill"></div></div>
+          </div>
+          <div class="meter-block">
+            <div class="meter-head"><span>Desempenho</span><span id="hudPerformanceTxt">0%</span></div>
+            <div class="meter"><div id="hudPerformance" class="meter-fill"></div></div>
+          </div>
+        </div>
 
-      <h4>Medicações</h4>
-      <div id="medications"></div>
+        <button id="btnNextCase" class="btn btn-primary btn-block">Próximo caso</button>
+        <button id="btnSave" class="btn btn-secondary btn-block">Salvar</button>
+        <button id="btnReset" class="btn btn-outline btn-block">Resetar Jogo</button>
 
-      <button id="submit">Finalizar Atendimento</button>
+        <p class="footnote">
+          O jogo é educativo. Condutas e opções são simplificadas e não substituem protocolos reais.
+        </p>
+      </aside>
+
+      <main class="office-stage">
+        <div class="office-overlay">
+          <h2>Consultório de Emergência</h2>
+          <p>
+            Você vai atender casos com diferentes níveis de gravidade.
+            Faça perguntas, solicite exames e escolha diagnóstico e conduta.
+          </p>
+          <div class="office-hint">
+            Dica: use exames com critério. Exames desnecessários podem reduzir pontuação por atraso/uso inadequado.
+          </div>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- SCREEN: CASE -->
+  <section id="screenCase" class="screen">
+    <div class="case-shell">
+      <aside class="case-left">
+        <div class="patient-card">
+          <img id="patientPhoto" class="patient-photo" src="images/patient_male.jpg" alt="Paciente" />
+          <div class="patient-meta">
+            <div id="patientName" class="patient-name">Paciente</div>
+            <div id="patientDemo" class="patient-demo">—</div>
+            <div class="triage">
+              <span>Risco:</span> <strong id="patientTriage">—</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="patient-block">
+          <h3>Queixa principal</h3>
+          <p id="patientComplaint">—</p>
+          <h3>Histórico</h3>
+          <p id="patientHistory">—</p>
+        </div>
+
+        <div class="patient-block">
+          <h3>Sinais vitais (simulados)</h3>
+          <div id="vitals" class="vitals">—</div>
+        </div>
+      </aside>
+
+      <main class="case-right">
+        <div class="card">
+          <h3>Perguntas</h3>
+          <div id="questions" class="chips"></div>
+          <div id="qa" class="qa">Selecione uma pergunta para ver a resposta.</div>
+        </div>
+
+        <div class="card">
+          <h3>Exames</h3>
+          <div id="exams" class="chips"></div>
+          <div id="examResults" class="exam-results">
+            Solicite exames para ver resultados. Alguns têm imagem.
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Diagnóstico</h3>
+          <div id="diagnosis" class="options"></div>
+        </div>
+
+        <div class="card">
+          <h3>Medicações / Conduta</h3>
+          <div id="medications" class="options"></div>
+          <div class="small muted">
+            Observação: opções são genéricas (sem doses). O objetivo é raciocínio clínico e tomada de decisão.
+          </div>
+        </div>
+
+        <div class="card actions-row">
+          <button id="btnFinish" class="btn btn-primary">Finalizar atendimento</button>
+          <button id="btnBackOffice" class="btn btn-outline">Voltar ao consultório</button>
+        </div>
+      </main>
+    </div>
+  </section>
+
+  <!-- SCREEN: RESULT -->
+  <section id="screenResult" class="screen">
+    <div class="panel">
+      <h2>Resultado do caso</h2>
+      <p id="resultSummary" class="result-summary">—</p>
+      <div class="divider"></div>
+      <p id="resultDetail" class="result-detail">—</p>
+      <div class="divider"></div>
+      <p id="resultScore" class="result-score">—</p>
+      <div class="panel-actions">
+        <button id="btnResultOffice" class="btn btn-primary">Voltar ao consultório</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- HELP MODAL -->
+  <div id="helpModal" class="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2>Ajuda / Manual rápido</h2>
+        <button id="btnHelpClose" class="btn btn-outline">Fechar</button>
+      </div>
+      <div class="modal-body">
+        <h3>Fluxo recomendado</h3>
+        <ol>
+          <li>Leia queixa e histórico.</li>
+          <li>Use perguntas para refinar hipóteses.</li>
+          <li>Solicite exames coerentes (não “atire para todo lado”).</li>
+          <li>Escolha 1 diagnóstico e selecione medicações/conduta.</li>
+        </ol>
+
+        <h3>Como pontua</h3>
+        <ul>
+          <li>Diagnóstico correto: +alto</li>
+          <li>Exame essencial solicitado: +</li>
+          <li>Exame desnecessário: -</li>
+          <li>Medicação correta: +</li>
+          <li>Medicação errada/perigosa: -</li>
+          <li>Erro crítico em caso grave: pode gerar óbito evitável</li>
+        </ul>
+
+        <h3>Aviso</h3>
+        <p>
+          Este jogo é educativo. Condutas são simplificadas e não substituem protocolos, diretrizes
+          ou avaliação médica real.
+        </p>
+      </div>
     </div>
   </div>
-</section>
 
-<!-- TELA RESULTADO -->
-<section id="screen-result" class="screen">
-  <div class="panel">
-    <h2>Resultado</h2>
-    <p id="resultText"></p>
-    <button id="backOffice">Voltar</button>
-  </div>
-</section>
-
-<script src="game.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
