@@ -4,99 +4,184 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Emergency Doctor Simulator</title>
+
+  <!-- CSS -->
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
-  <div id="app">
+<div id="app">
 
-    <!-- TOP BAR -->
-    <header class="topbar">
-      <div>
-        <strong>Emergency Doctor Simulator</strong><br>
-        <small>Simulador educacional de pronto-socorro</small>
-      </div>
-      <div>
-        <button onclick="toggleFullscreen()">Tela cheia</button>
-        <button onclick="openHelp()">Ajuda</button>
-      </div>
-    </header>
+  <!-- ================= TOP BAR ================= -->
+  <header class="topbar">
+    <div>
+      <strong>Emergency Doctor Simulator</strong><br />
+      <small>Simulador educacional de pronto-socorro</small>
+    </div>
+    <div>
+      <button onclick="toggleFullscreen()">Tela cheia</button>
+      <button onclick="openHelp()">Ajuda</button>
+    </div>
+  </header>
 
-    <!-- STAGE -->
-    <main class="stage">
+  <!-- ================= STAGE ================= -->
+  <main class="stage">
 
-      <!-- TELA INICIAL -->
-      <section class="screen active" id="screen-home">
-        <div class="screen-bg" style="background-image:url('images/cover.png')"></div>
-        <div class="screen-content">
-          <div class="panel" style="max-width:520px">
-            <div class="panel-body">
-              <h1>EMERGENCY DOCTOR SIMULATOR</h1>
-              <p>Tome decisões clínicas, solicite exames e conduza casos simulados.</p>
-              <p><strong>Aviso:</strong> Simulação educacional. Não substitui atendimento médico real.</p>
+    <!-- ================= HOME ================= -->
+    <section class="screen active" id="screen-home">
+      <div class="screen-bg" style="background-image:url('images/cover.png')"></div>
+      <div class="screen-content">
+        <div class="panel" style="max-width:520px">
+          <div class="panel-body">
+            <h1>EMERGENCY DOCTOR SIMULATOR</h1>
+            <p>Tome decisões clínicas, solicite exames e conduza casos simulados.</p>
+            <p><strong>Aviso:</strong> Simulação educacional. Não substitui atendimento médico real.</p>
+
+            <div style="margin-top:16px;display:flex;gap:10px">
               <button onclick="startNewGame()">Novo Jogo</button>
               <button onclick="continueGame()">Continuar</button>
             </div>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- PERFIL -->
-      <section class="screen" id="screen-profile">
-        <div class="screen-bg" style="background-image:url('images/fundo.jpg')"></div>
-        <div class="screen-content">
-          <div class="panel" style="width:100%; max-width:900px; margin:auto">
-            <div class="panel-header">
-              <strong>Perfil do Doutor</strong>
-            </div>
-            <div class="panel-body">
-              <label>Seu nome</label>
-              <input id="doctorName" placeholder="Ex: Dr(a). Jonatan" />
-              <h3>Escolha um avatar</h3>
-              <div class="action-grid" id="avatarGrid"></div>
-            </div>
-            <div class="panel-footer">
-              <button onclick="goHome()">Voltar</button>
-              <button onclick="confirmProfile()">Confirmar</button>
-            </div>
+    <!-- ================= PERFIL ================= -->
+    <section class="screen" id="screen-profile">
+      <div class="screen-bg" style="background-image:url('images/fundo.jpg')"></div>
+      <div class="screen-content">
+        <div class="panel" style="width:100%;max-width:900px;margin:auto">
+          <div class="panel-header">
+            <strong>Perfil do Doutor</strong>
+          </div>
+
+          <div class="panel-body">
+            <label>Seu nome</label>
+            <input id="doctorName" placeholder="Ex: Dr(a). Jonatan" />
+
+            <h3 style="margin-top:16px">Escolha um avatar</h3>
+            <div class="action-grid" id="avatarGrid"></div>
+          </div>
+
+          <div class="panel-footer">
+            <button onclick="goHome()">Voltar</button>
+            <button onclick="confirmProfile()">Confirmar</button>
           </div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- CONSULTÓRIO -->
-      <section class="screen" id="screen-office">
-        <div class="screen-bg" style="background-image:url('images/consultorio.jpg')"></div>
-        <div class="screen-content office-layout">
+    <!-- ================= CONSULTÓRIO ================= -->
+    <section class="screen" id="screen-office">
+      <div class="screen-bg" style="background-image:url('images/consultorio.jpg')"></div>
 
-          <!-- HUD -->
-          <aside class="panel hud">
-            <div class="panel-body hud-card">
-              <img id="doctorAvatar" style="width:100%;border-radius:12px">
-              <p id="doctorInfo"></p>
-              <div class="hud-stats">
-                <div>Pontos: <span id="points">0</span></div>
-                <div>Casos: <span id="casesDone">0</span></div>
-              </div>
-              <div class="hud-actions">
-                <button onclick="nextCase()">Próximo Caso</button>
-              </div>
+      <div class="screen-content office-layout">
+
+        <!-- HUD -->
+        <aside class="panel hud">
+          <div class="panel-body hud-card">
+            <img id="doctorAvatar" alt="Avatar" />
+            <p id="doctorInfo"></p>
+
+            <div class="hud-stats">
+              <div>Pontos: <span id="points">0</span></div>
+              <div>Casos: <span id="casesDone">0</span></div>
             </div>
-          </aside>
 
-          <!-- ÁREA PRINCIPAL -->
-          <section class="panel">
-            <div class="panel-body">
-              <h2>Consultório de Emergência</h2>
-              <p>Atenda pacientes, solicite exames e tome decisões.</p>
+            <div class="hud-actions">
+              <button onclick="nextCase()">Próximo Caso</button>
             </div>
-          </section>
+          </div>
+        </aside>
 
-        </div>
-      </section>
+        <!-- INFO -->
+        <section class="panel">
+          <div class="panel-body">
+            <h2>Consultório de Emergência</h2>
+            <p>
+              Atenda pacientes, solicite exames e tome decisões clínicas.
+            </p>
+            <p>
+              <strong>Como zerar:</strong><br />
+              Suba de cargo com pontuação e boa performance.<br />
+              Casos ficam mais difíceis conforme o rank.
+            </p>
+            <p>
+              Sistema expansivo: novos casos são adicionados apenas no
+              <code>cases.json</code>.
+            </p>
+          </div>
+        </section>
 
-    </main>
+      </div>
+    </section>
 
-  </div>
+    <!-- ================= ATENDIMENTO ================= -->
+    <section class="screen" id="screen-case">
+      <div class="screen-bg" id="caseBg"></div>
 
-  <script src="script.js"></script>
+      <div class="screen-content case-layout">
+
+        <!-- COLUNA PACIENTE -->
+        <section class="panel case-left">
+          <div class="panel-header">
+            <strong id="patientName"></strong>
+            <div id="triageBadge" class="triage-badge"></div>
+          </div>
+          <div class="panel-body">
+            <img id="patientPhoto" />
+            <p><strong>Queixa:</strong> <span id="patientComplaint"></span></p>
+            <p><strong>História:</strong> <span id="patientHistory"></span></p>
+
+            <h4>Sinais Vitais</h4>
+            <ul id="vitalsList"></ul>
+          </div>
+        </section>
+
+        <!-- COLUNA AÇÕES -->
+        <section class="panel">
+          <div class="panel-header">
+            <strong>Perguntas & Exames</strong>
+          </div>
+          <div class="panel-body">
+
+            <h4>Perguntas</h4>
+            <div id="questionsArea"></div>
+
+            <h4>Solicitar Exames</h4>
+            <div class="action-grid" id="examsArea"></div>
+
+            <div id="examResultsArea"></div>
+
+          </div>
+        </section>
+
+        <!-- COLUNA DECISÃO -->
+        <section class="panel case-right">
+          <div class="panel-header">
+            <strong>Decisão Clínica</strong>
+          </div>
+          <div class="panel-body">
+
+            <h4>Diagnóstico (escolha 1)</h4>
+            <div class="action-grid" id="diagnosisArea"></div>
+
+            <h4>Conduta / Medicação</h4>
+            <div class="action-grid" id="medicationsArea"></div>
+
+          </div>
+          <div class="panel-footer">
+            <button onclick="finalizeCase()">Finalizar Atendimento</button>
+          </div>
+        </section>
+
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ================= SCRIPT ================= -->
+<script src="script.js"></script>
 </body>
 </html>
