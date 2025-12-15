@@ -1,425 +1,262 @@
-/* ===========================
-   Emergency Doctor Simulator — UI Layout Fix (FULL)
-   =========================== */
-
-:root{
-  --bg: #05070c;
-  --glass: rgba(20, 24, 34, 0.60);
-  --glass-2: rgba(20, 24, 34, 0.38);
-  --stroke: rgba(255,255,255,0.12);
-  --stroke-2: rgba(255,255,255,0.08);
-  --text: rgba(255,255,255,0.92);
-  --muted: rgba(255,255,255,0.66);
-  --muted2: rgba(255,255,255,0.46);
-  --accent: #18b7ff;
-  --accent2: #0b6cff;
-
-  --shadow: 0 18px 60px rgba(0,0,0,0.55);
-  --shadow-soft: 0 10px 35px rgba(0,0,0,0.35);
-
-  --r-lg: 22px;
-  --r-md: 16px;
-  --r-sm: 12px;
-
-  --pad: 18px;
-  --pad2: 14px;
-  --gap: 14px;
-
-  --topbar-h: 58px;
+/* ===============================
+   RESET + BASE
+================================ */
+* {
+  box-sizing: border-box;
 }
 
-/* ===== RESET ===== */
-*{ box-sizing:border-box; }
-html, body{ height:100%; }
-body{
-  margin:0;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  color: var(--text);
-  background: var(--bg);
-  overflow:hidden; /* IMPORTANTE: scroll só dentro dos painéis */
-}
-img{ max-width:100%; display:block; }
-button{ font-family: inherit; }
-a{ color: inherit; }
-
-/* ===== FULLSCREEN SAFE AREA ===== */
-@supports (height: 100dvh){
-  body{ height: 100dvh; }
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* JOGO NÃO ROLA */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: #050b16;
+  color: #e5e7eb;
 }
 
-/* ===== BACKGROUND (usa seus fundos) ===== */
-.app-bg{
-  position: fixed;
+#app {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ===============================
+   TOP BAR
+================================ */
+.topbar {
+  height: 64px;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 18px;
+  background: rgba(5,11,22,0.85);
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  z-index: 10;
+}
+
+.stage {
+  height: calc(100vh - 64px);
+  width: 100%;
+  position: relative;
+}
+
+/* ===============================
+   SCREENS (FUNDAMENTAL)
+================================ */
+.screen {
+  position: absolute;
   inset: 0;
-  background: #000;
-  background-image:
-    radial-gradient(1200px 600px at 15% 20%, rgba(24,183,255,0.12), transparent 60%),
-    radial-gradient(900px 500px at 85% 30%, rgba(11,108,255,0.10), transparent 55%),
-    linear-gradient(180deg, rgba(0,0,0,0.35), rgba(0,0,0,0.85));
-  z-index: 0;
+  display: none;
 }
 
-.scene-bg{
-  position: fixed;
+.screen.active {
+  display: flex;
+}
+
+/* ===============================
+   BACKGROUND
+================================ */
+.screen-bg {
+  position: absolute;
   inset: 0;
-  z-index: 0;
-  background-position: center;
   background-size: cover;
-  background-repeat: no-repeat;
-  filter: saturate(1.08) contrast(1.06);
-  transform: scale(1.02);
-}
-.scene-bg::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: radial-gradient(900px 500px at 50% 25%, rgba(0,0,0,0.10), rgba(0,0,0,0.78));
+  background-position: center;
+  filter: brightness(0.35);
+  z-index: 0;
 }
 
-/* ===== APP SHELL ===== */
-.app{
+.screen-content {
   position: relative;
   z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  padding: 24px;
+  overflow: hidden;
+}
+
+/* ===============================
+   PAINÉIS
+================================ */
+.panel {
+  background: rgba(10,15,30,0.88);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panel-header,
+.panel-footer {
+  padding: 14px 18px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+
+.panel-footer {
+  border-top: 1px solid rgba(255,255,255,0.05);
+  border-bottom: none;
+}
+
+.panel-body {
+  padding: 16px;
+  overflow-y: auto;
+}
+
+/* ===============================
+   OFFICE LAYOUT
+================================ */
+.office-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 18px;
+  width: 100%;
+  height: 100%;
+}
+
+.hud {
+  height: 100%;
+}
+
+.hud-card {
   height: 100%;
   display: flex;
   flex-direction: column;
 }
 
-/* ===== TOP BAR ===== */
-.topbar{
-  height: var(--topbar-h);
-  min-height: var(--topbar-h);
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  padding: 10px 16px;
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  background: rgba(10,12,18,0.62);
-  border-bottom: 1px solid var(--stroke-2);
-}
-.brand{
-  display:flex;
-  flex-direction: column;
-  gap: 2px;
-  line-height: 1.1;
-}
-.brand .title{
-  font-weight: 800;
-  letter-spacing: 0.2px;
-  font-size: 15px;
-}
-.brand .subtitle{
-  font-size: 12px;
-  color: var(--muted);
-}
-
-.topbar-actions{
-  display:flex;
-  align-items:center;
-  gap: 10px;
-}
-
-/* ===== BUTTONS ===== */
-.btn{
-  border: 1px solid var(--stroke);
-  background: rgba(255,255,255,0.06);
-  color: var(--text);
-  padding: 10px 14px;
-  border-radius: 999px;
-  cursor: pointer;
-  box-shadow: var(--shadow-soft);
-  transition: transform .08s ease, background .12s ease, border-color .12s ease;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
-}
-.btn:hover{ background: rgba(255,255,255,0.10); }
-.btn:active{ transform: translateY(1px); }
-
-.btn.primary{
-  border-color: rgba(24,183,255,0.35);
-  background: linear-gradient(180deg, rgba(24,183,255,0.35), rgba(24,183,255,0.18));
-}
-.btn.primary:hover{
-  background: linear-gradient(180deg, rgba(24,183,255,0.42), rgba(24,183,255,0.22));
-}
-.btn.small{
-  padding: 8px 12px;
-  font-size: 13px;
-}
-
-/* ===== MAIN LAYOUT ===== */
-.main{
-  flex: 1;
-  min-height: 0; /* permite scroll interno */
-  display:flex;
-  padding: var(--pad);
-}
-
-/* Container do atendimento (onde estava “desconfigurando”) */
-.attendance{
-  width: 100%;
-  min-height: 0;
+.hud-stats {
   display: grid;
-  grid-template-columns: minmax(420px, 1fr) minmax(320px, 420px);
-  gap: var(--gap);
-  align-items: start;
-}
-
-/* Painéis */
-.panel{
-  min-height: 0; /* permite scroll interno */
-  border-radius: var(--r-lg);
-  border: 1px solid var(--stroke);
-  background: var(--glass);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow);
-  overflow: hidden; /* header fixo + body com scroll */
-}
-
-.panel-header{
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--stroke-2);
-  background: rgba(10,12,18,0.35);
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
 }
-.panel-header h2,
-.panel-header h3{
-  margin:0;
-  font-size: 14px;
-  letter-spacing: 0.2px;
-}
-.panel-header .hint{
-  font-size: 12px;
-  color: var(--muted);
-}
 
-/* Corpo com scroll */
-.panel-body{
-  padding: 14px 16px;
-  overflow: auto;
-  max-height: calc(100dvh - var(--topbar-h) - (var(--pad) * 2) - 2px);
-}
-
-/* ===== LEFT (perguntas / paciente / ações) ===== */
-.block{
-  border: 1px solid var(--stroke-2);
-  background: rgba(255,255,255,0.05);
-  border-radius: var(--r-md);
-  padding: 12px 12px;
-  margin-bottom: 12px;
-}
-.block-title{
-  font-weight: 800;
-  font-size: 13px;
-  margin: 0 0 8px 0;
-  color: var(--text);
-}
-.kv{
-  display:flex;
-  flex-wrap: wrap;
-  gap: 10px 14px;
-  color: var(--muted);
-  font-size: 13px;
-}
-.kv strong{ color: var(--text); font-weight: 700; }
-
-.question-item{
-  display:flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 10px;
-  padding: 10px 0;
-  border-top: 1px solid var(--stroke-2);
-}
-.question-item:first-of-type{ border-top: none; padding-top: 0; }
-.question-item .q{
-  font-weight: 700;
-  color: var(--text);
-}
-.question-item .a{
-  margin-top: 6px;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.35;
-}
-.question-actions{
-  display:flex;
-  flex-direction: column;
-  gap: 8px;
-  flex: 0 0 auto;
-}
-
-/* Barra de ações inferior no painel esquerdo */
-.actions-row{
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 10px;
-  padding-top: 12px;
-  border-top: 1px solid var(--stroke-2);
-}
-
-/* ===== RIGHT (exames, diagnóstico, medicação) ===== */
-.list{
-  display:flex;
+.hud-actions {
+  margin-top: auto;
+  display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.list-item{
-  border: 1px solid var(--stroke-2);
-  background: rgba(255,255,255,0.05);
-  border-radius: var(--r-md);
-  padding: 12px 12px;
-}
-.list-item .name{
-  font-weight: 800;
-  font-size: 13px;
-  margin: 0 0 6px 0;
-}
-.list-item .meta{
-  font-size: 12px;
-  color: var(--muted);
+
+/* ===============================
+   CASE LAYOUT (ONDE QUEBRAVA)
+================================ */
+.case-layout {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 18px;
+  width: 100%;
+  height: 100%;
 }
 
-/* Seções do painel direito */
-.section-title{
-  margin: 14px 0 10px;
-  font-weight: 900;
-  font-size: 13px;
-  color: var(--text);
+.case-left,
+.case-right {
+  height: 100%;
 }
 
-/* Itens clicáveis (exames/diagnóstico/medicação) */
-.selectable{
-  cursor:pointer;
-  user-select:none;
-  -webkit-tap-highlight-color: transparent;
-  transition: transform .08s ease, background .12s ease, border-color .12s ease;
-}
-.selectable:hover{
-  background: rgba(255,255,255,0.08);
-}
-.selectable:active{
-  transform: translateY(1px);
+.case-left .panel,
+.case-right .panel {
+  height: 100%;
 }
 
-/* Estados opcionais (se o JS adicionar classes) */
-.is-selected{
-  border-color: rgba(24,183,255,0.45) !important;
-  background: rgba(24,183,255,0.10) !important;
-}
-
-/* ===== TRIAGEM (faixa colorida) ===== */
-.triage-badge{
-  display:inline-flex;
-  align-items:center;
+/* ===============================
+   GRIDS DE AÇÃO
+================================ */
+.action-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: 10px;
+}
+
+.action-btn {
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  cursor: pointer;
+  transition: all .2s;
+}
+
+.action-btn:hover {
+  background: rgba(14,165,255,0.15);
+}
+
+.action-btn.selected {
+  outline: 2px solid #0ea5ff;
+}
+
+/* ===============================
+   TRIAGEM (VISUAL AAA)
+================================ */
+.triage-badge {
+  padding: 6px 14px;
   border-radius: 999px;
-  padding: 8px 12px;
-  border: 1px solid var(--stroke);
-  background: rgba(0,0,0,0.25);
-}
-.triage-pill{
-  width: 16px;
-  height: 16px;
-  border-radius: 99px;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.06) inset;
-}
-.triage-label{
-  font-weight: 900;
-  letter-spacing: 0.2px;
-  font-size: 12px;
+  font-weight: 700;
+  width: fit-content;
 }
 
-.triage-verde .triage-pill{ background: #22c55e; }
-.triage-amarelo .triage-pill{ background: #facc15; }
-.triage-vermelho .triage-pill{ background: #ef4444; }
-.triage-verde .triage-label{ color: #bbf7d0; }
-.triage-amarelo .triage-label{ color: #fde68a; }
-.triage-vermelho .triage-label{ color: #fecaca; }
+.triage-green {
+  background: #16a34a;
+  color: #fff;
+}
 
-/* ===== MODAL (resultados de exames) ===== */
-.modal-backdrop{
+.triage-yellow {
+  background: #facc15;
+  color: #000;
+}
+
+.triage-red {
+  background: #dc2626;
+  color: #fff;
+}
+
+/* ===============================
+   OVERLAYS
+================================ */
+.overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.62);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  padding: 18px;
-  z-index: 50;
+  z-index: 100;
 }
-.modal-backdrop.active{ display:flex; }
 
-.modal{
-  width: min(860px, 100%);
-  max-height: min(86dvh, 720px);
-  border-radius: var(--r-lg);
-  border: 1px solid var(--stroke);
-  background: rgba(18, 20, 28, 0.86);
-  box-shadow: var(--shadow);
-  overflow:hidden;
-  display:flex;
+.overlay.hidden {
+  display: none;
+}
+
+.overlay-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+}
+
+.overlay-card {
+  position: relative;
+  margin: auto;
+  width: min(1000px, 92vw);
+  max-height: 90vh;
+  background: #0b1225;
+  border-radius: 16px;
+  display: flex;
   flex-direction: column;
 }
-.modal-header{
-  padding: 14px 16px;
-  border-bottom: 1px solid var(--stroke-2);
-  display:flex;
-  align-items:center;
-  justify-content: space-between;
-  gap: 10px;
-}
-.modal-header h3{
-  margin:0;
-  font-size: 14px;
-}
-.modal-body{
-  padding: 14px 16px;
-  overflow:auto;
-}
-.modal-body p{
-  margin: 0 0 12px 0;
-  color: var(--muted);
-  line-height: 1.4;
-}
-.modal-media{
-  border-radius: var(--r-md);
-  overflow:hidden;
-  border: 1px solid var(--stroke-2);
-  background: rgba(255,255,255,0.05);
+
+.overlay-card-body {
+  overflow-y: auto;
+  padding: 16px;
 }
 
-/* ===== RESPONSIVO ===== */
-@media (max-width: 980px){
-  .main{ padding: 14px; }
-  .attendance{
+/* ===============================
+   MOBILE
+================================ */
+@media (max-width: 900px) {
+  .office-layout,
+  .case-layout {
     grid-template-columns: 1fr;
   }
-  .panel-body{
-    max-height: calc(100dvh - var(--topbar-h) - 28px - 2px);
+
+  .hud {
+    display: none;
   }
 }
-
-@media (max-width: 520px){
-  :root{
-    --pad: 12px;
-    --gap: 12px;
-    --topbar-h: 60px;
-  }
-  .topbar{ padding: 10px 12px; }
-  .btn{ padding: 10px 12px; }
-  .panel-header{ padding: 12px 12px; }
-  .panel-body{ padding: 12px 12px; }
-}
-
-/* ===== UTIL ===== */
-.hidden{ display:none !important; }
