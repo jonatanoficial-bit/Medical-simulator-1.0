@@ -1,35 +1,34 @@
 {
-  "version": 2,
+  "version": 3,
   "exams": [
-    { "id": "ecg", "label": "ECG", "time": 5, "image": null },
-    { "id": "stress_test", "label": "Teste Ergométrico", "time": 60, "image": null },
-    { "id": "echo", "label": "Ecocardiograma", "time": 45, "image": "images/labs.jpg" },
+    { "id": "ecg", "label": "ECG", "category": "Cardio", "time": 5, "image": null },
+    { "id": "troponin", "label": "Troponina", "category": "Cardio", "time": 45, "image": "images/labs.jpg" },
+    { "id": "stress_test", "label": "Teste Ergométrico", "category": "Cardio", "time": 60, "image": null },
+    { "id": "echo", "label": "Ecocardiograma", "category": "Cardio", "time": 45, "image": "images/labs.jpg" },
 
-    { "id": "cbc", "label": "Hemograma", "time": 30, "image": "images/labs.jpg" },
-    { "id": "bmp", "label": "Bioquímica (Eletrólitos/Renal)", "time": 40, "image": "images/labs.jpg" },
-    { "id": "crp", "label": "PCR", "time": 30, "image": "images/labs.jpg" },
-    { "id": "coags", "label": "Coagulograma", "time": 45, "image": "images/labs.jpg" },
-    { "id": "lactate", "label": "Lactato", "time": 20, "image": "images/labs.jpg" },
-    { "id": "d_dimer", "label": "D-dímero", "time": 45, "image": "images/labs.jpg" },
-    { "id": "troponin", "label": "Troponina", "time": 45, "image": "images/labs.jpg" },
-    { "id": "lipase", "label": "Lipase", "time": 45, "image": "images/labs.jpg" },
-    { "id": "glucose", "label": "Glicemia", "time": 5, "image": null },
+    { "id": "cbc", "label": "Hemograma", "category": "Laboratório", "time": 30, "image": "images/labs.jpg" },
+    { "id": "bmp", "label": "Bioquímica (Eletrólitos/Renal)", "category": "Laboratório", "time": 40, "image": "images/labs.jpg" },
+    { "id": "crp", "label": "PCR", "category": "Laboratório", "time": 30, "image": "images/labs.jpg" },
+    { "id": "coags", "label": "Coagulograma", "category": "Laboratório", "time": 45, "image": "images/labs.jpg" },
+    { "id": "lactate", "label": "Lactato", "category": "Laboratório", "time": 20, "image": "images/labs.jpg" },
+    { "id": "d_dimer", "label": "D-dímero", "category": "Laboratório", "time": 45, "image": "images/labs.jpg" },
+    { "id": "lipase", "label": "Lipase", "category": "Laboratório", "time": 45, "image": "images/labs.jpg" },
+    { "id": "glucose", "label": "Glicemia", "category": "Laboratório", "time": 5, "image": null },
 
-    { "id": "urinalysis", "label": "Urina Tipo I", "time": 25, "image": "images/labs.jpg" },
-    { "id": "pregnancy", "label": "Teste de Gravidez", "time": 20, "image": "images/labs.jpg" },
+    { "id": "urinalysis", "label": "Urina Tipo I", "category": "Laboratório", "time": 25, "image": "images/labs.jpg" },
+    { "id": "pregnancy", "label": "Teste de Gravidez", "category": "Laboratório", "time": 20, "image": "images/labs.jpg" },
 
-    { "id": "cxr", "label": "Raio-X de Tórax", "time": 25, "image": "images/xray.jpg" },
-    { "id": "ankle_xray", "label": "Raio-X de Tornozelo", "time": 25, "image": "images/xray.jpg" },
+    { "id": "cxr", "label": "Raio-X de Tórax", "category": "Imagem", "time": 25, "image": "images/xray.jpg" },
+    { "id": "ankle_xray", "label": "Raio-X de Tornozelo", "category": "Imagem", "time": 25, "image": "images/xray.jpg" },
+    { "id": "abd_us", "label": "Ultrassom de Abdome", "category": "Imagem", "time": 45, "image": "images/labs.jpg" },
+    { "id": "head_ct", "label": "TC de Crânio", "category": "Imagem", "time": 60, "image": "images/mri.jpg" },
+    { "id": "abd_ct", "label": "TC de Abdome", "category": "Imagem", "time": 70, "image": "images/mri.jpg" },
+    { "id": "cta_chest", "label": "AngioTC de Tórax", "category": "Imagem", "time": 80, "image": "images/mri.jpg" },
 
-    { "id": "abd_us", "label": "Ultrassom de Abdome", "time": 45, "image": "images/labs.jpg" },
-    { "id": "head_ct", "label": "TC de Crânio", "time": 60, "image": "images/mri.jpg" },
-    { "id": "abd_ct", "label": "TC de Abdome", "time": 70, "image": "images/mri.jpg" },
-    { "id": "cta_chest", "label": "AngioTC de Tórax", "time": 80, "image": "images/mri.jpg" },
-
-    { "id": "abg", "label": "Gasometria", "time": 20, "image": "images/labs.jpg" }
+    { "id": "abg", "label": "Gasometria", "category": "Laboratório", "time": 20, "image": "images/labs.jpg" }
   ],
   "normalFallback": {
-    "text": "Resultado dentro da normalidade para este caso (simulado).",
+    "text": "Resultado dentro da normalidade para este caso (simulado). Exame possivelmente sem indicação clínica aqui.",
     "image": null
   }
 }
