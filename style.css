@@ -1,262 +1,407 @@
-/* ===============================
-   RESET + BASE
-================================ */
-* {
-  box-sizing: border-box;
-}
+/* ===========================
+   RESET / BASE
+   =========================== */
+* { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   width: 100%;
   height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow: hidden; /* JOGO NÃO ROLA */
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #050b16;
-  color: #e5e7eb;
+  overflow: hidden; /* evita scroll global */
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  background: #000;
+  color: #fff;
 }
 
+/* ===========================
+   APP SHELL
+   =========================== */
 #app {
   width: 100%;
   height: 100%;
+  position: relative;
   overflow: hidden;
 }
 
-/* ===============================
+/* ===========================
    TOP BAR
-================================ */
+   =========================== */
 .topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
   height: 64px;
-  flex-shrink: 0;
+  z-index: 50;
+
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0 18px;
-  background: rgba(5,11,22,0.85);
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  z-index: 10;
+  justify-content: space-between;
+  gap: 16px;
+
+  padding: 10px 14px;
+  background: rgba(7, 12, 22, 0.70);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
 }
 
+.topbar small {
+  opacity: 0.85;
+}
+
+.topbar button {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.06);
+  color: #fff;
+  cursor: pointer;
+}
+
+.topbar button:hover {
+  background: rgba(255,255,255,0.12);
+}
+
+/* ===========================
+   STAGE (área do jogo)
+   =========================== */
 .stage {
-  height: calc(100vh - 64px);
-  width: 100%;
-  position: relative;
+  position: absolute;
+  top: 64px; /* altura da topbar */
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  overflow: hidden; /* evita scroll do stage */
 }
 
-/* ===============================
-   SCREENS (FUNDAMENTAL)
-================================ */
+/* ===========================
+   SCREENS (telas)
+   =========================== */
 .screen {
   position: absolute;
   inset: 0;
   display: none;
+  overflow: hidden;
 }
 
 .screen.active {
-  display: flex;
+  display: block;
 }
 
-/* ===============================
-   BACKGROUND
-================================ */
 .screen-bg {
   position: absolute;
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: brightness(0.35);
-  z-index: 0;
+  filter: saturate(1.05) contrast(1.05);
+  transform: scale(1.02);
+}
+
+.screen::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(1200px 600px at 20% 20%, rgba(14,165,255,0.12), transparent 60%),
+              radial-gradient(900px 500px at 80% 80%, rgba(255,255,255,0.07), transparent 55%),
+              rgba(0,0,0,0.45);
+  pointer-events: none;
 }
 
 .screen-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   width: 100%;
   height: 100%;
-  display: flex;
-  padding: 24px;
-  overflow: hidden;
+  padding: 20px;
+  display: grid;
+  place-items: center;
 }
 
-/* ===============================
-   PAINÉIS
-================================ */
+/* ===========================
+   PANEL (glass AAA)
+   =========================== */
 .panel {
-  background: rgba(10,15,30,0.88);
-  border-radius: 14px;
-  display: flex;
-  flex-direction: column;
+  width: 100%;
+  border-radius: 16px;
+  background: rgba(10, 16, 28, 0.62);
+  border: 1px solid rgba(255,255,255,0.10);
+  box-shadow: 0 18px 45px rgba(0,0,0,0.45);
+  backdrop-filter: blur(14px);
   overflow: hidden;
 }
 
-.panel-header,
-.panel-footer {
-  padding: 14px 18px;
-  border-bottom: 1px solid rgba(255,255,255,0.05);
-  flex-shrink: 0;
-}
-
-.panel-footer {
-  border-top: 1px solid rgba(255,255,255,0.05);
-  border-bottom: none;
+.panel-header {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255,255,255,0.10);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .panel-body {
-  padding: 16px;
-  overflow-y: auto;
+  padding: 14px;
 }
 
-/* ===============================
-   OFFICE LAYOUT
-================================ */
-.office-layout {
+.panel-footer {
+  padding: 12px 14px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* ===========================
+   TIPOGRAFIA
+   =========================== */
+h1 {
+  font-size: 34px;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+h2 {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+h3 {
+  font-size: 16px;
+  margin-bottom: 10px;
+  opacity: 0.95;
+}
+
+h4 {
+  font-size: 14px;
+  margin: 14px 0 8px;
+  opacity: 0.95;
+}
+
+p {
+  line-height: 1.45;
+  opacity: 0.95;
+}
+
+code {
+  background: rgba(255,255,255,0.08);
+  padding: 2px 6px;
+  border-radius: 6px;
+}
+
+/* ===========================
+   INPUTS / BOTÕES
+   =========================== */
+input {
+  width: 100%;
+  height: 40px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.20);
+  color: #fff;
+  outline: none;
+}
+
+input:focus {
+  border-color: rgba(14,165,255,0.75);
+}
+
+button {
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(14,165,255,0.22);
+  color: #fff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+button:hover {
+  background: rgba(14,165,255,0.30);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.selected {
+  outline: 3px solid #0ea5ff;
+}
+
+/* ===========================
+   GRID DE AÇÕES
+   =========================== */
+.action-grid {
   display: grid;
-  grid-template-columns: 320px 1fr;
-  gap: 18px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 520px) {
+  .action-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================
+   AVATARES (perfil)
+   =========================== */
+#avatarGrid img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.05);
+  cursor: pointer;
+}
+
+/* ===========================
+   CONSULTÓRIO (office)
+   =========================== */
+.office-layout {
   width: 100%;
   height: 100%;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 18px;
+  align-items: start;
+  padding: 18px;
 }
 
 .hud {
-  height: 100%;
+  height: fit-content;
 }
 
-.hud-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
+.hud-card img#doctorAvatar {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 10px;
+  border: 1px solid rgba(255,255,255,0.12);
 }
 
 .hud-stats {
+  margin-top: 10px;
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+  gap: 8px;
+  opacity: 0.95;
 }
 
 .hud-actions {
-  margin-top: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  margin-top: 12px;
 }
 
-/* ===============================
-   CASE LAYOUT (ONDE QUEBRAVA)
-================================ */
-.case-layout {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 18px;
-  width: 100%;
-  height: 100%;
-}
-
-.case-left,
-.case-right {
-  height: 100%;
-}
-
-.case-left .panel,
-.case-right .panel {
-  height: 100%;
-}
-
-/* ===============================
-   GRIDS DE AÇÃO
-================================ */
-.action-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  gap: 10px;
-}
-
-.action-btn {
-  padding: 12px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.08);
-  cursor: pointer;
-  transition: all .2s;
-}
-
-.action-btn:hover {
-  background: rgba(14,165,255,0.15);
-}
-
-.action-btn.selected {
-  outline: 2px solid #0ea5ff;
-}
-
-/* ===============================
-   TRIAGEM (VISUAL AAA)
-================================ */
-.triage-badge {
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-weight: 700;
-  width: fit-content;
-}
-
-.triage-green {
-  background: #16a34a;
-  color: #fff;
-}
-
-.triage-yellow {
-  background: #facc15;
-  color: #000;
-}
-
-.triage-red {
-  background: #dc2626;
-  color: #fff;
-}
-
-/* ===============================
-   OVERLAYS
-================================ */
-.overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-}
-
-.overlay.hidden {
-  display: none;
-}
-
-.overlay-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-}
-
-.overlay-card {
-  position: relative;
-  margin: auto;
-  width: min(1000px, 92vw);
-  max-height: 90vh;
-  background: #0b1225;
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-}
-
-.overlay-card-body {
-  overflow-y: auto;
-  padding: 16px;
-}
-
-/* ===============================
-   MOBILE
-================================ */
-@media (max-width: 900px) {
-  .office-layout,
-  .case-layout {
+@media (max-width: 980px) {
+  .office-layout {
     grid-template-columns: 1fr;
   }
+}
 
-  .hud {
-    display: none;
+/* ===========================
+   ATENDIMENTO (case screen)
+   =========================== */
+.case-layout {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 320px 1fr 360px;
+  gap: 18px;
+  align-items: start;
+  padding: 18px;
+  overflow: hidden;
+}
+
+.case-left img#patientPhoto {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+}
+
+#vitalsList {
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+  opacity: 0.95;
+}
+
+#questionsArea,
+#examsArea,
+#diagnosisArea,
+#medicationsArea {
+  display: grid;
+  gap: 10px;
+}
+
+#questionsArea button,
+#examsArea button,
+#diagnosisArea button,
+#medicationsArea button {
+  text-align: left;
+  min-height: 52px;
+  background: rgba(255,255,255,0.06);
+}
+
+#questionsArea button:hover,
+#examsArea button:hover,
+#diagnosisArea button:hover,
+#medicationsArea button:hover {
+  background: rgba(255,255,255,0.10);
+}
+
+#examResultsArea {
+  margin-top: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 12px;
+  min-height: 56px;
+  opacity: 0.95;
+}
+
+/* Responsivo atendimento */
+@media (max-width: 1100px) {
+  .case-layout {
+    grid-template-columns: 1fr;
+    overflow: auto;
   }
+  .screen, .stage {
+    overflow: hidden;
+  }
+}
+
+/* ===========================
+   TRIAGEM (badge com cor)
+   =========================== */
+.triage-badge {
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
+}
+
+/* Classes por cor (o JS aplica triage-<lowercase>) */
+.triage-verde {
+  background: rgba(34,197,94,0.25);
+  border-color: rgba(34,197,94,0.45);
+  color: #b7f7c9;
+}
+
+.triage-amarelo {
+  background: rgba(234,179,8,0.22);
+  border-color: rgba(234,179,8,0.45);
+  color: #fff2b3;
+}
+
+.triage-vermelho {
+  background: rgba(239,68,68,0.22);
+  border-color: rgba(239,68,68,0.45);
+  color: #ffd0d0;
 }
