@@ -241,7 +241,16 @@
     if (patientPhoto) patientPhoto.src = c.patient.photo;
     if (patientName) patientName.textContent = c.patient.name;
     if (patientDemo) patientDemo.textContent = `${c.patient.age} anos • ${c.patient.sex}`;
-    if (patientTriage) patientTriage.textContent = c.patient.triage;
+    if (patientTriage) {
+  const t = String(c.patient.triage || "").toLowerCase();
+  patientTriage.textContent = c.patient.triage;
+
+  patientTriage.classList.remove("triage-green", "triage-yellow", "triage-red");
+
+  if (t.includes("verde")) patientTriage.classList.add("triage-green");
+  else if (t.includes("amarelo")) patientTriage.classList.add("triage-yellow");
+  else if (t.includes("vermelho")) patientTriage.classList.add("triage-red");
+}
     if (patientComplaint) patientComplaint.textContent = c.complaint;
     if (patientHistory) patientHistory.textContent = c.history;
     if (vitalsEl) vitalsEl.innerHTML = (c.vitals || []).map(v => `<div>• ${v}</div>`).join("");
