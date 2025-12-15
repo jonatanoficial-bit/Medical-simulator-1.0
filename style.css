@@ -363,3 +363,22 @@ html,body{
   .actions-row{justify-content:stretch}
   .actions-row .btn{flex:1}
 }
+/* ===== TRIAGEM (faixa colorida AAA) ===== */
+#patientTriage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,0.22);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  margin-top: 6px;
+  min-width: 140px;
+}
+
+#patientTriage.triage-green  { background: rgba(20, 160, 80, 0.30);  }
+#patientTriage.triage-yellow { background: rgba(240, 180, 30, 0.30); }
+#patientTriage.triage-red    { background: rgba(220, 50, 60, 0.30);  }
