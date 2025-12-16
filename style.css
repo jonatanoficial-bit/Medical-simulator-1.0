@@ -351,3 +351,106 @@ input:focus{
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+/* ===========================
+   FIX AAA — AVATARES (PC + MOBILE)
+   =========================== */
+
+/* área do grid (ajuste os seletores abaixo se o seu HTML usar outros nomes) */
+.avatar-grid,
+#avatarGrid,
+.avatars,
+.avatar-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-items: stretch;
+}
+
+/* mobile: 2 colunas como no seu print “perfeito” */
+@media (max-width: 720px) {
+  .avatar-grid,
+  #avatarGrid,
+  .avatars,
+  .avatar-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+}
+
+/* cartão do avatar (tamanho consistente) */
+.avatar-card,
+.avatarOption,
+.avatar-option,
+.avatar-item,
+[data-avatar] {
+  position: relative;
+  border-radius: 18px;
+  padding: 14px;
+  background: rgba(10, 20, 35, 0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* tamanho do “círculo” do avatar */
+.avatar-card img,
+.avatarOption img,
+.avatar-option img,
+.avatar-item img,
+[data-avatar] img {
+  width: 110px;
+  height: 110px;
+  border-radius: 999px;
+  object-fit: cover;       /* evita deformar */
+  object-position: center; /* mantém rosto centralizado */
+  display: block;
+
+  border: 3px solid rgba(255,255,255,0.10);
+  box-shadow: 0 12px 26px rgba(0,0,0,0.45);
+}
+
+/* mobile: avatar um pouco menor para caber com folga */
+@media (max-width: 720px) {
+  .avatar-card img,
+  .avatarOption img,
+  .avatar-option img,
+  .avatar-item img,
+  [data-avatar] img {
+    width: 92px;
+    height: 92px;
+  }
+}
+
+/* estado selecionado (AAA feedback) */
+.avatar-card.selected,
+.avatarOption.selected,
+.avatar-option.selected,
+.avatar-item.selected,
+[data-avatar].selected {
+  border-color: rgba(0, 195, 255, 0.55);
+  box-shadow: 0 14px 36px rgba(0,195,255,0.10), 0 12px 30px rgba(0,0,0,0.35);
+}
+
+.avatar-card.selected img,
+.avatarOption.selected img,
+.avatar-option.selected img,
+.avatar-item.selected img,
+[data-avatar].selected img {
+  border-color: rgba(0, 195, 255, 0.55);
+}
+
+/* garante que a tela de perfil role no mobile se precisar */
+.profile-panel,
+.profile-card,
+#profileScreen,
+.screen.profile {
+  max-height: 92vh;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
