@@ -1,108 +1,353 @@
-/* ================================
-   PERFIL DO MÉDICO – MOBILE AAA
-================================ */
+:root{
+  --bg: #0b0f1a;
+  --bg2:#0f1730;
+  --panel: rgba(12, 18, 38, 0.82);
+  --panel2: rgba(14, 22, 48, 0.92);
+  --stroke: rgba(255,255,255,0.10);
+  --text: #eaeef7;
+  --muted: rgba(234,238,247,0.78);
+  --primary: #6aa9ff;
+  --danger: #ff6a6a;
+  --ok: #4ce39d;
 
-.profile-screen {
-  min-height: 100vh;
-  padding: 16px;
+  --radius: 16px;
+  --shadow: 0 18px 50px rgba(0,0,0,0.35);
+}
+
+*{ box-sizing: border-box; }
+
+html, body{
+  height: 100%;
+}
+
+body{
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* Links */
+a{ color: var(--primary); }
+
+/* Topbar */
+.topbar{
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  padding: 12px 14px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(10, 14, 30, 0.75);
+  border-bottom: 1px solid var(--stroke);
+  backdrop-filter: blur(10px);
+}
+
+.topbar small{ color: var(--muted); }
+
+.topbar-actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap: wrap;
+}
+
+/* Layout geral */
+.stage{
+  position: relative;
+  min-height: calc(100vh - 58px);
+}
+
+.screen{
+  display: none;
+  position: relative;
+  min-height: calc(100vh - 58px);
+}
+
+.screen.active{
+  display: block;
+}
+
+.screen-bg{
+  position:absolute;
+  inset:0;
+  background-size: cover;
+  background-position: center;
+  filter: saturate(1.05) contrast(1.02);
+  opacity: 0.95;
+}
+
+.screen-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: radial-gradient(1200px 700px at 15% 20%, rgba(0,0,0,0.15), rgba(0,0,0,0.65)),
+              linear-gradient(180deg, rgba(5,8,18,0.40), rgba(5,8,18,0.85));
+}
+
+.screen-content{
+  position: relative;
+  z-index: 1;
+  padding: 18px 14px 28px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
 }
 
-.profile-card {
+/* Panel */
+.panel{
   width: 100%;
-  max-width: 420px;
-  background: linear-gradient(180deg, #0c1f3f 0%, #081428 100%);
-  border-radius: 22px;
-  padding: 20px 18px 90px;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+  border: 1px solid var(--stroke);
+  border-radius: var(--radius);
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  overflow: hidden;
 }
 
-/* Título */
-.profile-card h1 {
-  font-size: 26px;
-  font-weight: 700;
-  margin-bottom: 6px;
+.panel-header{
+  padding: 12px 14px;
+  display:flex;
+  align-items:center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(0,0,0,0.18);
+  border-bottom: 1px solid var(--stroke);
 }
 
-.profile-card p.subtitle {
-  font-size: 14px;
-  opacity: 0.85;
-  margin-bottom: 20px;
+.panel-body{
+  padding: 14px;
 }
 
-/* Campo nome */
-.profile-card label {
+.panel-footer{
+  padding: 12px 14px;
+  display:flex;
+  gap: 10px;
+  justify-content: flex-end;
+  background: rgba(0,0,0,0.14);
+  border-top: 1px solid var(--stroke);
+}
+
+/* Tipografia */
+h1,h2,h3,h4{
+  margin: 0 0 10px;
+  letter-spacing: 0.2px;
+}
+p{ margin: 8px 0; }
+
+.small{ font-size: 13px; }
+.muted{ color: var(--muted); }
+
+/* Inputs */
+label{
+  display:block;
   font-size: 13px;
-  opacity: 0.85;
+  color: var(--muted);
+  margin-bottom: 8px;
 }
-
-.profile-card input {
+input{
   width: 100%;
-  height: 46px;
-  margin-top: 6px;
-  padding: 0 14px;
-  border-radius: 14px;
-  border: none;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  font-size: 15px;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.14);
+  outline: none;
+  background: rgba(0,0,0,0.20);
+  color: var(--text);
+}
+input:focus{
+  border-color: rgba(106,169,255,0.55);
+  box-shadow: 0 0 0 3px rgba(106,169,255,0.18);
 }
 
-.profile-card input::placeholder {
-  color: rgba(255,255,255,0.45);
-}
-
-/* Avatar grid */
-.avatar-grid {
-  margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-
-.avatar-card {
-  background: rgba(255,255,255,0.06);
-  border-radius: 18px;
-  padding: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  transition: 0.2s ease;
+/* Botões */
+.btn, button{
   cursor: pointer;
+  border: 1px solid rgba(255,255,255,0.16);
+  background: rgba(255,255,255,0.10);
+  color: var(--text);
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.btn:hover, button:hover{ filter: brightness(1.07); }
+.btn:active, button:active{ transform: translateY(1px); }
+
+.btn.primary{
+  background: rgba(106,169,255,0.28);
+  border-color: rgba(106,169,255,0.55);
+}
+.btn.ghost{
+  background: transparent;
+  border-color: rgba(255,255,255,0.16);
 }
 
-.avatar-card img {
+/* HOME actions */
+.row-actions{
+  margin-top: 16px;
+  display:flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Grids */
+.action-grid{
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+/* Office layout */
+.office-layout{
   width: 100%;
-  aspect-ratio: 1 / 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  display:grid;
+  grid-template-columns: 320px 1fr;
+  gap: 14px;
+  align-items: start;
+}
+
+.hud .panel-body{
+  background: var(--panel2);
+}
+
+.hud-card img{
+  width: 92px;
+  height: 92px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.18);
   object-fit: cover;
-  border-radius: 14px;
 }
 
-.avatar-card.selected {
-  outline: 3px solid #0ea5ff;
-  background: rgba(14,165,255,0.15);
+.hud-stats{
+  margin-top: 10px;
+  display:grid;
+  gap: 6px;
+  font-size: 14px;
 }
 
-/* Botão iniciar flutuante */
-.profile-start {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  left: 20px;
-  max-width: 420px;
-  margin: auto;
+.shift-row{
+  margin-top: 6px;
+  display:flex;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.profile-start button {
-  width: 100%;
-  height: 54px;
+.shift-pill{
+  padding: 4px 10px;
   border-radius: 999px;
-  border: none;
-  background: linear-gradient(135deg, #22d3ee, #0ea5ff);
-  color: #001018;
-  font-size: 16px;
-  font-weight: 700;
-  box-shadow: 0 10px 30px rgba(14,165,255,0.45);
+  border: 1px solid rgba(255,255,255,0.14);
+  background: rgba(255,255,255,0.10);
+}
+
+.hud-actions{
+  display:grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Case HUD */
+.case-hud{
+  position: sticky;
+  top: 58px;
+  z-index: 9;
+  padding: 10px 12px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  background: rgba(10, 14, 30, 0.70);
+  border-bottom: 1px solid var(--stroke);
+  backdrop-filter: blur(10px);
+}
+
+.case-hud-item{
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  border-radius: 14px;
+  padding: 10px;
+}
+
+.pressure-bar{
+  width: 100%;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.10);
+  overflow:hidden;
+  margin-top: 6px;
+}
+.pressure-fill{
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--ok), #ffd86a, var(--danger));
+}
+
+/* Case layout */
+.case-layout{
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  display:grid;
+  grid-template-columns: 340px 1fr 340px;
+  gap: 14px;
+  align-items: start;
+}
+
+.case-left img, #patientPhoto{
+  width: 100%;
+  height: 220px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(0,0,0,0.18);
+}
+
+/* Overlay */
+.overlay.hidden{ display:none; }
+
+.overlay{
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display:flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.overlay-backdrop{
+  position:absolute;
+  inset:0;
+  background: rgba(0,0,0,0.68);
+}
+
+.overlay-card{
+  position: relative;
+  width: 100%;
+  max-width: 720px;
+  border-radius: var(--radius);
+  border: 1px solid var(--stroke);
+  background: rgba(12, 18, 38, 0.92);
+  box-shadow: var(--shadow);
+  overflow:hidden;
+}
+.overlay-card-body{
+  padding: 14px;
+}
+
+/* Responsivo */
+@media (max-width: 980px){
+  .office-layout{
+    grid-template-columns: 1fr;
+  }
+  .case-hud{
+    grid-template-columns: 1fr 1fr;
+  }
+  .case-layout{
+    grid-template-columns: 1fr;
+  }
+  .action-grid{
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
