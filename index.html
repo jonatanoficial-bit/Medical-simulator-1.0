@@ -2,13 +2,28 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Emergency Doctor Simulator</title>
 
-  <link rel="stylesheet" href="style.css" />
+  <!-- CSS CRÍTICO (evita “tela branca crua” se o CSS externo falhar) -->
+  <style>
+    :root { color-scheme: dark; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      background: #0b0f1a;
+      color: #eaeef7;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    #app { min-height: 100vh; }
+    .hidden { display: none !important; }
+  </style>
+
+  <!-- IMPORTANTE: use ./ para GitHub Pages na raiz -->
+  <link rel="stylesheet" href="./style.css?v=1" />
 
   <!-- PWA -->
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="./manifest.json" />
   <meta name="theme-color" content="#0b1225" />
 </head>
 
@@ -21,10 +36,10 @@
       <strong>Emergency Doctor Simulator</strong><br />
       <small>Simulador educacional de pronto-socorro</small>
     </div>
-    <div style="display:flex;gap:10px;align-items:center;">
-      <button onclick="toggleFullscreen()">Tela cheia</button>
-      <button onclick="openHelp()">Ajuda</button>
-      <button onclick="openRanking()">Ranking</button>
+    <div class="topbar-actions">
+      <button class="btn" onclick="toggleFullscreen()">Tela cheia</button>
+      <button class="btn" onclick="openHelp()">Ajuda</button>
+      <button class="btn" onclick="openRanking()">Ranking</button>
     </div>
   </header>
 
@@ -32,7 +47,7 @@
 
     <!-- HOME -->
     <section class="screen active" id="screen-home">
-      <div class="screen-bg" style="background-image:url('images/cover.png')"></div>
+      <div class="screen-bg" style="background-image:url('./images/cover.png')"></div>
       <div class="screen-content">
         <div class="panel" style="max-width:560px">
           <div class="panel-body">
@@ -40,13 +55,13 @@
             <p>Tome decisões clínicas, solicite exames e conduza casos simulados.</p>
             <p><strong>Aviso:</strong> Simulação educacional. Não substitui atendimento médico real.</p>
 
-            <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
-              <button onclick="startNewGame()">Novo Jogo</button>
-              <button onclick="continueGame()">Continuar</button>
-              <button onclick="installPWA()">Instalar (PWA)</button>
+            <div class="row-actions">
+              <button class="btn primary" onclick="startNewGame()">Novo Jogo</button>
+              <button class="btn" onclick="continueGame()">Continuar</button>
+              <button class="btn ghost" onclick="installPWA()">Instalar (PWA)</button>
             </div>
 
-            <p style="margin-top:12px;opacity:.85;font-size:13px">
+            <p class="muted small">
               Upgrade AAA ativo: Plantão (10 casos), streak de acertos e eventos aleatórios (superlotação, falta de leito/equipamento/insumo).
             </p>
           </div>
@@ -56,7 +71,7 @@
 
     <!-- PERFIL -->
     <section class="screen" id="screen-profile">
-      <div class="screen-bg" style="background-image:url('images/fundo.jpg')"></div>
+      <div class="screen-bg" style="background-image:url('./images/fundo.jpg')"></div>
       <div class="screen-content">
         <div class="panel" style="width:100%;max-width:900px;margin:auto">
           <div class="panel-header">
@@ -72,8 +87,8 @@
           </div>
 
           <div class="panel-footer">
-            <button onclick="goHome()">Voltar</button>
-            <button onclick="confirmProfile()">Confirmar</button>
+            <button class="btn" onclick="goHome()">Voltar</button>
+            <button class="btn primary" onclick="confirmProfile()">Confirmar</button>
           </div>
         </div>
       </div>
@@ -81,7 +96,7 @@
 
     <!-- CONSULTÓRIO -->
     <section class="screen" id="screen-office">
-      <div class="screen-bg" style="background-image:url('images/consultorio.jpg')"></div>
+      <div class="screen-bg" style="background-image:url('./images/consultorio.jpg')"></div>
 
       <div class="screen-content office-layout">
         <aside class="panel hud">
@@ -110,10 +125,10 @@
               </div>
             </div>
 
-            <div class="hud-actions" style="display:grid;gap:10px;margin-top:12px;">
-              <button onclick="startShift(10)">Iniciar Plantão (10)</button>
-              <button onclick="endShift()">Encerrar Plantão</button>
-              <button onclick="nextCase()">Próximo Caso</button>
+            <div class="hud-actions">
+              <button class="btn primary" onclick="startShift(10)">Iniciar Plantão (10)</button>
+              <button class="btn" onclick="endShift()">Encerrar Plantão</button>
+              <button class="btn" onclick="nextCase()">Próximo Caso</button>
             </div>
           </div>
         </aside>
@@ -152,8 +167,8 @@
         </div>
         <div class="case-hud-item" style="min-width:260px">
           <strong>Evento do Plantão</strong>
-          <div id="eventLabel" style="opacity:.92">Nenhum</div>
-          <small id="eventEffect" style="opacity:.8">—</small>
+          <div id="eventLabel" class="muted">Nenhum</div>
+          <small id="eventEffect" class="muted">—</small>
         </div>
       </div>
 
@@ -163,10 +178,10 @@
         <section class="panel case-left">
           <div class="panel-header">
             <strong id="patientName"></strong>
-            <span style="opacity:.8;font-size:12px" id="patientMeta"></span>
+            <span class="muted small" id="patientMeta"></span>
           </div>
           <div class="panel-body">
-            <img id="patientPhoto" />
+            <img id="patientPhoto" alt="Paciente" />
             <p><strong>Queixa:</strong> <span id="patientComplaint"></span></p>
             <p><strong>História:</strong> <span id="patientHistory"></span></p>
 
@@ -204,7 +219,7 @@
             <div class="action-grid" id="medicationsArea"></div>
           </div>
           <div class="panel-footer">
-            <button onclick="finalizeCase()">Finalizar Atendimento</button>
+            <button class="btn primary" onclick="finalizeCase()">Finalizar Atendimento</button>
           </div>
         </section>
 
@@ -220,12 +235,12 @@
   <div class="overlay-card">
     <div class="panel-header">
       <strong>Ranking (Top 10)</strong>
-      <button onclick="closeRanking()">Fechar</button>
+      <button class="btn" onclick="closeRanking()">Fechar</button>
     </div>
     <div class="overlay-card-body" id="rankBody"></div>
   </div>
 </div>
 
-<script src="script.js"></script>
+<script src="./script.js"></script>
 </body>
-    </html>
+</html>
