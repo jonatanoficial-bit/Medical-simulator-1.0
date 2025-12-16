@@ -47,7 +47,7 @@
             </div>
 
             <p style="margin-top:12px;opacity:.85;font-size:13px">
-              Dica AAA: Exames desnecessários custam tempo e pontuação. Casos vermelhos têm tempo crítico e risco de óbito.
+              Upgrade AAA ativo: Plantão (10 casos), streak de acertos e eventos aleatórios (superlotação, falta de leito/equipamento/insumo).
             </p>
           </div>
         </div>
@@ -95,9 +95,24 @@
               <div>Prestígio: <span id="prestige">0</span></div>
               <div>Erros: <span id="mistakes">0</span></div>
               <div>Acertos: <span id="hits">0</span></div>
+
+              <div class="shift-row">
+                <div><strong>Plantão</strong></div>
+                <div id="shiftStatus" class="shift-pill">Inativo</div>
+              </div>
+              <div class="shift-row">
+                <div>Progresso:</div>
+                <div><span id="shiftProg">0</span>/<span id="shiftTarget">10</span></div>
+              </div>
+              <div class="shift-row">
+                <div>Streak:</div>
+                <div><span id="shiftStreak">0</span> (Best: <span id="shiftBest">0</span>)</div>
+              </div>
             </div>
 
-            <div class="hud-actions">
+            <div class="hud-actions" style="display:grid;gap:10px;margin-top:12px;">
+              <button onclick="startShift(10)">Iniciar Plantão (10)</button>
+              <button onclick="endShift()">Encerrar Plantão</button>
               <button onclick="nextCase()">Próximo Caso</button>
             </div>
           </div>
@@ -107,7 +122,7 @@
           <div class="panel-body">
             <h2>Consultório de Emergência</h2>
             <p>Atenda pacientes, solicite exames e tome decisões clínicas.</p>
-            <p><strong>AAA:</strong> Tempo, pressão, óbito e progressão de carreira estão ativos.</p>
+            <p><strong>AAA:</strong> Plantão + streak + eventos dinâmicos impactam tempo, pressão e pontuação.</p>
             <p>Novos casos entram apenas em <code>cases.json</code>.</p>
           </div>
         </section>
@@ -118,7 +133,7 @@
     <section class="screen" id="screen-case">
       <div class="screen-bg" id="caseBg"></div>
 
-      <!-- HUD FIXO DO CASO (tempo/pressão) -->
+      <!-- HUD FIXO DO CASO -->
       <div class="case-hud">
         <div class="case-hud-item">
           <strong>Tempo do Caso</strong>
@@ -135,11 +150,16 @@
           <strong>Triagem</strong>
           <div id="triageBadge" class="triage-badge"></div>
         </div>
+        <div class="case-hud-item" style="min-width:260px">
+          <strong>Evento do Plantão</strong>
+          <div id="eventLabel" style="opacity:.92">Nenhum</div>
+          <small id="eventEffect" style="opacity:.8">—</small>
+        </div>
       </div>
 
       <div class="screen-content case-layout">
 
-        <!-- COLUNA PACIENTE -->
+        <!-- PACIENTE -->
         <section class="panel case-left">
           <div class="panel-header">
             <strong id="patientName"></strong>
@@ -155,7 +175,7 @@
           </div>
         </section>
 
-        <!-- COLUNA AÇÕES -->
+        <!-- AÇÕES -->
         <section class="panel">
           <div class="panel-header">
             <strong>Perguntas & Exames</strong>
@@ -171,19 +191,17 @@
           </div>
         </section>
 
-        <!-- COLUNA DECISÃO -->
+        <!-- DECISÃO -->
         <section class="panel case-right">
           <div class="panel-header">
             <strong>Decisão Clínica</strong>
           </div>
           <div class="panel-body">
-
             <h4>Diagnóstico (escolha 1)</h4>
             <div class="action-grid" id="diagnosisArea"></div>
 
             <h4>Conduta / Medicação (até 2)</h4>
             <div class="action-grid" id="medicationsArea"></div>
-
           </div>
           <div class="panel-footer">
             <button onclick="finalizeCase()">Finalizar Atendimento</button>
@@ -210,4 +228,4 @@
 
 <script src="script.js"></script>
 </body>
-</html>
+    </html>
