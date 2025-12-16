@@ -1,20 +1,14 @@
-/* ===========================
-   RESET / BASE
-   =========================== */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body {
   width: 100%;
   height: 100%;
-  overflow: hidden; /* evita scroll global */
+  overflow: hidden;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
   background: #000;
   color: #fff;
 }
 
-/* ===========================
-   APP SHELL
-   =========================== */
 #app {
   width: 100%;
   height: 100%;
@@ -22,31 +16,22 @@ html, body {
   overflow: hidden;
 }
 
-/* ===========================
-   TOP BAR
-   =========================== */
 .topbar {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: 0; left: 0; right: 0;
   height: 64px;
   z-index: 50;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-
   padding: 10px 14px;
   background: rgba(7, 12, 22, 0.70);
   border-bottom: 1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
 }
 
-.topbar small {
-  opacity: 0.85;
-}
+.topbar small { opacity: 0.85; }
 
 .topbar button {
   padding: 8px 12px;
@@ -57,36 +42,21 @@ html, body {
   cursor: pointer;
 }
 
-.topbar button:hover {
-  background: rgba(255,255,255,0.12);
-}
+.topbar button:hover { background: rgba(255,255,255,0.12); }
 
-/* ===========================
-   STAGE (área do jogo)
-   =========================== */
 .stage {
   position: absolute;
-  top: 64px; /* altura da topbar */
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  overflow: hidden; /* evita scroll do stage */
+  top: 64px; left: 0; right: 0; bottom: 0;
+  overflow: hidden;
 }
 
-/* ===========================
-   SCREENS (telas)
-   =========================== */
 .screen {
   position: absolute;
   inset: 0;
   display: none;
   overflow: hidden;
 }
-
-.screen.active {
-  display: block;
-}
+.screen.active { display: block; }
 
 .screen-bg {
   position: absolute;
@@ -101,9 +71,10 @@ html, body {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(1200px 600px at 20% 20%, rgba(14,165,255,0.12), transparent 60%),
-              radial-gradient(900px 500px at 80% 80%, rgba(255,255,255,0.07), transparent 55%),
-              rgba(0,0,0,0.45);
+  background:
+    radial-gradient(1200px 600px at 20% 20%, rgba(14,165,255,0.12), transparent 60%),
+    radial-gradient(900px 500px at 80% 80%, rgba(255,255,255,0.07), transparent 55%),
+    rgba(0,0,0,0.45);
   pointer-events: none;
 }
 
@@ -117,9 +88,6 @@ html, body {
   place-items: center;
 }
 
-/* ===========================
-   PANEL (glass AAA)
-   =========================== */
 .panel {
   width: 100%;
   border-radius: 16px;
@@ -139,9 +107,7 @@ html, body {
   gap: 12px;
 }
 
-.panel-body {
-  padding: 14px;
-}
+.panel-body { padding: 14px; }
 
 .panel-footer {
   padding: 12px 14px;
@@ -151,46 +117,13 @@ html, body {
   gap: 10px;
 }
 
-/* ===========================
-   TIPOGRAFIA
-   =========================== */
-h1 {
-  font-size: 34px;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-}
+h1 { font-size: 34px; letter-spacing: 0.5px; margin-bottom: 10px; }
+h2 { font-size: 22px; margin-bottom: 10px; }
+h3 { font-size: 16px; margin-bottom: 10px; opacity: 0.95; }
+h4 { font-size: 14px; margin: 14px 0 8px; opacity: 0.95; }
+p { line-height: 1.45; opacity: 0.95; }
+code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 6px; }
 
-h2 {
-  font-size: 22px;
-  margin-bottom: 10px;
-}
-
-h3 {
-  font-size: 16px;
-  margin-bottom: 10px;
-  opacity: 0.95;
-}
-
-h4 {
-  font-size: 14px;
-  margin: 14px 0 8px;
-  opacity: 0.95;
-}
-
-p {
-  line-height: 1.45;
-  opacity: 0.95;
-}
-
-code {
-  background: rgba(255,255,255,0.08);
-  padding: 2px 6px;
-  border-radius: 6px;
-}
-
-/* ===========================
-   INPUTS / BOTÕES
-   =========================== */
 input {
   width: 100%;
   height: 40px;
@@ -201,10 +134,7 @@ input {
   color: #fff;
   outline: none;
 }
-
-input:focus {
-  border-color: rgba(14,165,255,0.75);
-}
+input:focus { border-color: rgba(14,165,255,0.75); }
 
 button {
   padding: 10px 14px;
@@ -215,40 +145,20 @@ button {
   cursor: pointer;
   font-weight: 600;
 }
+button:hover { background: rgba(14,165,255,0.30); }
+button:active { transform: translateY(1px); }
 
-button:hover {
-  background: rgba(14,165,255,0.30);
-}
+.selected { outline: 3px solid #0ea5ff; }
 
-button:active {
-  transform: translateY(1px);
-}
-
-.selected {
-  outline: 3px solid #0ea5ff;
-}
-
-/* ===========================
-   GRID DE AÇÕES
-   =========================== */
 .action-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 10px;
 }
+@media (max-width: 520px) { .action-grid { grid-template-columns: 1fr; } }
 
-@media (max-width: 520px) {
-  .action-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ===========================
-   AVATARES (perfil)
-   =========================== */
 #avatarGrid img {
-  width: 120px;
-  height: 120px;
+  width: 120px; height: 120px;
   object-fit: cover;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.14);
@@ -256,9 +166,6 @@ button:active {
   cursor: pointer;
 }
 
-/* ===========================
-   CONSULTÓRIO (office)
-   =========================== */
 .office-layout {
   width: 100%;
   height: 100%;
@@ -269,9 +176,7 @@ button:active {
   padding: 18px;
 }
 
-.hud {
-  height: fit-content;
-}
+.hud { height: fit-content; }
 
 .hud-card img#doctorAvatar {
   width: 100%;
@@ -289,19 +194,36 @@ button:active {
   opacity: 0.95;
 }
 
-.hud-actions {
-  margin-top: 12px;
+.shift-row{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  padding-top:4px;
 }
 
-@media (max-width: 980px) {
-  .office-layout {
-    grid-template-columns: 1fr;
-  }
+.shift-pill{
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-size: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.08);
 }
 
-/* ===========================
-   ATENDIMENTO (case screen)
-   =========================== */
+.shift-on{
+  background: rgba(34,197,94,0.18);
+  border-color: rgba(34,197,94,0.35);
+  color: #b7f7c9;
+}
+
+.shift-off{
+  background: rgba(239,68,68,0.14);
+  border-color: rgba(239,68,68,0.28);
+  color: #ffd0d0;
+}
+
+@media (max-width: 980px) { .office-layout { grid-template-columns: 1fr; } }
+
 .case-layout {
   width: 100%;
   height: 100%;
@@ -329,10 +251,7 @@ button:active {
   opacity: 0.95;
 }
 
-#questionsArea,
-#examsArea,
-#diagnosisArea,
-#medicationsArea {
+#questionsArea, #examsArea, #diagnosisArea, #medicationsArea {
   display: grid;
   gap: 10px;
 }
@@ -345,13 +264,10 @@ button:active {
   min-height: 52px;
   background: rgba(255,255,255,0.06);
 }
-
 #questionsArea button:hover,
 #examsArea button:hover,
 #diagnosisArea button:hover,
-#medicationsArea button:hover {
-  background: rgba(255,255,255,0.10);
-}
+#medicationsArea button:hover { background: rgba(255,255,255,0.10); }
 
 #examResultsArea {
   margin-top: 12px;
@@ -363,20 +279,11 @@ button:active {
   opacity: 0.95;
 }
 
-/* Responsivo atendimento */
 @media (max-width: 1100px) {
-  .case-layout {
-    grid-template-columns: 1fr;
-    overflow: auto;
-  }
-  .screen, .stage {
-    overflow: hidden;
-  }
+  .case-layout { grid-template-columns: 1fr; overflow: auto; }
+  .screen, .stage { overflow: hidden; }
 }
 
-/* ===========================
-   TRIAGEM (badge com cor)
-   =========================== */
 .triage-badge {
   padding: 6px 10px;
   border-radius: 999px;
@@ -386,40 +293,32 @@ button:active {
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.08);
 }
-
-/* Classes por cor (o JS aplica triage-<lowercase>) */
 .triage-verde {
   background: rgba(34,197,94,0.25);
   border-color: rgba(34,197,94,0.45);
   color: #b7f7c9;
 }
-
 .triage-amarelo {
   background: rgba(234,179,8,0.22);
   border-color: rgba(234,179,8,0.45);
   color: #fff2b3;
 }
-
 .triage-vermelho {
   background: rgba(239,68,68,0.22);
   border-color: rgba(239,68,68,0.45);
   color: #ffd0d0;
 }
-/* ===========================
-   CASE HUD (tempo/pressão)
-   =========================== */
+
+/* CASE HUD (tempo/pressão/evento) */
 .case-hud{
   position:absolute;
-  top:14px;
-  left:14px;
-  right:14px;
+  top:14px; left:14px; right:14px;
   z-index:5;
   display:flex;
   gap:12px;
   align-items:stretch;
   flex-wrap:wrap;
 }
-
 .case-hud-item{
   background: rgba(10, 16, 28, 0.62);
   border: 1px solid rgba(255,255,255,0.10);
@@ -428,7 +327,6 @@ button:active {
   backdrop-filter: blur(14px);
   min-width: 190px;
 }
-
 .pressure-bar{
   width: 180px;
   max-width: 55vw;
@@ -438,28 +336,25 @@ button:active {
   overflow:hidden;
   margin-top:6px;
 }
-
 .pressure-fill{
   height: 100%;
   width: 0%;
   background: rgba(14,165,255,0.65);
 }
 
+/* RANK overlay */
 .overlay{
   position:fixed;
   inset:0;
   z-index:200;
   display:flex;
 }
-
 .overlay.hidden{ display:none; }
-
 .overlay-backdrop{
   position:absolute;
   inset:0;
   background: rgba(0,0,0,0.75);
 }
-
 .overlay-card{
   position:relative;
   margin:auto;
@@ -472,17 +367,11 @@ button:active {
   display:flex;
   flex-direction:column;
 }
-
 .overlay-card-body{
   padding:14px;
   overflow:auto;
 }
-
 @media (max-width: 640px){
-  .case-hud{
-    top:10px; left:10px; right:10px;
-  }
-  .case-hud-item{
-    min-width: 160px;
-  }
+  .case-hud{ top:10px; left:10px; right:10px; }
+  .case-hud-item{ min-width: 160px; }
 }
