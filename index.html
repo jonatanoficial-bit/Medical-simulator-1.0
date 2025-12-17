@@ -52,6 +52,7 @@
 
     <div class="top-actions">
       <button id="btnFullScreen" class="btn">Tela cheia</button>
+      <button id="btnCertification" class="btn">Certificação</button>
       <button id="btnRanking" class="btn">Ranking</button>
       <button id="btnHelp" class="btn">Ajuda</button>
     </div>
@@ -127,6 +128,9 @@
             <div style="margin-top:4px; font-size:.8rem; opacity:.9;">
               Dificuldade atual: <b id="uiDifficulty">—</b>
             </div>
+            <div style="margin-top:4px; font-size:.8rem; opacity:.9;">
+              Certificação: <b id="uiCertLevel">—</b>
+            </div>
           </div>
         </div>
         <div class="timer">⏱️ <span id="caseTimer">00:00</span></div>
@@ -138,9 +142,10 @@
         <div>Óbitos: <b id="uiDeaths">0</b></div>
       </div>
 
-      <div style="margin-top:16px;">
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
         <button id="btnNextCase" class="btn primary">Iniciar plantão</button>
-        <button id="btnOfficeRanking" class="btn">Ver ranking</button>
+        <button id="btnOfficeCertification" class="btn">Certificação</button>
+        <button id="btnOfficeRanking" class="btn">Ranking</button>
       </div>
     </div>
   </section>
@@ -229,12 +234,54 @@
 
       <div class="caseCard">
         <div><b>Tempo:</b> <span id="reportTime">—</span></div>
+        <div style="margin-top:6px;"><b>Exames solicitados:</b> <span id="reportExamsCount">—</span></div>
         <div style="margin-top:6px;"><b>Pontuação do caso:</b> <span id="reportScore">—</span></div>
         <div style="margin-top:10px; opacity:.95;"><b>Feedback educacional:</b><br /><span id="reportFeedback">—</span></div>
       </div>
 
-      <div style="margin-top:16px;">
+      <div class="caseCard">
+        <div><b>Certificação atual:</b> <span id="reportCert">—</span></div>
+        <div style="margin-top:6px;"><b>Próxima meta:</b> <span id="reportNextGoal">—</span></div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
         <button id="btnReportContinue" class="btn primary">Voltar ao consultório</button>
+        <button id="btnReportCertification" class="btn">Ver certificação</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CERTIFICAÇÃO ================= -->
+  <section class="screen" data-screen="cert">
+    <div class="panel">
+      <h2>Certificação por Desempenho</h2>
+
+      <div class="caseCard">
+        <div><b>Profissional:</b> <span id="certName">—</span></div>
+        <div style="margin-top:6px;"><b>Cargo:</b> <span id="certRank">—</span></div>
+        <div style="margin-top:6px;"><b>Nível de Certificação:</b> <span id="certLevel">—</span></div>
+        <div style="margin-top:6px;"><b>ID do Certificado:</b> <span id="certId">—</span></div>
+        <div style="margin-top:6px;"><b>Data:</b> <span id="certDate">—</span></div>
+      </div>
+
+      <div class="caseCard">
+        <h3 style="margin:0 0 10px 0;">Métricas</h3>
+        <div>Casos concluídos: <b id="certCases">0</b></div>
+        <div>Óbitos: <b id="certDeaths">0</b></div>
+        <div>Precisão (diagnóstico): <b id="certDxAcc">0%</b></div>
+        <div>Precisão (conduta): <b id="certCondAcc">0%</b></div>
+        <div>Exames por caso (média): <b id="certExamAvg">0.0</b></div>
+        <div>Pontos: <b id="certPoints">0</b></div>
+      </div>
+
+      <div class="caseCard">
+        <h3 style="margin:0 0 10px 0;">Critérios</h3>
+        <div id="certCriteria"></div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnCertBack" class="btn primary">Voltar</button>
+        <button id="btnCertCopy" class="btn">Copiar certificado</button>
       </div>
     </div>
   </section>
@@ -263,8 +310,8 @@
       <h2>Ajuda</h2>
       <p>
         A dificuldade aumenta automaticamente com a carreira.
-        Faça exames coerentes, escolha o diagnóstico correto e aplique a conduta adequada.
-        Erros e atrasos aumentam óbitos e reduzem sua pontuação.
+        Exames consomem tempo e agora também influenciam na pontuação (uso racional).
+        Diagnóstico e conduta corretos são o principal.
       </p>
       <button id="btnCloseHelp" class="btn">Fechar</button>
     </div>
@@ -272,10 +319,8 @@
 
 </div>
 
-<!-- ================= JS ================= -->
 <script src="script.js"></script>
 
-<!-- ================= PWA ================= -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
