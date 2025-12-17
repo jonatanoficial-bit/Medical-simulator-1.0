@@ -2,279 +2,163 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
-  <meta name="theme-color" content="#070b14" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b1020" />
   <title>Emergency Doctor Simulator</title>
 
+  <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <!-- Cache-busting: aumente a versão quando atualizar -->
-  <link rel="stylesheet" href="style.css?v=1.1.1" />
+  <link rel="apple-touch-icon" href="images/avatar1.png" />
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css?v=2.0.0" />
 </head>
 
 <body>
-  <div class="app" id="app">
-    <!-- Topbar -->
-    <header class="topbar">
-      <div class="brand">
-        <div class="brand-title">Emergency Doctor Simulator</div>
-        <div class="brand-sub">Simulador educacional de pronto-socorro</div>
-      </div>
 
-      <div class="top-actions">
-        <button class="chip" id="btnFullScreen" type="button">Tela cheia</button>
-        <button class="chip" id="btnHelp" type="button">Ajuda</button>
-        <button class="chip" id="btnRanking" type="button">Ranking</button>
-      </div>
-    </header>
+<!-- =========================
+     SPLASH / CAPA INICIAL
+========================= -->
+<div id="splashScreen" class="splash">
+  <img src="images/capa.jpg" alt="Emergency Doctor Simulator" />
+  <div class="splashHint">Toque ou clique para continuar</div>
+</div>
 
-    <!-- HOME -->
-    <section class="screen active" data-screen="home" aria-label="Tela inicial">
-      <div class="panel hero">
-        <div class="hero-left">
-          <h1>Bem-vindo(a), Doutor(a)</h1>
-          <p>
-            Atenda pacientes, solicite exames, escolha diagnósticos e condutas.
-            Ganhe pontos e evolua seu rank.
-          </p>
+<!-- =========================
+     APP
+========================= -->
+<div class="app">
 
-          <div class="hero-actions">
-            <button class="btn primary" id="btnNewGame" type="button">Novo jogo</button>
-            <button class="btn" id="btnContinue" type="button">Continuar</button>
-          </div>
-        </div>
-
-        <div class="hero-right">
-          <div class="card cover">
-            <div class="cover-title">Pronto-socorro</div>
-            <div class="cover-sub">Casos clínicos simulados</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel tips">
-        <div class="tip">
-          <div class="tip-title">Dica</div>
-          <div class="tip-text">Solicite somente exames necessários para maximizar pontos.</div>
-        </div>
-        <div class="tip">
-          <div class="tip-title">Dica</div>
-          <div class="tip-text">Diagnóstico correto aumenta sua sequência (streak).</div>
-        </div>
-        <div class="tip">
-          <div class="tip-title">Dica</div>
-          <div class="tip-text">Conduta errada pode reduzir bastante sua pontuação.</div>
-        </div>
-      </div>
-    </section>
-
-    <!-- PROFILE -->
-    <section class="screen" data-screen="profile" aria-label="Perfil do jogador">
-      <div class="panel profile">
-        <h2>Criar perfil</h2>
-
-        <label class="field">
-          <span>Nome</span>
-          <input id="inputName" type="text" maxlength="24" placeholder="Digite seu nome" />
-        </label>
-
-        <div class="subtitle">Selecione seu avatar</div>
-
-        <div class="avatarGrid" id="avatarGrid" aria-label="Lista de avatares">
-          <button class="avatarCard" type="button" data-avatar="images/avatar1.png">
-            <img src="images/avatar1.png" alt="Avatar 1" />
-          </button>
-          <button class="avatarCard" type="button" data-avatar="images/avatar2.png">
-            <img src="images/avatar2.png" alt="Avatar 2" />
-          </button>
-          <button class="avatarCard" type="button" data-avatar="images/avatar3.png">
-            <img src="images/avatar3.png" alt="Avatar 3" />
-          </button>
-          <button class="avatarCard" type="button" data-avatar="images/avatar4.png">
-            <img src="images/avatar4.png" alt="Avatar 4" />
-          </button>
-          <button class="avatarCard" type="button" data-avatar="images/avatar5.png">
-            <img src="images/avatar5.png" alt="Avatar 5" />
-          </button>
-          <button class="avatarCard" type="button" data-avatar="images/avatar6.png">
-            <img src="images/avatar6.png" alt="Avatar 6" />
-          </button>
-        </div>
-
-        <div class="divider"></div>
-
-        <div class="profileActions">
-          <button class="btn" id="btnProfileBack" type="button">Voltar</button>
-          <button class="btn primary" id="btnStartFromProfile" type="button">Iniciar</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- OFFICE -->
-    <section class="screen" data-screen="office" aria-label="Sala do médico">
-      <div class="panel office">
-        <div class="officeHeader">
-          <div class="who">
-            <img id="uiAvatar" src="images/avatar1.png" alt="Doutor(a)" />
-            <div class="whoText">
-              <div class="whoName" id="uiName">—</div>
-              <div class="whoRank">Rank: <span id="uiRank">Interno</span></div>
-            </div>
-          </div>
-
-          <div class="stats">
-            <div class="stat"><div class="statLabel">Pontos</div><div class="statVal" id="uiPoints">0</div></div>
-            <div class="stat"><div class="statLabel">Acertos</div><div class="statVal" id="uiCorrect">0</div></div>
-            <div class="stat"><div class="statLabel">Erros</div><div class="statVal" id="uiWrong">0</div></div>
-            <div class="stat"><div class="statLabel">Casos</div><div class="statVal" id="uiCases">0</div></div>
-            <div class="stat"><div class="statLabel">Plantões</div><div class="statVal" id="uiShift">0</div></div>
-            <div class="stat"><div class="statLabel">Streak</div><div class="statVal" id="uiStreak">0</div></div>
-          </div>
-        </div>
-
-        <div class="officeActions">
-          <button class="btn primary" id="btnNextCase" type="button">Iniciar próximo caso</button>
-          <button class="btn danger" id="btnResetSave" type="button">Resetar save</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- CASE -->
-    <section class="screen" data-screen="case" aria-label="Atendimento do caso">
-      <div class="panel case">
-        <div class="caseTop">
-          <div class="caseTitle" id="caseTitle">Caso</div>
-          <div class="triage" id="triageBadge"><span id="triageText">—</span></div>
-        </div>
-
-        <div class="caseGrid">
-          <div class="caseLeft">
-            <div class="patientCard">
-              <img id="patientPhoto" src="images/patient_male.jpg" alt="Paciente" />
-              <div class="patientInfo">
-                <div class="patientName" id="patientName">—</div>
-                <div class="patientSub" id="patientSub">—</div>
-              </div>
-            </div>
-
-            <div class="block">
-              <div class="blockTitle">Sinais vitais</div>
-              <ul class="vitals" id="vitalsList"></ul>
-            </div>
-
-            <div class="block">
-              <div class="blockTitle">Queixa principal</div>
-              <div class="blockText" id="complaintText">—</div>
-            </div>
-
-            <div class="block">
-              <div class="blockTitle">Histórico</div>
-              <div class="blockText" id="historyText">—</div>
-            </div>
-
-            <div class="block">
-              <div class="blockTitle">Perguntas adicionais</div>
-              <div id="questionsList"></div>
-            </div>
-          </div>
-
-          <div class="caseRight">
-            <div class="block">
-              <div class="blockTitle">Exames (máx. <span id="maxExams">3</span>)</div>
-              <div id="examPickList" class="pickList"></div>
-            </div>
-
-            <div class="block">
-              <div class="blockTitle">Resultados</div>
-              <div id="examResultsBox" class="resultsBox"></div>
-            </div>
-
-            <div class="block">
-              <div class="blockTitle">Diagnóstico</div>
-              <div id="dxPickList" class="pickList"></div>
-            </div>
-
-            <div class="block">
-              <div class="blockTitle">Condutas/Medicações (máx. <span id="maxMeds">2</span>)</div>
-              <div id="medPickList" class="pickList"></div>
-            </div>
-
-            <div class="caseActions">
-              <button class="btn" id="btnBackOffice" type="button">Voltar</button>
-              <button class="btn primary" id="btnFinalize" type="button">Finalizar atendimento</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RESULTS -->
-    <section class="screen" data-screen="results" aria-label="Resultado do caso">
-      <div class="panel results">
-        <h2 id="resultsTitle">Resultado do Caso</h2>
-        <div class="muted" id="resultsSub">—</div>
-
-        <div class="resultsGrid">
-          <div class="resultCard">
-            <div class="resultLabel">Total</div>
-            <div class="resultVal" id="resPoints">0</div>
-          </div>
-          <div class="resultCard">
-            <div class="resultLabel">Exames</div>
-            <div class="resultVal" id="resExams">0</div>
-          </div>
-          <div class="resultCard">
-            <div class="resultLabel">Diagnóstico</div>
-            <div class="resultVal" id="resDx">0</div>
-          </div>
-          <div class="resultCard">
-            <div class="resultLabel">Condutas</div>
-            <div class="resultVal" id="resMeds">0</div>
-          </div>
-        </div>
-
-        <div class="resultsActions">
-          <button class="btn" id="btnResultsHome" type="button">Home</button>
-          <button class="btn primary" id="btnResultsOffice" type="button">Voltar ao escritório</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- HELP MODAL -->
-    <div class="modal hidden" id="helpModal" aria-hidden="true">
-      <div class="modalCard">
-        <div class="modalHead">
-          <div class="modalTitle">Ajuda</div>
-          <button class="iconBtn" id="btnCloseHelp" type="button">✕</button>
-        </div>
-        <div class="modalBody">
-          <p>Escolha exames com cuidado (máximo limitado). Em seguida selecione diagnóstico e condutas.</p>
-          <p>Finalize para receber a pontuação do caso e atualizar seu rank.</p>
-        </div>
-      </div>
+  <!-- TOPBAR -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-title">Emergency Doctor Simulator</div>
+      <div class="brand-sub">Simulador educacional de pronto-socorro</div>
     </div>
 
-    <!-- RANK MODAL -->
-    <div class="modal hidden" id="rankModal" aria-hidden="true">
-      <div class="modalCard">
-        <div class="modalHead">
-          <div class="modalTitle">Ranking</div>
-          <button class="iconBtn" id="btnCloseRank" type="button">✕</button>
-        </div>
-        <div class="modalBody" id="rankList">
-          <div class="muted">Carregando…</div>
+    <div class="top-actions">
+      <button id="btnFullScreen" class="chip">Tela cheia</button>
+      <button id="btnRanking" class="chip">Ranking</button>
+    </div>
+  </header>
+
+  <!-- =========================
+       HOME
+  ========================= -->
+  <section class="screen active" data-screen="home">
+    <div class="panel hero">
+      <div>
+        <h1>Bem-vindo(a), Doutor(a)</h1>
+        <p>Atenda pacientes contra o tempo. Cada decisão importa.</p>
+
+        <div class="hero-actions">
+          <button id="btnNewGame" class="btn primary">Novo jogo</button>
+          <button id="btnContinue" class="btn">Continuar</button>
         </div>
       </div>
+
+      <div class="heroCover">
+        <span>Pronto-socorro</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================
+       PROFILE
+  ========================= -->
+  <section class="screen" data-screen="profile">
+    <div class="panel profile">
+      <h2>Criar perfil</h2>
+
+      <input id="inputName" placeholder="Digite seu nome" maxlength="24"/>
+
+      <div class="avatarGrid" id="avatarGrid">
+        <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png"></button>
+        <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png"></button>
+        <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png"></button>
+        <button class="avatarCard" data-avatar="images/avatar4.png"><img src="images/avatar4.png"></button>
+        <button class="avatarCard" data-avatar="images/avatar5.png"><img src="images/avatar5.png"></button>
+        <button class="avatarCard" data-avatar="images/avatar6.png"><img src="images/avatar6.png"></button>
+      </div>
+
+      <div class="profileActions">
+        <button id="btnProfileBack" class="btn">Voltar</button>
+        <button id="btnStartFromProfile" class="btn primary">Iniciar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================
+       OFFICE
+  ========================= -->
+  <section class="screen" data-screen="office">
+    <div class="panel office">
+      <div class="officeHeader">
+        <img id="uiAvatar" class="officeAvatar" src="images/avatar1.png" />
+        <div>
+          <div id="uiName" class="officeName">—</div>
+          <div id="uiRank" class="officeRank">Interno</div>
+        </div>
+
+        <div class="timer">
+          ⏱️ <span id="caseTimer">00:00</span>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div>Pontos: <b id="uiPoints">0</b></div>
+        <div>Casos: <b id="uiCases">0</b></div>
+        <div>Óbitos: <b id="uiDeaths">0</b></div>
+      </div>
+
+      <button id="btnNextCase" class="btn primary">Iniciar atendimento</button>
+    </div>
+  </section>
+
+  <!-- =========================
+       CASE (simplificado)
+  ========================= -->
+  <section class="screen" data-screen="case">
+    <div class="panel case">
+      <h2>Paciente em atendimento</h2>
+      <p id="caseStatus">Tempo crítico. Atenda rápido.</p>
+
+      <button id="btnFinalize" class="btn primary">Finalizar atendimento</button>
+    </div>
+  </section>
+
+  <!-- =========================
+       ÓBITO
+  ========================= -->
+  <section class="screen" data-screen="death">
+    <div class="panel death">
+      <h1>🟥 ÓBITO</h1>
+      <p>O paciente não resistiu.</p>
+      <button id="btnBackOffice" class="btn">Voltar ao hospital</button>
+    </div>
+  </section>
+
+  <!-- =========================
+       RANKING
+  ========================= -->
+  <div id="rankingModal" class="modal hidden">
+    <div class="modalCard">
+      <h2>Ranking</h2>
+      <div id="rankingList"></div>
+      <button id="btnCloseRanking" class="btn">Fechar</button>
     </div>
   </div>
 
-  <script src="script.js?v=1.1.1"></script>
-  <script>
-    // PWA service worker (opcional)
-    if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(() => {});
-      });
-    }
-  </script>
+</div>
+
+<!-- JS -->
+<script src="script.js?v=2.0.0"></script>
+
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js");
+  }
+</script>
+
 </body>
 </html>
