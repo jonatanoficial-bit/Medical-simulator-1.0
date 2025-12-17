@@ -8,21 +8,58 @@
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="images/avatar1.png" />
+  <link rel="apple-touch-icon" href="images/icon-192.png" />
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css?v=2.0.0" />
+  <link rel="stylesheet" href="style.css?v=2.2.1" />
 </head>
 
 <body>
 
 <!-- =========================
      SPLASH / CAPA INICIAL
+     (NÃO DEPENDE do script.js)
 ========================= -->
-<div id="splashScreen" class="splash">
+<div id="splashScreen" class="splash" role="button" tabindex="0" aria-label="Toque para continuar">
   <img src="images/capa.jpg" alt="Emergency Doctor Simulator" />
   <div class="splashHint">Toque ou clique para continuar</div>
 </div>
+
+<script>
+  // FIX DEFINITIVO: fecha a capa independente do script.js (mouse + touch + PWA)
+  (function(){
+    const splash = document.getElementById("splashScreen");
+    if(!splash) return;
+
+    function closeSplash(ev){
+      try {
+        if (ev && ev.preventDefault) ev.preventDefault();
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+      } catch {}
+
+      splash.classList.add("splash--hide");
+      // dá tempo para animação/repintura antes de remover do DOM
+      setTimeout(()=> {
+        if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+      }, 180);
+    }
+
+    // capture=true garante que pega antes de qualquer overlay/handler
+    const opts = { once: true, capture: true, passive: false };
+
+    splash.addEventListener("pointerdown", closeSplash, opts);
+    splash.addEventListener("mousedown", closeSplash, opts);
+    splash.addEventListener("touchstart", closeSplash, opts);
+    splash.addEventListener("click", closeSplash, opts);
+
+    // acessibilidade / fallback teclado
+    splash.addEventListener("keydown", (e)=>{
+      if(e.key === "Enter" || e.key === " "){
+        closeSplash(e);
+      }
+    }, { once:true, capture:true });
+  })();
+</script>
 
 <!-- =========================
      APP
@@ -73,12 +110,12 @@
       <input id="inputName" placeholder="Digite seu nome" maxlength="24"/>
 
       <div class="avatarGrid" id="avatarGrid">
-        <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png"></button>
-        <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png"></button>
-        <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png"></button>
-        <button class="avatarCard" data-avatar="images/avatar4.png"><img src="images/avatar4.png"></button>
-        <button class="avatarCard" data-avatar="images/avatar5.png"><img src="images/avatar5.png"></button>
-        <button class="avatarCard" data-avatar="images/avatar6.png"><img src="images/avatar6.png"></button>
+        <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png" alt="Avatar 1"></button>
+        <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png" alt="Avatar 2"></button>
+        <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png" alt="Avatar 3"></button>
+        <button class="avatarCard" data-avatar="images/avatar4.png"><img src="images/avatar4.png" alt="Avatar 4"></button>
+        <button class="avatarCard" data-avatar="images/avatar5.png"><img src="images/avatar5.png" alt="Avatar 5"></button>
+        <button class="avatarCard" data-avatar="images/avatar6.png"><img src="images/avatar6.png" alt="Avatar 6"></button>
       </div>
 
       <div class="profileActions">
@@ -94,7 +131,7 @@
   <section class="screen" data-screen="office">
     <div class="panel office">
       <div class="officeHeader">
-        <img id="uiAvatar" class="officeAvatar" src="images/avatar1.png" />
+        <img id="uiAvatar" class="officeAvatar" src="images/avatar1.png" alt="Avatar" />
         <div>
           <div id="uiName" class="officeName">—</div>
           <div id="uiRank" class="officeRank">Interno</div>
@@ -116,7 +153,7 @@
   </section>
 
   <!-- =========================
-       CASE (simplificado)
+       CASE
   ========================= -->
   <section class="screen" data-screen="case">
     <div class="panel case">
@@ -141,7 +178,7 @@
   <!-- =========================
        RANKING
   ========================= -->
-  <div id="rankingModal" class="modal hidden">
+  <div id="rankingModal" class="modal hidden" aria-hidden="true">
     <div class="modalCard">
       <h2>Ranking</h2>
       <div id="rankingList"></div>
@@ -151,9 +188,10 @@
 
 </div>
 
-<!-- JS -->
-<script src="script.js?v=2.0.0"></script>
+<!-- JS principal -->
+<script src="script.js?v=2.2.1"></script>
 
+<!-- PWA SW -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
