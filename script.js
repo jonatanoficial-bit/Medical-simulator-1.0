@@ -1,9 +1,10 @@
 /* =========================================================
-   Emergency Doctor Simulator — script.js (v3.0.0)
+   Emergency Doctor Simulator — script.js (v3.1.0)
    =========================================================
-   ✔ Persistência total (save)
-   ✔ Ranking persistente (Top 20)
-   ✔ Casos clínicos via JSON (cases.json)
+   ✔ Intro com typewriter (Diretor do Hospital)
+   ✔ Consultório (hub) restaurado
+   ✔ Casos reais via cases.json (título + vitais + resumo)
+   ✔ Persistência total (save) + ranking Top 20 (localStorage)
    ✔ Cronômetro + óbito automático
    ✔ Progressão de cargo
    ========================================================= */
@@ -14,11 +15,10 @@
   /* =========================
      CONFIG
   ========================= */
-  const APP_VERSION = "3.0.0";
-  const STORAGE_SAVE = "eds_save_v3";
-  const STORAGE_RANK = "eds_rank_v3";
+  const APP_VERSION = "3.1.0";
+  const STORAGE_SAVE = "eds_save_v3_1";
+  const STORAGE_RANK = "eds_rank_v3_1";
 
-  // tempo por caso (segundos)
   const CASE_TIME_DEFAULT = 120;
 
   /* =========================
@@ -48,6 +48,8 @@
 
   function clamp(n,a,b){ return Math.max(a, Math.min(b, n)); }
 
+  function qs(sel){ return document.querySelector(sel); }
+
   /* =========================
      ESTADO
   ========================= */
@@ -56,7 +58,8 @@
       name: "",
       avatar: "",
       rank: "Interno",
-      createdAt: null
+      createdAt: null,
+      introSeen: false
     },
     stats: {
       points: 0,
@@ -78,6 +81,10 @@
     },
     gameplay: {
       currentCase: null
+    },
+    typewriter: {
+      running: false,
+      skip: false
     }
   };
 
@@ -96,7 +103,6 @@
     try{
       localStorage.setItem(STORAGE_SAVE, JSON.stringify(serializeSave()));
     }catch(e){}
-    // ranking sempre atualizado após salvar
     updateRanking();
   }
 
@@ -112,6 +118,7 @@
         state.doctor.avatar = safeText(obj.doctor.avatar || "");
         state.doctor.rank = safeText(obj.doctor.rank || "Interno") || "Interno";
         state.doctor.createdAt = obj.doctor.createdAt ?? null;
+        state.doctor.introSeen = !!obj.doctor.introSeen;
       }
       if(obj.stats){
         state.stats.points = Number(obj.stats.points || 0);
@@ -133,13 +140,15 @@
   }
 
   function resetGame(){
-    state.doctor = { name:"", avatar:"", rank:"Interno", createdAt:null };
+    state.doctor = { name:"", avatar:"", rank:"Interno", createdAt:null, introSeen:false };
     state.stats = { points:0, cases:0, deaths:0, correct:0, wrong:0, streak:0, bestStreak:0 };
+    state.gameplay.currentCase = null;
+    clearTimer();
     saveGame();
   }
 
   /* =========================
-     RANKING (Top 20)
+     RANKING
   ========================= */
   function getRanking(){
     try{
@@ -183,9 +192,8 @@
   }
 
   function renderRanking(){
-    const modal = $("rankingModal");
     const listWrap = $("rankingList");
-    if(!modal || !listWrap) return;
+    if(!listWrap) return;
 
     const list = getRanking();
     if(!list.length){
@@ -216,12 +224,15 @@
   }
 
   /* =========================
+     AJUDA
+  ========================= */
+  function openHelp(){ $("helpModal")?.classList.remove("hidden"); }
+  function closeHelp(){ $("helpModal")?.classList.add("hidden"); }
+
+  /* =========================
      PROGRESSÃO DE CARGO
   ========================= */
   function updateRank(){
-    // modelo simples e estável:
-    // Interno -> Residente -> Titular -> Pleno
-    // com penalidade indireta por óbitos (via pontos)
     const p = state.stats.points;
 
     let rank = "Interno";
@@ -243,18 +254,38 @@
     if($("uiPoints")) $("uiPoints").textContent = String(state.stats.points);
     if($("uiCases")) $("uiCases").textContent = String(state.stats.cases);
     if($("uiDeaths")) $("uiDeaths").textContent = String(state.stats.deaths);
+
+    // timer no consultório fica 00:00 se não está em caso
+    if(!$("caseTimer")) return;
+    const txt = state.timer.interval ? formatTime(state.timer.remaining) : "00:00";
+    $("caseTimer").textContent = txt;
   }
 
-  function setCaseStatus(text){
-    const el = $("caseStatus");
-    if(el) el.textContent = safeText(text);
+  function setCaseUI(c){
+    if(!c) return;
+    const title = c.title ? `${c.title}` : "Paciente em atendimento";
+    const patient = c.patient || {};
+    const vitals = Array.isArray(c.vitals) ? c.vitals.join(" • ") : "—";
+
+    const resumo =
+      `Paciente: ${safeText(patient.name || "—")} (${safeText(patient.age ?? "—")} anos, ${safeText(patient.sex || "—")}). ` +
+      `Queixa: ${safeText(c.complaint || "—")}. ` +
+      (c.history ? `História: ${safeText(c.history)}.` : "");
+
+    if($("caseTitle")) $("caseTitle").textContent = title;
+    if($("caseStatus")) $("caseStatus").textContent = resumo;
+    if($("caseVitals")) $("caseVitals").textContent = vitals;
+  }
+
+  function setDeathReason(text){
+    const el = $("deathReason");
+    if(el) el.textContent = safeText(text || "O paciente não resistiu.");
   }
 
   /* =========================
-     DATA: carregar cases.json
+     DATA: cases.json
   ========================= */
   async function loadCases(){
-    // cache bust para GitHub Pages/PWA
     const url = `cases.json?v=${encodeURIComponent(APP_VERSION)}&t=${Date.now()}`;
     const res = await fetch(url, { cache: "no-store" });
     if(!res.ok) throw new Error(`Falha ao carregar cases.json (HTTP ${res.status})`);
@@ -282,10 +313,10 @@
 
   function startTimer(seconds){
     clearTimer();
-
     state.timer.max = seconds;
     state.timer.remaining = seconds;
     state.timer.startedAt = nowTs();
+
     if($("caseTimer")) $("caseTimer").textContent = formatTime(state.timer.remaining);
 
     state.timer.interval = setInterval(()=>{
@@ -300,11 +331,62 @@
   }
 
   /* =========================
+     INTRO TYPEWRITER
+  ========================= */
+  async function runTypewriter(text){
+    const box = $("directorText");
+    if(!box) return;
+    state.typewriter.running = true;
+    state.typewriter.skip = false;
+
+    box.textContent = "";
+
+    for(let i=0; i<text.length; i++){
+      if(state.typewriter.skip){
+        box.textContent = text;
+        break;
+      }
+      box.textContent += text[i];
+      // velocidade de digitação
+      await new Promise(r => setTimeout(r, 18));
+    }
+
+    state.typewriter.running = false;
+  }
+
+  function skipTypewriter(){
+    state.typewriter.skip = true;
+  }
+
+  function introText(){
+    const name = state.doctor.name || "Doutor(a)";
+    return (
+`Bem-vindo(a), ${name}.
+
+Você está iniciando seu plantão no pronto-socorro.
+Aqui, tempo e precisão salvam vidas.
+
+Regras do plantão:
+• Cada caso possui um cronômetro. Se zerar, o risco de óbito é alto.
+• Atenda com rapidez para ganhar bônus.
+• Óbitos reduzem sua pontuação.
+• Suba de cargo: Interno → Residente → Titular → Pleno.
+
+Quando estiver pronto(a), entre no consultório e inicie o atendimento.`
+    );
+  }
+
+  async function goIntro(){
+    showScreen("intro");
+    await runTypewriter(introText());
+  }
+
+  /* =========================
      GAMEPLAY
   ========================= */
   function startCase(){
     if(!state.data.cases.length){
-      alert("cases.json ainda não carregou. Verifique se está na raiz do projeto.");
+      alert("cases.json ainda não carregou. Confira se o arquivo está na raiz do projeto.");
       return;
     }
 
@@ -317,20 +399,10 @@
     state.gameplay.currentCase = c;
     state.stats.cases += 1;
 
-    // tempo por caso vindo do JSON (se existir), senão default
     const caseTime = Number(c.timeLimitSec || CASE_TIME_DEFAULT);
     startTimer(caseTime);
 
-    // Mostra resumo do caso no texto atual da sua tela
-    const patient = c.patient || {};
-    const vitals = Array.isArray(c.vitals) ? c.vitals.join(" • ") : "";
-    const txt =
-      `Paciente: ${safeText(patient.name || "—")} (${safeText(patient.age ?? "—")} anos, ${safeText(patient.sex || "—")}). ` +
-      `Queixa: ${safeText(c.complaint || "—")}. ` +
-      (c.history ? `História: ${safeText(c.history)}. ` : "") +
-      (vitals ? `Sinais vitais: ${vitals}.` : "");
-
-    setCaseStatus(txt);
+    setCaseUI(c);
 
     updateRank();
     updateOfficeHUD();
@@ -340,41 +412,35 @@
   }
 
   function finalizeCase(){
-    // Nesta versão, como sua tela ainda está simplificada,
-    // vamos pontuar com base em "acertou" vindo do JSON (para já ter casos reais).
-    // Depois, quando você ativar o fluxo de exames/diagnóstico, a pontuação fica 100% baseada nas escolhas.
     clearTimer();
 
     const c = state.gameplay.currentCase;
     if(!c){
+      updateOfficeHUD();
       showScreen("office");
       return;
     }
 
-    // Regra base:
-    // - Caso tem "expectedOutcome": "survive" ou "death"
-    // - Aqui, finalizar a tempo = "survive" (treino de tempo)
-    // - Se no futuro você quiser diagnóstico, nós trocamos por scoring clínico real
+    // Pontuação atual (fase 1):
+    // - atender a tempo já soma
+    // - bônus por tempo restante
+    // - se o caso for marcado como "death" no JSON, soma pouco (alta letalidade)
     const expected = safeText(c.expectedOutcome || "survive").toLowerCase();
 
     let gained = 0;
 
     if(expected === "death"){
-      // caso crítico (simulação): mesmo atendendo, pode ser de alto risco
       gained = 8;
       state.stats.wrong += 1;
       state.stats.streak = 0;
-      setCaseStatus("Caso crítico concluído. Alto risco. Pontuação reduzida.");
     } else {
       gained = 20;
       state.stats.correct += 1;
       state.stats.streak += 1;
       state.stats.bestStreak = Math.max(state.stats.bestStreak, state.stats.streak);
-      setCaseStatus("Atendimento concluído a tempo. Pontuação aplicada.");
     }
 
-    // bônus por tempo restante (incentiva rapidez)
-    const bonus = Math.floor(Math.max(0, state.timer.remaining) / 10); // +1 a cada 10s restantes
+    const bonus = Math.floor(Math.max(0, state.timer.remaining) / 10);
     gained += bonus;
 
     state.stats.points = clamp(state.stats.points + gained, 0, 999999);
@@ -395,7 +461,6 @@
     state.stats.wrong += 1;
     state.stats.streak = 0;
 
-    // penalidade real
     state.stats.points = clamp(state.stats.points - 15, 0, 999999);
 
     updateRank();
@@ -404,7 +469,7 @@
 
     state.gameplay.currentCase = null;
 
-    // tela de óbito
+    setDeathReason(reason);
     showScreen("death");
   }
 
@@ -414,7 +479,6 @@
   function bindHome(){
     $("btnNewGame")?.addEventListener("click", () => {
       resetGame();
-      // limpa seleção visual
       document.querySelectorAll(".avatarCard").forEach(c => c.classList.remove("selected"));
       const input = $("inputName");
       if(input) input.value = "";
@@ -423,8 +487,14 @@
 
     $("btnContinue")?.addEventListener("click", () => {
       if(hasProfile()){
+        updateRank();
         updateOfficeHUD();
-        showScreen("office");
+        // se não viu intro ainda, mostra intro
+        if(!state.doctor.introSeen){
+          goIntro();
+        }else{
+          showScreen("office");
+        }
       }else{
         showScreen("profile");
       }
@@ -463,12 +533,38 @@
       updateOfficeHUD();
       saveGame();
 
+      // sempre passa pela intro na primeira vez
+      goIntro();
+    });
+  }
+
+  function bindIntro(){
+    // clicar no texto acelera/skip
+    $("directorText")?.addEventListener("click", ()=>{
+      if(state.typewriter.running) skipTypewriter();
+    });
+
+    $("btnIntroHelp")?.addEventListener("click", openHelp);
+    $("btnIntroContinue")?.addEventListener("click", ()=>{
+      state.doctor.introSeen = true;
+      saveGame();
+      updateOfficeHUD();
       showScreen("office");
+    });
+
+    // ESC para pular intro
+    document.addEventListener("keydown", (e)=>{
+      if(qs('.screen.active')?.dataset?.screen === "intro"){
+        if(e.key === "Escape"){
+          skipTypewriter();
+        }
+      }
     });
   }
 
   function bindOffice(){
     $("btnNextCase")?.addEventListener("click", startCase);
+    $("btnOfficeRanking")?.addEventListener("click", openRanking);
   }
 
   function bindCase(){
@@ -486,9 +582,17 @@
     $("btnRanking")?.addEventListener("click", openRanking);
     $("btnCloseRanking")?.addEventListener("click", closeRanking);
 
-    // clicar fora para fechar
     $("rankingModal")?.addEventListener("click", (e)=>{
       if(e.target && e.target.id === "rankingModal") closeRanking();
+    });
+  }
+
+  function bindHelp(){
+    $("btnHelp")?.addEventListener("click", openHelp);
+    $("btnCloseHelp")?.addEventListener("click", closeHelp);
+
+    $("helpModal")?.addEventListener("click", (e)=>{
+      if(e.target && e.target.id === "helpModal") closeHelp();
     });
   }
 
@@ -508,32 +612,28 @@
      BOOT
   ========================= */
   async function boot(){
-    // binds
     bindHome();
     bindProfile();
+    bindIntro();
     bindOffice();
     bindCase();
     bindDeath();
     bindRanking();
+    bindHelp();
     bindFullscreen();
 
-    // load save
     const ok = loadGame();
     updateRank();
     updateOfficeHUD();
     if(ok) updateRanking();
 
-    // carrega JSON de casos
     try{
       await loadCases();
-      // pronto
     }catch(err){
       console.error(err);
-      // não bloqueia o app, mas avisa
-      alert("Não foi possível carregar cases.json. Confira se o arquivo está na raiz do projeto.");
+      alert("Não foi possível carregar cases.json. Confirme: o arquivo está na raiz e o nome é cases.json.");
     }
 
-    // tela inicial
     showScreen("home");
   }
 
