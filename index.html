@@ -8,7 +8,7 @@
 
   <link rel="manifest" href="manifest.json" />
   <!-- Cache-busting: aumente a versão quando atualizar -->
-  <link rel="stylesheet" href="style.css?v=1.1.0" />
+  <link rel="stylesheet" href="style.css?v=1.1.1" />
 </head>
 
 <body>
@@ -28,272 +28,213 @@
     </header>
 
     <!-- HOME -->
-    <section class="screen active" id="screenHome" data-screen="home">
-      <div class="hero">
-        <div class="heroCard">
-          <div class="heroKicker">SIMULAÇÃO REALISTA</div>
-          <div class="heroTitle">Pronto-Socorro – Plantão de Emergência</div>
-          <div class="heroSub">
-            Jogo educativo (simulado). Baseado em condutas e raciocínio clínico reais, mas não substitui avaliação médica.
-          </div>
+    <section class="screen active" data-screen="home" aria-label="Tela inicial">
+      <div class="panel hero">
+        <div class="hero-left">
+          <h1>Bem-vindo(a), Doutor(a)</h1>
+          <p>
+            Atenda pacientes, solicite exames, escolha diagnósticos e condutas.
+            Ganhe pontos e evolua seu rank.
+          </p>
 
-          <div class="heroActions">
-            <button class="btnPrimary" id="btnNewGame" type="button">Novo Jogo</button>
-            <button class="btnGhost" id="btnContinue" type="button">Continuar</button>
+          <div class="hero-actions">
+            <button class="btn primary" id="btnNewGame" type="button">Novo jogo</button>
+            <button class="btn" id="btnContinue" type="button">Continuar</button>
           </div>
+        </div>
 
-          <div class="heroFoot">
-            Dica: Use “Tela cheia” no topo para melhor experiência.
+        <div class="hero-right">
+          <div class="card cover">
+            <div class="cover-title">Pronto-socorro</div>
+            <div class="cover-sub">Casos clínicos simulados</div>
           </div>
+        </div>
+      </div>
+
+      <div class="panel tips">
+        <div class="tip">
+          <div class="tip-title">Dica</div>
+          <div class="tip-text">Solicite somente exames necessários para maximizar pontos.</div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">Dica</div>
+          <div class="tip-text">Diagnóstico correto aumenta sua sequência (streak).</div>
+        </div>
+        <div class="tip">
+          <div class="tip-title">Dica</div>
+          <div class="tip-text">Conduta errada pode reduzir bastante sua pontuação.</div>
         </div>
       </div>
     </section>
 
     <!-- PROFILE -->
-    <section class="screen" id="screenProfile" data-screen="profile">
-      <div class="panel">
-        <div class="panelHeader">
-          <div>
-            <div class="panelKicker">Perfil do Doutor</div>
-            <div class="panelTitle">Crie seu Médico(a)</div>
-            <div class="panelSub">Digite seu nome e selecione um avatar.</div>
-          </div>
+    <section class="screen" data-screen="profile" aria-label="Perfil do jogador">
+      <div class="panel profile">
+        <h2>Criar perfil</h2>
+
+        <label class="field">
+          <span>Nome</span>
+          <input id="inputName" type="text" maxlength="24" placeholder="Digite seu nome" />
+        </label>
+
+        <div class="subtitle">Selecione seu avatar</div>
+
+        <div class="avatarGrid" id="avatarGrid" aria-label="Lista de avatares">
+          <button class="avatarCard" type="button" data-avatar="images/avatar1.png">
+            <img src="images/avatar1.png" alt="Avatar 1" />
+          </button>
+          <button class="avatarCard" type="button" data-avatar="images/avatar2.png">
+            <img src="images/avatar2.png" alt="Avatar 2" />
+          </button>
+          <button class="avatarCard" type="button" data-avatar="images/avatar3.png">
+            <img src="images/avatar3.png" alt="Avatar 3" />
+          </button>
+          <button class="avatarCard" type="button" data-avatar="images/avatar4.png">
+            <img src="images/avatar4.png" alt="Avatar 4" />
+          </button>
+          <button class="avatarCard" type="button" data-avatar="images/avatar5.png">
+            <img src="images/avatar5.png" alt="Avatar 5" />
+          </button>
+          <button class="avatarCard" type="button" data-avatar="images/avatar6.png">
+            <img src="images/avatar6.png" alt="Avatar 6" />
+          </button>
         </div>
 
-        <div class="panelBody scrollY">
-          <label class="field">
-            <span class="fieldLabel">Nome</span>
-            <input id="inputName" class="fieldInput" type="text" placeholder="Ex.: Dr(a). Jonatan Vale" autocomplete="off" />
-          </label>
+        <div class="divider"></div>
 
-          <div class="divider"></div>
-
-          <div class="sectionTitle">Escolha seu avatar</div>
-          <div class="avatarGrid" id="avatarGrid" aria-label="Lista de avatares">
-            <button class="avatarCard" type="button" data-avatar="images/doctor_1.jpg">
-              <img src="images/doctor_1.jpg" alt="Avatar 1" />
-            </button>
-            <button class="avatarCard" type="button" data-avatar="images/doctor_2.jpg">
-              <img src="images/doctor_2.jpg" alt="Avatar 2" />
-            </button>
-            <button class="avatarCard" type="button" data-avatar="images/doctor_3.jpg">
-              <img src="images/doctor_3.jpg" alt="Avatar 3" />
-            </button>
-            <button class="avatarCard" type="button" data-avatar="images/doctor_4.jpg">
-              <img src="images/doctor_4.jpg" alt="Avatar 4" />
-            </button>
-            <button class="avatarCard" type="button" data-avatar="images/doctor_5.jpg">
-              <img src="images/doctor_5.jpg" alt="Avatar 5" />
-            </button>
-            <button class="avatarCard" type="button" data-avatar="images/doctor_6.jpg">
-              <img src="images/doctor_6.jpg" alt="Avatar 6" />
-            </button>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="profileActions">
-            <button class="btnGhost" id="btnProfileBack" type="button">Voltar</button>
-            <button class="btnPrimary" id="btnStartFromProfile" type="button">Iniciar</button>
-          </div>
+        <div class="profileActions">
+          <button class="btn" id="btnProfileBack" type="button">Voltar</button>
+          <button class="btn primary" id="btnStartFromProfile" type="button">Iniciar</button>
         </div>
       </div>
     </section>
 
     <!-- OFFICE -->
-    <section class="screen" id="screenOffice" data-screen="office">
-      <div class="officeLayout">
-        <aside class="card officeSide">
-          <div class="doctorCard">
-            <div class="doctorAvatar">
-              <img id="uiAvatar" src="images/doctor_1.jpg" alt="Doutor(a)" />
-            </div>
-            <div class="doctorMeta">
-              <div class="doctorName" id="uiName">—</div>
-              <div class="doctorRank" id="uiRank">Interno</div>
+    <section class="screen" data-screen="office" aria-label="Sala do médico">
+      <div class="panel office">
+        <div class="officeHeader">
+          <div class="who">
+            <img id="uiAvatar" src="images/avatar1.png" alt="Doutor(a)" />
+            <div class="whoText">
+              <div class="whoName" id="uiName">—</div>
+              <div class="whoRank">Rank: <span id="uiRank">Interno</span></div>
             </div>
           </div>
 
-          <div class="divider"></div>
-
-          <div class="statsGrid">
-            <div class="stat">
-              <div class="statLabel">Pontos</div>
-              <div class="statValue" id="uiPoints">0</div>
-            </div>
-            <div class="stat">
-              <div class="statLabel">Acertos</div>
-              <div class="statValue" id="uiCorrect">0</div>
-            </div>
-            <div class="stat">
-              <div class="statLabel">Erros</div>
-              <div class="statValue" id="uiWrong">0</div>
-            </div>
-            <div class="stat">
-              <div class="statLabel">Casos</div>
-              <div class="statValue" id="uiCases">0</div>
-            </div>
-            <div class="stat">
-              <div class="statLabel">Plantão</div>
-              <div class="statValue" id="uiShift">0</div>
-            </div>
-            <div class="stat">
-              <div class="statLabel">Streak</div>
-              <div class="statValue" id="uiStreak">0</div>
-            </div>
+          <div class="stats">
+            <div class="stat"><div class="statLabel">Pontos</div><div class="statVal" id="uiPoints">0</div></div>
+            <div class="stat"><div class="statLabel">Acertos</div><div class="statVal" id="uiCorrect">0</div></div>
+            <div class="stat"><div class="statLabel">Erros</div><div class="statVal" id="uiWrong">0</div></div>
+            <div class="stat"><div class="statLabel">Casos</div><div class="statVal" id="uiCases">0</div></div>
+            <div class="stat"><div class="statLabel">Plantões</div><div class="statVal" id="uiShift">0</div></div>
+            <div class="stat"><div class="statLabel">Streak</div><div class="statVal" id="uiStreak">0</div></div>
           </div>
+        </div>
 
-          <div class="officeActions">
-            <button class="btnPrimary" id="btnNextCase" type="button">Próximo Caso</button>
-            <button class="btnGhost" id="btnResetSave" type="button">Resetar Save</button>
-          </div>
-        </aside>
-
-        <section class="card officeMain">
-          <div class="officeTitle">Consultório de Emergência</div>
-          <div class="officeSub">
-            Você está no pronto-socorro. Inicie o próximo atendimento para avaliar paciente, solicitar exames, escolher diagnóstico e conduta.
-          </div>
-
-          <div class="officeHint">
-            Objetivo: acertar diagnóstico e conduta com exames apropriados. Exames desnecessários e condutas inadequadas tiram pontos.
-          </div>
-
-          <div class="officeFooter">
-            <div class="muted">
-              Aviso: Simulação educacional (simulado). Não é orientação clínica real.
-            </div>
-          </div>
-        </section>
+        <div class="officeActions">
+          <button class="btn primary" id="btnNextCase" type="button">Iniciar próximo caso</button>
+          <button class="btn danger" id="btnResetSave" type="button">Resetar save</button>
+        </div>
       </div>
     </section>
 
     <!-- CASE -->
-    <section class="screen" id="screenCase" data-screen="case">
-      <div class="caseLayout">
-        <!-- Left: patient -->
-        <aside class="card caseLeft">
-          <div class="caseHeader">
-            <div class="caseTitle" id="caseTitle">Caso</div>
+    <section class="screen" data-screen="case" aria-label="Atendimento do caso">
+      <div class="panel case">
+        <div class="caseTop">
+          <div class="caseTitle" id="caseTitle">Caso</div>
+          <div class="triage" id="triageBadge"><span id="triageText">—</span></div>
+        </div>
 
-            <div class="triageBadge" id="triageBadge">
-              <span class="triageLabel" id="triageLabel">TRIAGEM</span>
-              <span class="triageText" id="triageText">—</span>
-            </div>
-          </div>
-
-          <div class="patientRow">
-            <div class="patientPhoto">
+        <div class="caseGrid">
+          <div class="caseLeft">
+            <div class="patientCard">
               <img id="patientPhoto" src="images/patient_male.jpg" alt="Paciente" />
+              <div class="patientInfo">
+                <div class="patientName" id="patientName">—</div>
+                <div class="patientSub" id="patientSub">—</div>
+              </div>
             </div>
-            <div class="patientMeta">
-              <div class="patientName" id="patientName">—</div>
-              <div class="patientSub" id="patientSub">—</div>
+
+            <div class="block">
+              <div class="blockTitle">Sinais vitais</div>
+              <ul class="vitals" id="vitalsList"></ul>
+            </div>
+
+            <div class="block">
+              <div class="blockTitle">Queixa principal</div>
+              <div class="blockText" id="complaintText">—</div>
+            </div>
+
+            <div class="block">
+              <div class="blockTitle">Histórico</div>
+              <div class="blockText" id="historyText">—</div>
+            </div>
+
+            <div class="block">
+              <div class="blockTitle">Perguntas adicionais</div>
+              <div id="questionsList"></div>
             </div>
           </div>
 
-          <div class="block">
-            <div class="blockTitle">Sinais vitais</div>
-            <ul class="vitals" id="vitalsList"></ul>
+          <div class="caseRight">
+            <div class="block">
+              <div class="blockTitle">Exames (máx. <span id="maxExams">3</span>)</div>
+              <div id="examPickList" class="pickList"></div>
+            </div>
+
+            <div class="block">
+              <div class="blockTitle">Resultados</div>
+              <div id="examResultsBox" class="resultsBox"></div>
+            </div>
+
+            <div class="block">
+              <div class="blockTitle">Diagnóstico</div>
+              <div id="dxPickList" class="pickList"></div>
+            </div>
+
+            <div class="block">
+              <div class="blockTitle">Condutas/Medicações (máx. <span id="maxMeds">2</span>)</div>
+              <div id="medPickList" class="pickList"></div>
+            </div>
+
+            <div class="caseActions">
+              <button class="btn" id="btnBackOffice" type="button">Voltar</button>
+              <button class="btn primary" id="btnFinalize" type="button">Finalizar atendimento</button>
+            </div>
           </div>
-
-          <div class="block">
-            <div class="blockTitle">Queixa</div>
-            <div class="blockText" id="complaintText">—</div>
-          </div>
-
-          <div class="block">
-            <div class="blockTitle">História</div>
-            <div class="blockText" id="historyText">—</div>
-          </div>
-
-          <button class="btnGhost full" id="btnBackOffice" type="button">Voltar ao consultório</button>
-        </aside>
-
-        <!-- Middle: questions + results -->
-        <section class="card caseCenter">
-          <div class="centerTop">
-            <div class="centerTitle">Perguntas (opcional)</div>
-            <div class="centerHint">Use para obter contexto. Não pontua diretamente.</div>
-          </div>
-
-          <div class="qaList scrollY" id="questionsList"></div>
-
-          <div class="divider"></div>
-
-          <div class="centerTitle">Resultados de exames solicitados</div>
-          <div class="resultsBox scrollY" id="examResultsBox">
-            <div class="muted">Nenhum exame solicitado ainda.</div>
-          </div>
-
-          <div class="centerFooter">
-            <button class="btnPrimary" id="btnFinalize" type="button">Finalizar</button>
-          </div>
-        </section>
-
-        <!-- Right: exams + diagnosis + meds -->
-        <aside class="card caseRight">
-          <div class="rightSection">
-            <div class="rightTitle">Exames (escolha até <span id="maxExams">3</span>)</div>
-            <div class="rightHint">Exames fora do caso retornam “normal” e podem tirar pontos.</div>
-            <div class="list scrollY" id="examPickList"></div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="rightSection">
-            <div class="rightTitle">Diagnóstico (escolha 1)</div>
-            <div class="list scrollY small" id="dxPickList"></div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="rightSection">
-            <div class="rightTitle">Conduta / Medicação (escolha até <span id="maxMeds">2</span>)</div>
-            <div class="rightHint">Há opções erradas. Escolhas inadequadas tiram pontos.</div>
-            <div class="list scrollY small" id="medPickList"></div>
-          </div>
-        </aside>
+        </div>
       </div>
     </section>
 
     <!-- RESULTS -->
-    <section class="screen" id="screenResults" data-screen="results">
-      <div class="panel">
-        <div class="panelHeader">
-          <div>
-            <div class="panelKicker">Resumo</div>
-            <div class="panelTitle" id="resultsTitle">Resultado do Caso</div>
-            <div class="panelSub" id="resultsSub">—</div>
+    <section class="screen" data-screen="results" aria-label="Resultado do caso">
+      <div class="panel results">
+        <h2 id="resultsTitle">Resultado do Caso</h2>
+        <div class="muted" id="resultsSub">—</div>
+
+        <div class="resultsGrid">
+          <div class="resultCard">
+            <div class="resultLabel">Total</div>
+            <div class="resultVal" id="resPoints">0</div>
+          </div>
+          <div class="resultCard">
+            <div class="resultLabel">Exames</div>
+            <div class="resultVal" id="resExams">0</div>
+          </div>
+          <div class="resultCard">
+            <div class="resultLabel">Diagnóstico</div>
+            <div class="resultVal" id="resDx">0</div>
+          </div>
+          <div class="resultCard">
+            <div class="resultLabel">Condutas</div>
+            <div class="resultVal" id="resMeds">0</div>
           </div>
         </div>
 
-        <div class="panelBody scrollY">
-          <div class="resultGrid">
-            <div class="resultCard">
-              <div class="resultLabel">Pontos do caso</div>
-              <div class="resultValue" id="resPoints">0</div>
-            </div>
-            <div class="resultCard">
-              <div class="resultLabel">Exames</div>
-              <div class="resultValue" id="resExams">0</div>
-            </div>
-            <div class="resultCard">
-              <div class="resultLabel">Diagnóstico</div>
-              <div class="resultValue" id="resDx">0</div>
-            </div>
-            <div class="resultCard">
-              <div class="resultLabel">Conduta</div>
-              <div class="resultValue" id="resMeds">0</div>
-            </div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="resultsActions">
-            <button class="btnGhost" id="btnResultsHome" type="button">Menu</button>
-            <button class="btnPrimary" id="btnResultsOffice" type="button">Consultório</button>
-          </div>
+        <div class="resultsActions">
+          <button class="btn" id="btnResultsHome" type="button">Home</button>
+          <button class="btn primary" id="btnResultsOffice" type="button">Voltar ao escritório</button>
         </div>
       </div>
     </section>
@@ -301,16 +242,13 @@
     <!-- HELP MODAL -->
     <div class="modal hidden" id="helpModal" aria-hidden="true">
       <div class="modalCard">
-        <div class="modalHeader">
+        <div class="modalHead">
           <div class="modalTitle">Ajuda</div>
-          <button class="btnGhost" id="btnCloseHelp" type="button">Fechar</button>
+          <button class="iconBtn" id="btnCloseHelp" type="button">✕</button>
         </div>
-        <div class="modalBody scrollY">
-          <div class="helpText">
-            <b>Objetivo:</b> Solicitar exames apropriados, escolher diagnóstico e conduta/medicação adequados (simulado).<br/><br/>
-            <b>Pontuação:</b> escolhas corretas somam; exames desnecessários e condutas inadequadas tiram pontos.<br/><br/>
-            <b>Aviso:</b> Simulação educacional. Não é orientação médica real.
-          </div>
+        <div class="modalBody">
+          <p>Escolha exames com cuidado (máximo limitado). Em seguida selecione diagnóstico e condutas.</p>
+          <p>Finalize para receber a pontuação do caso e atualizar seu rank.</p>
         </div>
       </div>
     </div>
@@ -318,32 +256,25 @@
     <!-- RANK MODAL -->
     <div class="modal hidden" id="rankModal" aria-hidden="true">
       <div class="modalCard">
-        <div class="modalHeader">
-          <div class="modalTitle">Ranking (local)</div>
-          <button class="btnGhost" id="btnCloseRank" type="button">Fechar</button>
+        <div class="modalHead">
+          <div class="modalTitle">Ranking</div>
+          <button class="iconBtn" id="btnCloseRank" type="button">✕</button>
         </div>
-        <div class="modalBody scrollY">
-          <div class="rankList" id="rankList"></div>
+        <div class="modalBody" id="rankList">
+          <div class="muted">Carregando…</div>
         </div>
       </div>
     </div>
-
   </div>
 
-  <script src="script.js?v=1.1.0"></script>
-
+  <script src="script.js?v=1.1.1"></script>
   <script>
-    // PWA / SW (controlado por versão para não travar atualização)
-    (function () {
-      if (!("serviceWorker" in navigator)) return;
-
+    // PWA service worker (opcional)
+    if ("serviceWorker" in navigator) {
       window.addEventListener("load", () => {
-        navigator.serviceWorker.register("sw.js?v=1.1.0").then(reg => {
-          // força checar atualização
-          if (reg.update) reg.update();
-        }).catch(() => {});
+        navigator.serviceWorker.register("./sw.js").catch(() => {});
       });
-    })();
+    }
   </script>
 </body>
 </html>
