@@ -1,34 +1,136 @@
 {
-  "version": 3,
+  "meta": {
+    "version": "1.0.0",
+    "description": "Banco de exames clínicos para Emergency Doctor Simulator",
+    "language": "pt-BR"
+  },
+
   "exams": [
-    { "id": "ecg", "label": "ECG", "category": "Cardio", "time": 5, "image": null },
-    { "id": "troponin", "label": "Troponina", "category": "Cardio", "time": 45, "image": "images/labs.jpg" },
-    { "id": "stress_test", "label": "Teste Ergométrico", "category": "Cardio", "time": 60, "image": null },
-    { "id": "echo", "label": "Ecocardiograma", "category": "Cardio", "time": 45, "image": "images/labs.jpg" },
+    {
+      "id": "ECG",
+      "name": "Eletrocardiograma",
+      "category": "cardiologia",
+      "timeSec": 10,
+      "cost": 5,
+      "results": {
+        "normal": "Ritmo sinusal, sem alterações isquêmicas.",
+        "iam": "Supradesnivelamento do segmento ST em parede inferior.",
+        "arrhythmia": "Fibrilação atrial com resposta ventricular rápida.",
+        "shock": "Bradicardia extrema e sinais de baixo débito."
+      }
+    },
 
-    { "id": "cbc", "label": "Hemograma", "category": "Laboratório", "time": 30, "image": "images/labs.jpg" },
-    { "id": "bmp", "label": "Bioquímica (Eletrólitos/Renal)", "category": "Laboratório", "time": 40, "image": "images/labs.jpg" },
-    { "id": "crp", "label": "PCR", "category": "Laboratório", "time": 30, "image": "images/labs.jpg" },
-    { "id": "coags", "label": "Coagulograma", "category": "Laboratório", "time": 45, "image": "images/labs.jpg" },
-    { "id": "lactate", "label": "Lactato", "category": "Laboratório", "time": 20, "image": "images/labs.jpg" },
-    { "id": "d_dimer", "label": "D-dímero", "category": "Laboratório", "time": 45, "image": "images/labs.jpg" },
-    { "id": "lipase", "label": "Lipase", "category": "Laboratório", "time": 45, "image": "images/labs.jpg" },
-    { "id": "glucose", "label": "Glicemia", "category": "Laboratório", "time": 5, "image": null },
+    {
+      "id": "TROPONIN",
+      "name": "Troponina",
+      "category": "laboratório",
+      "timeSec": 20,
+      "cost": 8,
+      "results": {
+        "normal": "Troponina dentro dos valores de referência.",
+        "iam": "Troponina elevada, compatível com lesão miocárdica aguda."
+      }
+    },
 
-    { "id": "urinalysis", "label": "Urina Tipo I", "category": "Laboratório", "time": 25, "image": "images/labs.jpg" },
-    { "id": "pregnancy", "label": "Teste de Gravidez", "category": "Laboratório", "time": 20, "image": "images/labs.jpg" },
+    {
+      "id": "HEMOGRAMA",
+      "name": "Hemograma completo",
+      "category": "laboratório",
+      "timeSec": 18,
+      "cost": 6,
+      "results": {
+        "normal": "Hemograma sem alterações significativas.",
+        "infection": "Leucocitose com desvio à esquerda.",
+        "bleeding": "Hemoglobina reduzida, sugerindo sangramento ativo."
+      }
+    },
 
-    { "id": "cxr", "label": "Raio-X de Tórax", "category": "Imagem", "time": 25, "image": "images/xray.jpg" },
-    { "id": "ankle_xray", "label": "Raio-X de Tornozelo", "category": "Imagem", "time": 25, "image": "images/xray.jpg" },
-    { "id": "abd_us", "label": "Ultrassom de Abdome", "category": "Imagem", "time": 45, "image": "images/labs.jpg" },
-    { "id": "head_ct", "label": "TC de Crânio", "category": "Imagem", "time": 60, "image": "images/mri.jpg" },
-    { "id": "abd_ct", "label": "TC de Abdome", "category": "Imagem", "time": 70, "image": "images/mri.jpg" },
-    { "id": "cta_chest", "label": "AngioTC de Tórax", "category": "Imagem", "time": 80, "image": "images/mri.jpg" },
+    {
+      "id": "GASOMETRIA",
+      "name": "Gasometria arterial",
+      "category": "laboratório",
+      "timeSec": 15,
+      "cost": 6,
+      "results": {
+        "normal": "Equilíbrio ácido-base preservado.",
+        "dka": "Acidose metabólica com ânion gap aumentado.",
+        "resp_failure": "Hipoxemia e retenção de CO₂."
+      }
+    },
 
-    { "id": "abg", "label": "Gasometria", "category": "Laboratório", "time": 20, "image": "images/labs.jpg" }
-  ],
-  "normalFallback": {
-    "text": "Resultado dentro da normalidade para este caso (simulado). Exame possivelmente sem indicação clínica aqui.",
-    "image": null
-  }
+    {
+      "id": "RX_TORAX",
+      "name": "Raio-X de tórax",
+      "category": "imagem",
+      "timeSec": 25,
+      "cost": 7,
+      "results": {
+        "normal": "Campos pulmonares sem alterações.",
+        "pneumonia": "Infiltrado alveolar em base direita.",
+        "pneumothorax": "Ausência de trama pulmonar à direita."
+      }
+    },
+
+    {
+      "id": "TC_CRANIO",
+      "name": "Tomografia de crânio",
+      "category": "imagem",
+      "timeSec": 35,
+      "cost": 12,
+      "results": {
+        "normal": "Sem evidências de sangramento intracraniano.",
+        "stroke": "Área hipodensa compatível com AVC isquêmico.",
+        "hemorrhage": "Sangramento intracraniano agudo."
+      }
+    },
+
+    {
+      "id": "USG_FAST",
+      "name": "Ultrassom FAST",
+      "category": "imagem",
+      "timeSec": 20,
+      "cost": 8,
+      "results": {
+        "normal": "Sem líquido livre na cavidade abdominal.",
+        "trauma": "Presença de líquido livre sugestivo de hemorragia."
+      }
+    },
+
+    {
+      "id": "BETA_HCG",
+      "name": "Beta-hCG",
+      "category": "laboratório",
+      "timeSec": 20,
+      "cost": 6,
+      "results": {
+        "negative": "Beta-hCG negativo.",
+        "positive": "Beta-hCG positivo."
+      }
+    },
+
+    {
+      "id": "GLICEMIA",
+      "name": "Glicemia capilar",
+      "category": "laboratório",
+      "timeSec": 5,
+      "cost": 3,
+      "results": {
+        "normal": "Glicemia dentro da normalidade.",
+        "hyper": "Hiperglicemia acentuada.",
+        "hypo": "Hipoglicemia grave."
+      }
+    },
+
+    {
+      "id": "LACTATE",
+      "name": "Lactato",
+      "category": "laboratório",
+      "timeSec": 15,
+      "cost": 6,
+      "results": {
+        "normal": "Lactato normal.",
+        "sepsis": "Lactato elevado, compatível com hipoperfusão tecidual."
+      }
+    }
+  ]
 }
