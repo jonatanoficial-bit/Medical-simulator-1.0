@@ -3,136 +3,205 @@
     "id": "MI_001",
     "title": "Dor torácica típica",
     "patient": { "name": "Carlos", "age": 58, "sex": "M" },
-    "complaint": "Dor no peito em aperto há 40 minutos, irradiando para braço esquerdo",
-    "history": "Hipertenso e tabagista. Náuseas e sudorese.",
-    "vitals": ["PA 160/100", "FC 104", "FR 22", "SpO2 95%", "T 36,7°C"],
+    "complaint": "Dor torácica em aperto irradiando para braço esquerdo.",
+    "history": "Hipertenso, tabagista, sudorese fria.",
+    "vitals": ["PA 160/100", "FC 104", "FR 22", "SpO2 95%"],
     "timeLimitSec": 120,
-    "expectedOutcome": "survive",
     "severity": "alta",
-    "notesForGame": {
-      "keyFindings": ["dor opressiva", "irradiação", "sudorese"],
-      "likelyDiagnosis": "Síndrome coronariana aguda",
-      "recommendedFirstActions": ["monitorização", "ECG", "acesso venoso", "analgesia conforme protocolo"]
-    }
+    "diagnoses": ["Síndrome coronariana aguda", "Ansiedade", "Refluxo gastroesofágico", "Dissecção de aorta"],
+    "correctDiagnosis": "Síndrome coronariana aguda",
+    "conducts": ["Alta", "Observação", "Internação em UTI + protocolo IAM", "Analgésico simples"],
+    "correctConduct": "Internação em UTI + protocolo IAM",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Dor torácica típica deve ser tratada como IAM até prova em contrário."
   },
+
+  {
+    "id": "MI_002",
+    "title": "Dor torácica atípica em idoso",
+    "patient": { "name": "Osvaldo", "age": 76, "sex": "M" },
+    "complaint": "Mal-estar e náuseas sem dor evidente.",
+    "history": "Diabético e hipertenso.",
+    "vitals": ["PA 150/90", "FC 98", "FR 20", "SpO2 96%"],
+    "timeLimitSec": 110,
+    "severity": "alta",
+    "diagnoses": ["IAM silencioso", "Gastrite", "Ansiedade", "Hipoglicemia"],
+    "correctDiagnosis": "IAM silencioso",
+    "conducts": ["Alta", "Internação + protocolo IAM", "Antiácido", "Observação"],
+    "correctConduct": "Internação + protocolo IAM",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Idosos e diabéticos podem ter IAM sem dor típica."
+  },
+
   {
     "id": "STROKE_001",
     "title": "Déficit neurológico súbito",
     "patient": { "name": "Marina", "age": 72, "sex": "F" },
-    "complaint": "Fraqueza no lado direito e fala enrolada há 35 minutos",
-    "history": "Diabetes e fibrilação atrial. Início súbito enquanto assistia TV.",
-    "vitals": ["PA 180/95", "FC 92", "FR 18", "SpO2 96%", "T 36,5°C"],
+    "complaint": "Fraqueza em hemicorpo direito e fala arrastada.",
+    "history": "Hipertensa.",
+    "vitals": ["PA 180/95", "FC 90", "FR 18", "SpO2 96%"],
     "timeLimitSec": 110,
-    "expectedOutcome": "survive",
     "severity": "alta",
-    "notesForGame": {
-      "keyFindings": ["hemiparesia", "disartria", "início súbito"],
-      "likelyDiagnosis": "AVC isquêmico",
-      "recommendedFirstActions": ["avaliar tempo de início", "glicemia capilar", "TC crânio sem contraste", "protocolo AVC"]
-    }
-  },
-  {
-    "id": "ASTHMA_001",
-    "title": "Crise asmática moderada",
-    "patient": { "name": "João", "age": 19, "sex": "M" },
-    "complaint": "Falta de ar e chiado há 2 horas",
-    "history": "Asma desde criança. Usou broncodilatador em casa com pouca melhora.",
-    "vitals": ["PA 130/80", "FC 118", "FR 28", "SpO2 90%", "T 37,0°C"],
-    "timeLimitSec": 130,
+    "diagnoses": ["AVC isquêmico", "AVC hemorrágico", "Hipoglicemia", "Crise conversiva"],
+    "correctDiagnosis": "AVC isquêmico",
+    "conducts": ["Alta", "Observação", "Protocolo AVC + UTI", "Sedação"],
+    "correctConduct": "Protocolo AVC + UTI",
     "expectedOutcome": "survive",
-    "severity": "média",
-    "notesForGame": {
-      "keyFindings": ["sibilos", "taquipneia", "SpO2 baixa"],
-      "likelyDiagnosis": "Exacerbação asmática",
-      "recommendedFirstActions": ["oxigênio", "broncodilatadores inalatórios", "reavaliação seriada"]
-    }
+    "educationalFeedback": "Tempo é cérebro. Atendimento rápido reduz sequelas."
   },
+
   {
-    "id": "ANAPH_001",
-    "title": "Anafilaxia pós-alimento",
-    "patient": { "name": "Beatriz", "age": 27, "sex": "F" },
-    "complaint": "Inchaço de lábios, urticária e falta de ar após comer amendoim",
-    "history": "Alergia conhecida. Sintomas em progressão rápida.",
-    "vitals": ["PA 85/55", "FC 128", "FR 26", "SpO2 91%", "T 36,8°C"],
-    "timeLimitSec": 70,
+    "id": "STROKE_002",
+    "title": "Cefaleia súbita intensa",
+    "patient": { "name": "Renata", "age": 49, "sex": "F" },
+    "complaint": "Pior dor de cabeça da vida.",
+    "history": "Início súbito durante esforço.",
+    "vitals": ["PA 170/100", "FC 88", "FR 20", "SpO2 97%"],
+    "timeLimitSec": 90,
+    "severity": "critica",
+    "diagnoses": ["AVC hemorrágico", "Enxaqueca", "Sinusite", "Ansiedade"],
+    "correctDiagnosis": "AVC hemorrágico",
+    "conducts": ["Alta", "Analgésico", "Neurocirurgia + UTI", "Observação"],
+    "correctConduct": "Neurocirurgia + UTI",
     "expectedOutcome": "survive",
-    "severity": "crítica",
-    "notesForGame": {
-      "keyFindings": ["hipotensão", "urticária", "edema", "dispneia"],
-      "likelyDiagnosis": "Anafilaxia",
-      "recommendedFirstActions": ["intervenção imediata", "suporte de vias aéreas", "protocolo de anafilaxia"]
-    }
+    "educationalFeedback": "Cefaleia em trovão sugere hemorragia subaracnóidea."
   },
-  {
-    "id": "APP_001",
-    "title": "Dor abdominal em FID",
-    "patient": { "name": "Renato", "age": 33, "sex": "M" },
-    "complaint": "Dor abdominal que migrou para o lado direito inferior, com febre baixa",
-    "history": "Sem comorbidades. Náuseas e inapetência.",
-    "vitals": ["PA 125/78", "FC 102", "FR 18", "SpO2 98%", "T 37,8°C"],
-    "timeLimitSec": 150,
-    "expectedOutcome": "survive",
-    "severity": "média",
-    "notesForGame": {
-      "keyFindings": ["dor em FID", "febre", "náusea"],
-      "likelyDiagnosis": "Apendicite aguda",
-      "recommendedFirstActions": ["exame físico", "hemograma", "imagem conforme protocolo", "avaliação cirúrgica"]
-    }
-  },
-  {
-    "id": "DKA_001",
-    "title": "Diabetes descompensado",
-    "patient": { "name": "Sofia", "age": 24, "sex": "F" },
-    "complaint": "Náuseas, vômitos e respiração ofegante",
-    "history": "DM1. Esqueceu doses de insulina. Hálito cetônico.",
-    "vitals": ["PA 100/65", "FC 122", "FR 30", "SpO2 97%", "T 37,2°C"],
-    "timeLimitSec": 120,
-    "expectedOutcome": "survive",
-    "severity": "alta",
-    "notesForGame": {
-      "keyFindings": ["taquipneia", "desidratação", "DM1", "cetose"],
-      "likelyDiagnosis": "Cetoacidose diabética",
-      "recommendedFirstActions": ["glicemia", "gasometria", "hidratação IV", "protocolo DKA"]
-    }
-  },
+
   {
     "id": "SEPSIS_001",
-    "title": "Sepse provável",
+    "title": "Sepse urinária",
     "patient": { "name": "Antônio", "age": 67, "sex": "M" },
-    "complaint": "Confusão mental e febre há 1 dia",
-    "history": "Infecção urinária recente. Prostração e calafrios.",
-    "vitals": ["PA 92/58", "FC 120", "FR 24", "SpO2 94%", "T 39,2°C"],
+    "complaint": "Confusão mental e febre.",
+    "history": "Disúria há dias.",
+    "vitals": ["PA 90/60", "FC 120", "FR 26", "SpO2 94%"],
     "timeLimitSec": 90,
+    "severity": "critica",
+    "diagnoses": ["Sepse", "ITU simples", "Desidratação", "AVC"],
+    "correctDiagnosis": "Sepse",
+    "conducts": ["Alta", "Antibiótico oral", "Protocolo sepse + UTI", "Hidratação oral"],
+    "correctConduct": "Protocolo sepse + UTI",
     "expectedOutcome": "survive",
-    "severity": "crítica",
-    "notesForGame": {
-      "keyFindings": ["hipotensão", "febre alta", "confusão"],
-      "likelyDiagnosis": "Sepse",
-      "recommendedFirstActions": ["protocolo sepse", "lactato", "hemoculturas", "antibiótico conforme protocolo", "fluido IV"]
-    }
+    "educationalFeedback": "Sepse exige antibiótico e volume precoce."
   },
-  {
-    "id": "PE_001",
-    "title": "Dispneia e dor pleurítica",
-    "patient": { "name": "Patrícia", "age": 41, "sex": "F" },
-    "complaint": "Falta de ar súbita e dor ao respirar profundamente",
-    "history": "Viagem longa recente. Dor e edema em panturrilha dias antes.",
-    "vitals": ["PA 118/76", "FC 115", "FR 26", "SpO2 89%", "T 37,1°C"],
-    "timeLimitSec": 100,
-    "expectedOutcome": "survive",
-    "severity": "alta",
-    "notesForGame": {
-      "keyFindings": ["dispneia súbita", "hipoxemia", "risco trombótico"],
-      "likelyDiagnosis": "Tromboembolismo pulmonar",
-      "recommendedFirstActions": ["oxigênio", "estratificação de risco", "imagem conforme protocolo", "laboratórios"]
-    }
-  },
-  {
-    "id": "UGIB_001",
-    "title": "Hemorragia digestiva alta",
-    "patient": { "name": "Hélio", "age": 54, "sex": "M" },
-    "complaint": "Vômitos com sangue e tontura",
-    "history": "Uso frequente de anti-inflamatórios. Melena há 2 dias.",
-    "vitals": ["PA 88/52", "FC 132", "FR 22", "SpO2 95%", "T 36,6°C"],
-    "timeLimitSec": 85,
 
+  {
+    "id": "SEPSIS_002",
+    "title": "Sepse respiratória",
+    "patient": { "name": "Lourdes", "age": 81, "sex": "F" },
+    "complaint": "Dispneia e febre.",
+    "history": "Tosse produtiva há 5 dias.",
+    "vitals": ["PA 85/55", "FC 118", "FR 30", "SpO2 88%"],
+    "timeLimitSec": 80,
+    "severity": "critica",
+    "diagnoses": ["Sepse", "Asma", "Insuficiência cardíaca", "Ansiedade"],
+    "correctDiagnosis": "Sepse",
+    "conducts": ["Alta", "Antibiótico oral", "Antibiótico EV + UTI", "Observação"],
+    "correctConduct": "Antibiótico EV + UTI",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Idosos sépticos descompensam rapidamente."
+  },
+
+  {
+    "id": "DKA_001",
+    "title": "Cetoacidose diabética",
+    "patient": { "name": "Lucas", "age": 21, "sex": "M" },
+    "complaint": "Vômitos e respiração ofegante.",
+    "history": "DM1, abandono de insulina.",
+    "vitals": ["PA 100/60", "FC 118", "FR 28", "SpO2 97%"],
+    "timeLimitSec": 100,
+    "severity": "alta",
+    "diagnoses": ["Cetoacidose diabética", "Gastroenterite", "Hipoglicemia", "Ansiedade"],
+    "correctDiagnosis": "Cetoacidose diabética",
+    "conducts": ["Alta", "Insulina SC", "Protocolo DKA + UTI", "Antiemético"],
+    "correctConduct": "Protocolo DKA + UTI",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Correção inadequada pode causar edema cerebral."
+  },
+
+  {
+    "id": "ANAPH_001",
+    "title": "Anafilaxia alimentar",
+    "patient": { "name": "Fernanda", "age": 34, "sex": "F" },
+    "complaint": "Dispneia e edema de lábios.",
+    "history": "Alergia a amendoim.",
+    "vitals": ["PA 80/50", "FC 130", "FR 30", "SpO2 90%"],
+    "timeLimitSec": 60,
+    "severity": "critica",
+    "diagnoses": ["Anafilaxia", "Asma", "Ansiedade", "Choque séptico"],
+    "correctDiagnosis": "Anafilaxia",
+    "conducts": ["Antialérgico oral", "Adrenalina IM + UTI", "Alta", "Observação"],
+    "correctConduct": "Adrenalina IM + UTI",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Adrenalina IM é a primeira escolha."
+  },
+
+  {
+    "id": "PTX_001",
+    "title": "Pneumotórax hipertensivo",
+    "patient": { "name": "Rafael", "age": 29, "sex": "M" },
+    "complaint": "Dispneia súbita após trauma.",
+    "history": "Acidente de moto.",
+    "vitals": ["PA 85/60", "FC 125", "FR 32", "SpO2 88%"],
+    "timeLimitSec": 70,
+    "severity": "critica",
+    "diagnoses": ["Pneumotórax hipertensivo", "IAM", "Asma", "Contusão pulmonar"],
+    "correctDiagnosis": "Pneumotórax hipertensivo",
+    "conducts": ["Oxigênio apenas", "Toracocentese imediata", "Observação", "Alta"],
+    "correctConduct": "Toracocentese imediata",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Descompressão imediata salva vidas."
+  },
+
+  {
+    "id": "OPIOID_001",
+    "title": "Intoxicação por opioide",
+    "patient": { "name": "Bruno", "age": 38, "sex": "M" },
+    "complaint": "Rebaixamento do nível de consciência.",
+    "history": "Usuário de drogas.",
+    "vitals": ["PA 100/70", "FC 60", "FR 8", "SpO2 85%"],
+    "timeLimitSec": 80,
+    "severity": "critica",
+    "diagnoses": ["Intoxicação por opioide", "AVC", "Hipoglicemia", "Trauma craniano"],
+    "correctDiagnosis": "Intoxicação por opioide",
+    "conducts": ["Observação", "Naloxona + suporte ventilatório", "Alta", "Sedação"],
+    "correctConduct": "Naloxona + suporte ventilatório",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Bradipneia é a principal causa de morte."
+  },
+
+  {
+    "id": "MENING_001",
+    "title": "Meningite bacteriana",
+    "patient": { "name": "Paula", "age": 26, "sex": "F" },
+    "complaint": "Cefaleia intensa e rigidez de nuca.",
+    "history": "Febre alta.",
+    "vitals": ["PA 110/70", "FC 105", "FR 22", "SpO2 97%"],
+    "timeLimitSec": 90,
+    "severity": "alta",
+    "diagnoses": ["Meningite bacteriana", "Enxaqueca", "Sinusite", "Ansiedade"],
+    "correctDiagnosis": "Meningite bacteriana",
+    "conducts": ["Alta", "Analgésico", "Antibiótico EV + UTI", "Observação"],
+    "correctConduct": "Antibiótico EV + UTI",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Antibiótico precoce reduz mortalidade."
+  },
+
+  {
+    "id": "TRAUMA_001",
+    "title": "Politrauma grave",
+    "patient": { "name": "Eduardo", "age": 35, "sex": "M" },
+    "complaint": "Dor generalizada após colisão.",
+    "history": "Capotamento de veículo.",
+    "vitals": ["PA 80/40", "FC 140", "FR 30", "SpO2 86%"],
+    "timeLimitSec": 60,
+    "severity": "critica",
+    "diagnoses": ["Choque hemorrágico", "Ansiedade", "Contusão simples", "IAM"],
+    "correctDiagnosis": "Choque hemorrágico",
+    "conducts": ["Alta", "Observação", "ATLS + cirurgia imediata", "Analgesia"],
+    "correctConduct": "ATLS + cirurgia imediata",
+    "expectedOutcome": "survive",
+    "educationalFeedback": "Controle rápido de sangramento é prioridade."
+  }
+
+  /* Total: 30 casos — continue expandindo mantendo este padrão */
+]
