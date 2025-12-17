@@ -1,84 +1,83 @@
 /* =========================================================
-   Service Worker — EDS (v1.1.0)
-   - Cache versionado
-   - Network-first para HTML/CSS/JS/JSON (sempre tenta atualizar)
-   - Cache-first para imagens
+   Emergency Doctor Simulator — sw.js (v2.2.0)
+   =========================================================
+   ✔ Cache inteligente
+   ✔ Atualização automática
+   ✔ Corrige splash travada
+   ✔ Offline-first (PWA)
    ========================================================= */
 
-const CACHE_NAME = "eds-cache-v1.1.0";
-const CORE = [
+const CACHE_VERSION = "eds-cache-v2.2.0";
+const CORE_ASSETS = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
-  "./cases.json",
-  "./exams.json",
-  "./manifest.json"
+  "./manifest.json",
+
+  // Imagens principais
+  "./images/capa.jpg",
+  "./images/fundo.jpg",
+
+  // Avatares
+  "./images/avatar1.png",
+  "./images/avatar2.png",
+  "./images/avatar3.png",
+  "./images/avatar4.png",
+  "./images/avatar5.png",
+  "./images/avatar6.png",
+
+  // Ícones PWA
+  "./images/icon-192.png",
+  "./images/icon-512.png"
 ];
 
+/* =========================
+   INSTALL
+========================= */
 self.addEventListener("install", (event) => {
+  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then((cache) => cache.addAll(CORE))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_VERSION).then((cache) => {
+      return cache.addAll(CORE_ASSETS);
+    })
   );
 });
 
+/* =========================
+   ACTIVATE
+========================= */
 self.addEventListener("activate", (event) => {
-  event.waitUntil((async () => {
-    const keys = await caches.keys();
-    await Promise.all(keys.map(k => (k !== CACHE_NAME ? caches.delete(k) : null)));
-    await self.clients.claim();
-  })());
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_VERSION) {
+            return caches.delete(key);
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
 });
 
-function isAsset(url) {
-  return (
-    url.pathname.endsWith(".js") ||
-    url.pathname.endsWith(".css") ||
-    url.pathname.endsWith(".json") ||
-    url.pathname.endsWith(".html") ||
-    url.pathname === "/" ||
-    url.pathname.endsWith("/")
-  );
-}
-
-function isImage(url) {
-  return /\.(png|jpg|jpeg|webp|svg)$/i.test(url.pathname);
-}
-
+/* =========================
+   FETCH (NETWORK FIRST)
+========================= */
 self.addEventListener("fetch", (event) => {
-  const req = event.request;
-  const url = new URL(req.url);
+  if (event.request.method !== "GET") return;
 
-  // Só controla o mesmo domínio
-  if (url.origin !== location.origin) return;
-
-  // Imagens: cache-first
-  if (isImage(url)) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      const cached = await cache.match(req);
-      if (cached) return cached;
-      const fresh = await fetch(req);
-      cache.put(req, fresh.clone());
-      return fresh;
-    })());
-    return;
-  }
-
-  // HTML/CSS/JS/JSON: network-first
-  if (isAsset(url)) {
-    event.respondWith((async () => {
-      const cache = await caches.open(CACHE_NAME);
-      try {
-        const fresh = await fetch(req, { cache: "no-store" });
-        cache.put(req, fresh.clone());
-        return fresh;
-      } catch {
-        const cached = await cache.match(req);
-        return cached || Response.error();
-      }
-    })());
-  }
+  event.respondWith(
+    fetch(event.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_VERSION).then((cache) => {
+          cache.put(event.request, clone);
+        });
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
+  );
 });
