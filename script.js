@@ -1,952 +1,659 @@
-/* ===============================
-   AAA CORE (Shift + Streak + Events)
-================================ */
-const SAVE_KEY = "eds-save";
-const RANK_KEY = "eds-ranking";
+/* =========================================================
+   Emergency Doctor Simulator – Core
+   ========================================================= */
 
-let deferredPWAInstall = null;
+const STORAGE_KEY = "eds_save_v1";
+const RANKING_KEY = "eds_ranking_v1";
 
-let gameState = {
-  doctor: { name: "", avatar: "", tier: "residente" },
+/* ---------- State ---------- */
+let CASES = [];
+let EXAMS = [];
 
-  points: 0,
-  prestige: 0,
-  casesDone: 0,
-  hits: 0,
-  mistakes: 0,
-
-  cases: [],
-  currentCase: null,
-
-  examsCatalog: [],
-  requestedExams: new Set(),
-  selectedDiagnosis: null,
-  selectedMedications: new Set(),
-
-  // AAA time/pressure
-  caseTimerSec: 0,
-  caseLimitSec: 0,
-  pressure: 0, // 0-100
-  caseInterval: null,
-
-  // SHIFT SYSTEM
-  shift: {
-    active: false,
-    target: 10,
-    done: 0,
-    streak: 0,
-    bestStreak: 0,
-    deaths: 0,
-    startedAt: null
-  },
-
-  // EVENT SYSTEM (aplica por caso)
-  currentEvent: {
-    id: "none",
-    title: "Nenhum",
-    effectText: "—",
-    // modifiers
-    timeLimitMul: 1.0,
-    pressureStartAdd: 0,
-    pressurePerSecAdd: 0,
-    examTimeMul: 1.0,
-    scoreMul: 1.0,
-    disabledExamTypes: [], // ex: ["Imagem"]
-    extraPenaltyWrongExam: 0
-  }
+let state = {
+  doctor: { name: "", avatar: "images/doctor_1.jpg", rank: "Médico Residente" },
+  stats: { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0 },
+  lastCaseId: null
 };
 
-function $(id){ return document.getElementById(id); }
-function clamp(v,min,max){ return Math.max(min, Math.min(max,v)); }
+let current = {
+  caseObj: null,
+  pickedExams: new Set(),
+  pickedDx: null,
+  pickedMeds: new Set(),
+  maxExams: 3,
+  maxMeds: 2
+};
 
-function showScreen(id) {
+/* ---------- Helpers ---------- */
+const el = (id) => document.getElementById(id);
+const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
+
+function showScreen(name){
   document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  $(id).classList.add("active");
+  const screen = document.querySelector(`.screen[data-screen="${name}"]`);
+  if (screen) screen.classList.add("active");
 }
 
-function normalizeTriage(triage){
-  const t = (triage || "").toLowerCase();
-  if(t.includes("verd")) return "verde";
-  if(t.includes("amar")) return "amarelo";
-  if(t.includes("verm")) return "vermelho";
-  return "amarelo";
+function toast(msg){
+  alert(msg);
 }
 
-function riskPenalty(risk){
-  const r = (risk || "").toLowerCase();
-  if(r === "baixa") return 10;
-  if(r === "media" || r === "média") return 20;
-  if(r === "alta") return 35;
-  return 20;
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
-function secToMMSS(sec){
-  const m = Math.floor(sec/60);
-  const s = sec%60;
-  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
-}
-
-/* ===============================
-   SAVE / LOAD
-================================ */
-function saveGame(){
-  const safe = {
-    ...gameState,
-    requestedExams: Array.from(gameState.requestedExams),
-    selectedMedications: Array.from(gameState.selectedMedications),
-    caseInterval: null
-  };
-  localStorage.setItem(SAVE_KEY, JSON.stringify(safe));
-}
-
-function loadSave(){
-  const raw = localStorage.getItem(SAVE_KEY);
-  if(!raw) return null;
-  const data = JSON.parse(raw);
-  data.requestedExams = new Set(data.requestedExams || []);
-  data.selectedMedications = new Set(data.selectedMedications || []);
-  data.caseInterval = null;
-  return data;
-}
-
-/* ===============================
-   PWA
-================================ */
-window.addEventListener("beforeinstallprompt", (e)=>{
-  e.preventDefault();
-  deferredPWAInstall = e;
-});
-
-async function installPWA(){
-  if(!deferredPWAInstall){
-    alert("Instalação não disponível agora. No Android/Chrome use: Menu > Instalar app.");
-    return;
-  }
-  deferredPWAInstall.prompt();
-  deferredPWAInstall = null;
-}
-
-async function registerSW(){
-  if("serviceWorker" in navigator){
-    try{ await navigator.serviceWorker.register("./sw.js"); }catch(e){ console.warn("SW falhou:", e); }
+function load(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return false;
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || !parsed.doctor || !parsed.stats) return false;
+    state = parsed;
+    return true;
+  } catch {
+    return false;
   }
 }
 
-/* ===============================
-   HELP / FULLSCREEN / RANKING UI
-================================ */
-function toggleFullscreen(){
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen?.();
-  } else {
-    document.exitFullscreen?.();
-  }
-}
-
-function openHelp(){
-  alert(
-`MANUAL (AAA)
-- Plantão: meta de N casos com streak e eventos aleatórios.
-- Você pode pedir TODOS os exames. Exames errados custam tempo e pontuação.
-- Alguns exames são ESSENCIAIS (penalidade grave se não pedir).
-- Escolha 1 diagnóstico e até 2 condutas/medicações.
-- Casos Vermelhos: tempo crítico e risco de óbito.
-Obs: Simulação educacional. Não é orientação médica real.`
-  );
-}
-
-function openRanking(){ renderRanking(); $("rankOverlay").classList.remove("hidden"); }
-function closeRanking(){ $("rankOverlay").classList.add("hidden"); }
-
-function renderRanking(){
-  const list = JSON.parse(localStorage.getItem(RANK_KEY) || "[]");
-  const body = $("rankBody");
-  if(list.length === 0){
-    body.innerHTML = "<p style='opacity:.85'>Sem registros ainda. Finalize casos para entrar no ranking.</p>";
-    return;
-  }
-  const rows = list.slice(0,10).map((r,i)=>`
-    <div style="display:flex;justify-content:space-between;gap:10px;padding:10px;border-bottom:1px solid rgba(255,255,255,0.08)">
-      <div>
-        <strong>#${i+1} ${r.name}</strong>
-        <div style="opacity:.85;font-size:13px">Cargo: ${r.tier} · Plantões: ${r.shifts} · Casos: ${r.casesDone} · Best Streak: ${r.bestStreak}</div>
-      </div>
-      <div style="text-align:right">
-        <strong>${r.points} pts</strong>
-        <div style="opacity:.85;font-size:13px">Prestígio: ${r.prestige} · Óbitos: ${r.deaths}</div>
-      </div>
-    </div>
-  `).join("");
-  body.innerHTML = rows;
-}
-
-function updateRanking(){
-  const entry = {
-    name: gameState.doctor.name || "Doutor(a)",
-    tier: gameState.doctor.tier,
-    points: gameState.points,
-    prestige: gameState.prestige,
-    casesDone: gameState.casesDone,
-    hits: gameState.hits,
-    mistakes: gameState.mistakes,
-    deaths: gameState.shift.deaths || 0,
-    bestStreak: gameState.shift.bestStreak || 0,
-    shifts: JSON.parse(localStorage.getItem("eds-shifts") || "0"),
-    at: Date.now()
-  };
-
-  const list = JSON.parse(localStorage.getItem(RANK_KEY) || "[]");
-  list.push(entry);
-  list.sort((a,b)=> (b.points - a.points) || (b.bestStreak - a.bestStreak) || (b.prestige - a.prestige));
-  localStorage.setItem(RANK_KEY, JSON.stringify(list.slice(0,50)));
-}
-
-/* ===============================
-   HOME / PROFILE
-================================ */
-function goHome(){ showScreen("screen-home"); }
-
-function startNewGame() {
-  localStorage.removeItem(SAVE_KEY);
-  gameState = {
-    doctor: { name: "", avatar: "", tier: "residente" },
-    points: 0, prestige: 0, casesDone: 0, hits: 0, mistakes: 0,
-    cases: [], currentCase: null,
-    examsCatalog: [],
-    requestedExams: new Set(),
-    selectedDiagnosis: null,
-    selectedMedications: new Set(),
-    caseTimerSec: 0, caseLimitSec: 0, pressure: 0, caseInterval: null,
-    shift: { active:false, target:10, done:0, streak:0, bestStreak:0, deaths:0, startedAt:null },
-    currentEvent: defaultEvent()
-  };
-  showScreen("screen-profile");
-  loadAvatars();
-}
-
-function continueGame() {
-  const loaded = loadSave();
-  if(!loaded) return alert("Nenhum jogo salvo.");
-  gameState = loaded;
-  enterOffice();
-}
-
-function loadAvatars() {
-  const grid = $("avatarGrid");
-  grid.innerHTML = "";
-  ["avatar1","avatar2","avatar3","avatar4","avatar5","avatar6"].forEach(a=>{
-    const img = document.createElement("img");
-    img.src = `images/${a}.png`;
-    img.onclick = ()=>{
-      document.querySelectorAll("#avatarGrid img").forEach(i=>i.classList.remove("selected"));
-      img.classList.add("selected");
-      gameState.doctor.avatar = img.src;
-    };
-    grid.appendChild(img);
-  });
-}
-
-function confirmProfile() {
-  const name = $("doctorName").value.trim();
-  if(!name || !gameState.doctor.avatar) return alert("Preencha nome e selecione um avatar.");
-  gameState.doctor.name = name;
-  saveGame();
-  enterOffice();
-}
-
-/* ===============================
-   LOAD DATA
-================================ */
-async function loadCasesIfNeeded(){
-  if(gameState.cases && gameState.cases.length > 0) return;
-  const res = await fetch("cases.json", { cache: "no-store" });
-  if(!res.ok) throw new Error("Falha ao carregar cases.json");
-  gameState.cases = await res.json();
-}
-
-async function loadExamsIfNeeded(){
-  if(gameState.examsCatalog && gameState.examsCatalog.length > 0) return;
-  const res = await fetch("exams.json", { cache: "no-store" });
-  if(!res.ok) throw new Error("Falha ao carregar exams.json");
-  gameState.examsCatalog = await res.json();
-}
-
-/* ===============================
-   PROGRESSÃO AAA
-================================ */
-function applyProgression(){
-  if(gameState.points >= 1200) gameState.doctor.tier = "pleno";
-  else if(gameState.points >= 450) gameState.doctor.tier = "titular";
-  else gameState.doctor.tier = "residente";
-}
-
-function prestigeDeltaFromCaseScore(score, death=false){
-  if(death) return -25;
-  if(score >= 80) return +10;
-  if(score >= 50) return +6;
-  if(score >= 20) return +3;
-  if(score >= 0) return +1;
-  return -4;
-}
-
-/* ===============================
-   SHIFT SYSTEM
-================================ */
-function startShift(target=10){
-  target = Number(target) || 10;
-  gameState.shift.active = true;
-  gameState.shift.target = target;
-  gameState.shift.done = 0;
-  gameState.shift.streak = 0;
-  gameState.shift.bestStreak = Math.max(gameState.shift.bestStreak || 0, 0);
-  gameState.shift.deaths = 0;
-  gameState.shift.startedAt = Date.now();
-
-  alert(`Plantão iniciado!\nMeta: ${target} casos.\nBônus por streak de acertos (diagnóstico + conduta).`);
-  saveGame();
-  enterOffice();
-}
-
-function endShift(){
-  if(!gameState.shift.active){
-    alert("Nenhum plantão ativo.");
-    return;
-  }
-
-  gameState.shift.active = false;
-
-  // bônus final por performance
-  const completion = gameState.shift.done / Math.max(1, gameState.shift.target);
-  const best = gameState.shift.bestStreak || 0;
-  const deaths = gameState.shift.deaths || 0;
-
-  let bonus = 0;
-  if(completion >= 1) bonus += 80;            // completou meta
-  bonus += Math.min(60, best * 6);            // best streak
-  bonus -= deaths * 40;                        // óbitos punem pesado
-
-  gameState.points = Math.max(0, gameState.points + bonus);
-  gameState.prestige += prestigeDeltaFromCaseScore(bonus, deaths > 0);
-
-  // conta plantões para ranking
-  const shifts = JSON.parse(localStorage.getItem("eds-shifts") || "0") + 1;
-  localStorage.setItem("eds-shifts", JSON.stringify(shifts));
-
-  applyProgression();
-  updateRanking();
-  saveGame();
-
-  alert(
-`Plantão encerrado!
-Casos atendidos: ${gameState.shift.done}/${gameState.shift.target}
-Best streak: ${best}
-Óbitos: ${deaths}
-Bônus final: ${bonus} pts`
-  );
-
-  enterOffice();
-}
-
-/* ===============================
-   EVENT SYSTEM
-================================ */
-function defaultEvent(){
-  return {
-    id: "none",
-    title: "Nenhum",
-    effectText: "—",
-    timeLimitMul: 1.0,
-    pressureStartAdd: 0,
-    pressurePerSecAdd: 0,
-    examTimeMul: 1.0,
-    scoreMul: 1.0,
-    disabledExamTypes: [],
-    extraPenaltyWrongExam: 0
+function resetSave(){
+  localStorage.removeItem(STORAGE_KEY);
+  state = {
+    doctor: { name: "", avatar: "images/doctor_1.jpg", rank: "Médico Residente" },
+    stats: { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0 },
+    lastCaseId: null
   };
 }
 
-function pickRandomEvent(triageNorm){
-  // chances por triagem (mais caos em vermelho)
-  const base = triageNorm === "vermelho" ? 0.75 : triageNorm === "amarelo" ? 0.55 : 0.35;
-  if(Math.random() > base) return defaultEvent();
-
-  const pool = [
-    {
-      id: "overcrowding",
-      title: "Superlotação",
-      effectText: "Tempo do caso reduzido e pressão aumenta mais rápido.",
-      timeLimitMul: 0.85,
-      pressureStartAdd: 8,
-      pressurePerSecAdd: 0.25,
-      examTimeMul: 1.0,
-      scoreMul: 1.0,
-      disabledExamTypes: [],
-      extraPenaltyWrongExam: 0
-    },
-    {
-      id: "no_beds",
-      title: "Falta de leitos",
-      effectText: "Pressão inicial alta. Erros custam mais pontos.",
-      timeLimitMul: 1.0,
-      pressureStartAdd: 15,
-      pressurePerSecAdd: 0.15,
-      examTimeMul: 1.0,
-      scoreMul: 0.95,
-      disabledExamTypes: [],
-      extraPenaltyWrongExam: 0
-    },
-    {
-      id: "imaging_down",
-      title: "Imagem indisponível",
-      effectText: "Exames de imagem não podem ser solicitados neste caso.",
-      timeLimitMul: 1.0,
-      pressureStartAdd: 6,
-      pressurePerSecAdd: 0.10,
-      examTimeMul: 1.0,
-      scoreMul: 1.0,
-      disabledExamTypes: ["Imagem"],
-      extraPenaltyWrongExam: 0
-    },
-    {
-      id: "lab_delay",
-      title: "Atraso no laboratório",
-      effectText: "Exames laboratoriais demoram mais (custo de tempo).",
-      timeLimitMul: 1.0,
-      pressureStartAdd: 4,
-      pressurePerSecAdd: 0.10,
-      examTimeMul: 1.25,
-      scoreMul: 1.0,
-      disabledExamTypes: [],
-      extraPenaltyWrongExam: 0
-    },
-    {
-      id: "supplies_shortage",
-      title: "Falta de insumos",
-      effectText: "Condutas erradas de alto risco aumentam chance de falha grave.",
-      timeLimitMul: 1.0,
-      pressureStartAdd: 10,
-      pressurePerSecAdd: 0.20,
-      examTimeMul: 1.0,
-      scoreMul: 0.97,
-      disabledExamTypes: [],
-      extraPenaltyWrongExam: 4
-    }
-  ];
-
-  return pool[Math.floor(Math.random() * pool.length)];
-}
-
-/* ===============================
-   OFFICE
-================================ */
-async function enterOffice() {
+/* ---------- Data loading ---------- */
+async function loadData(){
   try{
-    await loadCasesIfNeeded();
-    await loadExamsIfNeeded();
-  } catch(e){
-    alert("Erro ao carregar cases.json/exams.json. Verifique se os arquivos estão na raiz do projeto.");
-    console.error(e);
-  }
+    const [casesRes, examsRes] = await Promise.all([
+      fetch("cases.json", { cache: "no-store" }),
+      fetch("exams.json", { cache: "no-store" })
+    ]);
 
-  applyProgression();
-  showScreen("screen-office");
+    if (!casesRes.ok || !examsRes.ok) throw new Error("HTTP error");
+    CASES = await casesRes.json();
+    EXAMS = await examsRes.json();
 
-  $("doctorAvatar").src = gameState.doctor.avatar || "images/avatar1.png";
-  $("doctorInfo").innerHTML = `<strong>${gameState.doctor.name || "Doutor(a)"}</strong><br>Cargo: ${gameState.doctor.tier}`;
-
-  $("points").innerText = String(gameState.points);
-  $("casesDone").innerText = String(gameState.casesDone);
-  $("prestige").innerText = String(gameState.prestige);
-  $("mistakes").innerText = String(gameState.mistakes);
-  $("hits").innerText = String(gameState.hits);
-
-  // shift ui
-  $("shiftTarget").innerText = String(gameState.shift.target || 10);
-  $("shiftProg").innerText = String(gameState.shift.done || 0);
-  $("shiftStreak").innerText = String(gameState.shift.streak || 0);
-  $("shiftBest").innerText = String(gameState.shift.bestStreak || 0);
-
-  const pill = $("shiftStatus");
-  if(gameState.shift.active){
-    pill.textContent = "Ativo";
-    pill.className = "shift-pill shift-on";
-  } else {
-    pill.textContent = "Inativo";
-    pill.className = "shift-pill shift-off";
-  }
-
-  saveGame();
-}
-
-function nextCase(){
-  if(!gameState.cases || gameState.cases.length === 0){
-    updateRanking();
-    alert("Você concluiu todos os casos disponíveis. Seu desempenho foi registrado no ranking.");
-    return;
-  }
-
-  // se plantão ativo e já bateu meta, encerra automaticamente
-  if(gameState.shift.active && gameState.shift.done >= gameState.shift.target){
-    endShift();
-    return;
-  }
-
-  gameState.currentCase = gameState.cases.shift();
-  gameState.requestedExams = new Set();
-  gameState.selectedDiagnosis = null;
-  gameState.selectedMedications = new Set();
-
-  setupCaseTimerPressureAndEvent();
-  openCase();
-}
-
-/* ===============================
-   TIMER + PRESSÃO + EVENTO
-================================ */
-function stopCaseInterval(){
-  if(gameState.caseInterval){
-    clearInterval(gameState.caseInterval);
-    gameState.caseInterval = null;
+    if (!Array.isArray(CASES) || !Array.isArray(EXAMS)) throw new Error("JSON inválido");
+    return true;
+  }catch(err){
+    console.error(err);
+    toast("Erro ao carregar cases.json/exams.json. Verifique se os arquivos existem na raiz do projeto.");
+    return false;
   }
 }
 
-function pressureLabel(p){
-  if(p < 30) return "Baixa";
-  if(p < 60) return "Média";
-  if(p < 85) return "Alta";
-  return "Crítica";
+/* ---------- UI: Profile ---------- */
+function bindAvatarGrid(){
+  const grid = el("avatarGrid");
+  if (!grid) return;
+
+  grid.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".avatarCard");
+    if (!btn) return;
+    const avatar = btn.getAttribute("data-avatar");
+    if (!avatar) return;
+
+    state.doctor.avatar = avatar;
+
+    grid.querySelectorAll(".avatarCard").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+  }, { passive: true });
 }
 
-function updateCaseHUD(){
-  if(!$("caseTime")) return;
-  $("caseTime").innerText = secToMMSS(gameState.caseTimerSec);
-  $("caseLimit").innerText = secToMMSS(gameState.caseLimitSec);
+/* ---------- UI: Office ---------- */
+function refreshOffice(){
+  el("uiAvatar").src = state.doctor.avatar || "images/doctor_1.jpg";
+  el("uiName").textContent = state.doctor.name || "—";
+  el("uiRank").textContent = state.doctor.rank || "Médico Residente";
 
-  const fill = $("pressureFill");
-  fill.style.width = `${clamp(gameState.pressure,0,100)}%`;
+  el("uiPoints").textContent = state.stats.points;
+  el("uiCorrect").textContent = state.stats.correct;
+  el("uiWrong").textContent = state.stats.wrong;
+  el("uiCases").textContent = state.stats.cases;
+  el("uiShift").textContent = state.stats.shift;
+  el("uiStreak").textContent = state.stats.streak;
+}
 
-  $("pressureLabel").innerText = pressureLabel(gameState.pressure);
+/* ---------- Triage badge ---------- */
+function applyTriage(triage){
+  const badge = el("triageBadge");
+  badge.classList.remove("triage-green","triage-yellow","triage-red");
 
-  if($("eventLabel")){
-    $("eventLabel").innerText = gameState.currentEvent.title || "Nenhum";
-    $("eventEffect").innerText = gameState.currentEvent.effectText || "—";
+  const t = (triage || "").toLowerCase();
+  if (t.includes("verde")) badge.classList.add("triage-green");
+  else if (t.includes("amare")) badge.classList.add("triage-yellow");
+  else if (t.includes("vermel")) badge.classList.add("triage-red");
+
+  el("triageText").textContent = triage || "—";
+}
+
+/* ---------- Case selection ---------- */
+function pickNextCase(){
+  if (!CASES.length) return null;
+
+  // simples: evita repetir o último
+  let pool = CASES.slice();
+  if (state.lastCaseId){
+    pool = pool.filter(c => c.id !== state.lastCaseId);
+    if (!pool.length) pool = CASES.slice();
   }
+
+  // “AAA”: aumenta chance de tiers mais altos conforme pontos
+  const pts = state.stats.points || 0;
+  const tierWanted =
+    pts >= 220 ? "pleno" :
+    pts >= 120 ? "titular" :
+    "residente";
+
+  // prioriza tierWanted, mas mantém mistura
+  const preferred = pool.filter(c => (c.tier || "") === tierWanted);
+  const mixed = preferred.length ? preferred : pool;
+  const chosen = mixed[Math.floor(Math.random() * mixed.length)];
+  return chosen || pool[0];
 }
 
-function setupCaseTimerPressureAndEvent(){
-  stopCaseInterval();
+/* ---------- Render Case ---------- */
+function renderCase(c){
+  current.caseObj = c;
+  current.pickedExams = new Set();
+  current.pickedDx = null;
+  current.pickedMeds = new Set();
 
-  const c = gameState.currentCase;
-  const tri = normalizeTriage(c?.patient?.triage);
+  // difficulty knobs
+  current.maxExams = 3;
+  current.maxMeds = 2;
 
-  // base limits por triagem (segundos)
-  const baseLimit = tri === "vermelho" ? 240 : tri === "amarelo" ? 420 : 720;
+  el("maxExams").textContent = String(current.maxExams);
+  el("maxMeds").textContent = String(current.maxMeds);
 
-  // evento do caso
-  gameState.currentEvent = pickRandomEvent(tri);
+  el("caseTitle").textContent = `Caso: ${c.id || "—"}`;
+  applyTriage(c.patient?.triage);
 
-  gameState.caseLimitSec = Math.round(baseLimit * gameState.currentEvent.timeLimitMul);
-  gameState.caseTimerSec = 0;
+  el("patientPhoto").src = c.patient?.photo || "images/patient_male.jpg";
+  el("patientName").textContent = c.patient?.name || "—";
+  el("patientSub").textContent = `${c.patient?.age ?? "—"} anos • ${c.patient?.sex || "—"}`;
 
-  gameState.pressure = (tri === "vermelho" ? 35 : tri === "amarelo" ? 20 : 10) + (gameState.currentEvent.pressureStartAdd || 0);
-  gameState.pressure = clamp(gameState.pressure, 0, 100);
-
-  updateCaseHUD();
-
-  gameState.caseInterval = setInterval(()=>{
-    gameState.caseTimerSec += 1;
-
-    const triMul = tri === "vermelho" ? 0.45 : tri === "amarelo" ? 0.30 : 0.20;
-    const evAdd = gameState.currentEvent.pressurePerSecAdd || 0;
-    gameState.pressure = clamp(gameState.pressure + triMul + evAdd, 0, 100);
-
-    updateCaseHUD();
-
-    // óbito automático se estourar tempo em vermelho com pressão alta
-    if(tri === "vermelho" && gameState.caseTimerSec > gameState.caseLimitSec){
-      handleDeath("Tempo crítico excedido em caso vermelho.");
-    }
-  }, 1000);
-}
-
-/* ===============================
-   ATENDIMENTO UI
-================================ */
-function openCase(){
-  const c = gameState.currentCase;
-  if(!c) return;
-
-  showScreen("screen-case");
-  $("caseBg").style.backgroundImage = `url(images/hospital_corridor.jpg)`;
-
-  $("patientName").innerText = `${c.patient.name} (${c.patient.age}a)`;
-  $("patientMeta").innerText = `${c.patient.sex || ""}`;
-
-  $("patientPhoto").src = c.patient.photo;
-  $("patientComplaint").innerText = c.complaint;
-  $("patientHistory").innerText = c.history;
-
-  const triBadge = $("triageBadge");
-  const triNorm = normalizeTriage(c.patient.triage);
-  triBadge.innerText = c.patient.triage || "Amarelo";
-  triBadge.className = `triage-badge triage-${triNorm}`;
-
-  const vit = $("vitalsList");
-  vit.innerHTML = "";
-  (c.vitals || []).forEach(v=>{
+  // vitals
+  const vitals = el("vitalsList");
+  vitals.innerHTML = "";
+  (c.vitals || []).forEach(v => {
     const li = document.createElement("li");
-    li.innerText = v;
-    vit.appendChild(li);
+    li.textContent = v;
+    vitals.appendChild(li);
   });
 
-  renderQuestions(c);
-  renderAllExams(c);
-  renderDiagnosis(c);
-  renderMedications(c);
+  el("complaintText").textContent = c.complaint || "—";
+  el("historyText").textContent = c.history || "—";
 
-  $("examResultsArea").innerHTML = "";
-  updateCaseHUD();
-}
-
-function renderQuestions(c){
-  const q = $("questionsArea");
-  q.innerHTML = "";
-  (c.questions || []).forEach(qu=>{
-    const b = document.createElement("button");
-    b.innerText = qu.label;
-    b.onclick = ()=>{
-      gameState.caseTimerSec = clamp(gameState.caseTimerSec + 6, 0, 999999);
-      gameState.pressure = clamp(gameState.pressure + 1.0, 0, 100);
-      updateCaseHUD();
-      alert(qu.answer);
-      saveGame();
-    };
-    q.appendChild(b);
+  // questions
+  const qBox = el("questionsList");
+  qBox.innerHTML = "";
+  (c.questions || []).forEach((q) => {
+    const row = document.createElement("div");
+    row.className = "pickItem";
+    row.innerHTML = `
+      <div class="pickMeta">
+        <div class="pickTitle">${q.label || "Pergunta"}</div>
+        <div class="pickSub" style="display:none">${q.answer || "—"}</div>
+      </div>
+      <button class="chip" type="button">Ver resposta</button>
+    `;
+    const btn = row.querySelector("button");
+    const ans = row.querySelector(".pickSub");
+    btn.addEventListener("click", () => {
+      const isHidden = ans.style.display === "none";
+      ans.style.display = isHidden ? "block" : "none";
+      btn.textContent = isHidden ? "Ocultar" : "Ver resposta";
+    });
+    qBox.appendChild(row);
   });
+
+  // exam results
+  const res = el("examResultsBox");
+  res.innerHTML = `<div class="muted">Nenhum exame solicitado ainda.</div>`;
+
+  // picks: exams (shows ALL exams)
+  renderExamPickList();
+
+  // dx
+  renderDxPickList();
+
+  // meds
+  renderMedPickList();
 }
 
-function renderAllExams(c){
-  const area = $("examsArea");
-  area.innerHTML = "";
+function renderExamPickList(){
+  const list = el("examPickList");
+  list.innerHTML = "";
 
-  const disabledTypes = new Set(gameState.currentEvent.disabledExamTypes || []);
+  EXAMS.forEach(ex => {
+    const id = ex.id;
+    const item = document.createElement("div");
+    item.className = "pickItem";
+    item.innerHTML = `
+      <input type="checkbox" />
+      <div class="pickMeta">
+        <div class="pickTitle">${ex.label}</div>
+        <div class="pickSub">Tempo: ${ex.time} min • ${ex.type}</div>
+      </div>
+    `;
+    const cb = item.querySelector("input");
 
-  gameState.examsCatalog.forEach(exam=>{
-    const b = document.createElement("button");
+    item.addEventListener("click", (ev) => {
+      if (ev.target.tagName !== "INPUT") cb.checked = !cb.checked;
 
-    const recommended = (c.recommendedExams || []).includes(exam.id);
-    const essential = (c.essentialExams || []).includes(exam.id);
-    const disabled = disabledTypes.has(exam.type);
-
-    b.innerHTML =
-      `<strong>${exam.label}</strong><br><small>${exam.type} · ${exam.etaMin} min${essential ? " · ESSENCIAL" : (recommended ? " · recomendado" : "")}${disabled ? " · INDISPONÍVEL" : ""}</small>`;
-
-    if(disabled){
-      b.style.opacity = "0.55";
-      b.onclick = ()=>alert("Este tipo de exame está indisponível neste caso (evento do plantão).");
-    } else {
-      b.onclick = ()=>requestExam(exam.id);
-    }
-
-    area.appendChild(b);
-  });
-}
-
-function requestExam(examId){
-  const c = gameState.currentCase;
-  const catalog = gameState.examsCatalog.find(e=>e.id===examId);
-  if(!catalog) return;
-
-  if(gameState.requestedExams.has(examId)){
-    alert("Exame já solicitado.");
-    return;
-  }
-
-  gameState.requestedExams.add(examId);
-
-  const tri = normalizeTriage(c.patient.triage);
-  const triTimeMul = tri === "vermelho" ? 1.15 : tri === "amarelo" ? 1.05 : 1.0;
-
-  const evExamMul = gameState.currentEvent.examTimeMul || 1.0;
-
-  // custo de tempo/pressão
-  gameState.caseTimerSec += Math.round(catalog.etaMin * 1.8 * triTimeMul * evExamMul);
-  gameState.pressure = clamp(gameState.pressure + (catalog.etaMin >= 60 ? 7 : 3), 0, 100);
-
-  updateCaseHUD();
-
-  const specific = c.examResults ? c.examResults[examId] : null;
-  const result = specific || { text: catalog.normalText, image: catalog.image || null };
-
-  const box = $("examResultsArea");
-  const wrap = document.createElement("div");
-  wrap.style.padding = "10px";
-  wrap.style.marginTop = "10px";
-  wrap.style.border = "1px solid rgba(255,255,255,0.10)";
-  wrap.style.borderRadius = "12px";
-  wrap.style.background = "rgba(255,255,255,0.04)";
-
-  const title = document.createElement("div");
-  title.innerHTML = `<strong>${catalog.label}</strong> <small style="opacity:.8">(${catalog.type} · ${catalog.etaMin} min)</small>`;
-  title.style.marginBottom = "6px";
-
-  const text = document.createElement("div");
-  text.innerText = result.text || "(Sem descrição)";
-
-  wrap.appendChild(title);
-  wrap.appendChild(text);
-
-  if(result.image){
-    const img = document.createElement("img");
-    img.src = result.image;
-    img.style.width = "100%";
-    img.style.borderRadius = "10px";
-    img.style.marginTop = "8px";
-    img.style.border = "1px solid rgba(255,255,255,0.10)";
-    wrap.appendChild(img);
-  }
-
-  box.prepend(wrap);
-  saveGame();
-}
-
-function renderDiagnosis(c){
-  const d = $("diagnosisArea");
-  d.innerHTML = "";
-
-  (c.diagnosis || []).forEach(di=>{
-    const b = document.createElement("button");
-    b.innerHTML = `<strong>${di.label}</strong><br><small>gravidade: ${di.severity || "-"}</small>`;
-    b.onclick = ()=>{
-      document.querySelectorAll("#diagnosisArea button").forEach(x=>x.classList.remove("selected"));
-      b.classList.add("selected");
-      gameState.selectedDiagnosis = di;
-      saveGame();
-    };
-    d.appendChild(b);
-  });
-}
-
-function renderMedications(c){
-  const m = $("medicationsArea");
-  m.innerHTML = "";
-
-  (c.medications || []).forEach(me=>{
-    const b = document.createElement("button");
-    b.innerHTML = `<strong>${me.label}</strong><br><small>risco: ${me.risk || "media"}</small>`;
-    b.onclick = ()=>{
-      const key = me.label;
-      const has = gameState.selectedMedications.has(key);
-
-      if(has){
-        gameState.selectedMedications.delete(key);
-        b.classList.remove("selected");
-      } else {
-        if(gameState.selectedMedications.size >= 2){
-          alert("Você pode selecionar no máximo 2 condutas/medicações.");
+      if (cb.checked){
+        if (current.pickedExams.size >= current.maxExams){
+          cb.checked = false;
+          toast(`Você pode escolher até ${current.maxExams} exames.`);
           return;
         }
-        gameState.selectedMedications.add(key);
-        b.classList.add("selected");
+        current.pickedExams.add(id);
+        item.classList.add("selected");
+      }else{
+        current.pickedExams.delete(id);
+        item.classList.remove("selected");
       }
 
-      gameState.pressure = clamp(gameState.pressure + 1.5, 0, 100);
-      updateCaseHUD();
+      renderExamResults();
+    });
 
-      saveGame();
-    };
-    m.appendChild(b);
+    list.appendChild(item);
   });
 }
 
-/* ===============================
-   ÓBITO / FALHA GRAVE
-================================ */
-function handleDeath(reason){
-  stopCaseInterval();
+function renderExamResults(){
+  const c = current.caseObj;
+  const res = el("examResultsBox");
+  res.innerHTML = "";
 
-  gameState.mistakes += 1;
-  gameState.shift.deaths = (gameState.shift.deaths || 0) + 1;
-
-  gameState.prestige += prestigeDeltaFromCaseScore(-999, true);
-  gameState.points = Math.max(0, gameState.points - 90);
-  gameState.casesDone += 1;
-
-  // shift progress
-  if(gameState.shift.active){
-    gameState.shift.done += 1;
-    gameState.shift.streak = 0; // streak quebra
-  }
-
-  applyProgression();
-  updateRanking();
-  saveGame();
-
-  alert(`ÓBITO / FALHA GRAVE\nMotivo: ${reason}\n\nImpacto: -90 pts, prestígio negativo, streak zerada.`);
-  enterOffice();
-}
-
-/* ===============================
-   FINALIZAÇÃO + SCORE (com Streak)
-================================ */
-function finalizeCase(){
-  const c = gameState.currentCase;
-  if(!c) return;
-
-  if(!gameState.selectedDiagnosis){
-    alert("Selecione um diagnóstico para finalizar.");
+  if (!current.pickedExams.size){
+    res.innerHTML = `<div class="muted">Nenhum exame solicitado ainda.</div>`;
     return;
   }
 
-  stopCaseInterval();
+  current.pickedExams.forEach((examId) => {
+    const known = (c.examResults || {})[examId];
+    const block = document.createElement("div");
+    block.className = "block";
+    const title = EXAMS.find(e => e.id === examId)?.label || examId;
 
-  let score = 0;
-  let death = false;
+    // Se não existir resultado no caso => "normal"
+    const text = known?.text || "Sem alterações relevantes (resultado normal simulado).";
+    const img = known?.image || null;
 
-  // Diagnóstico
-  const dxCorrect = !!gameState.selectedDiagnosis.correct;
-  score += dxCorrect ? 50 : -45;
-
-  // Medicações/condutas
-  const meds = (c.medications || []);
-  const chosen = Array.from(gameState.selectedMedications);
-
-  let medsAllCorrect = chosen.length > 0;
-  let hasHighRiskWrong = false;
-
-  chosen.forEach(label=>{
-    const opt = meds.find(x=>x.label === label);
-    if(!opt) return;
-
-    if(opt.correct){
-      score += 20;
-    } else {
-      medsAllCorrect = false;
-      const pen = riskPenalty(opt.risk);
-      score -= pen;
-
-      if(String(opt.risk||"").toLowerCase()==="alta") hasHighRiskWrong = true;
-    }
+    block.innerHTML = `
+      <div class="blockTitle">${title}</div>
+      <div class="blockText">${text}</div>
+      ${img ? `<div style="margin-top:10px;"><img src="${img}" alt="Imagem do exame" style="width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.10)"></div>` : ""}
+    `;
+    res.appendChild(block);
   });
+}
 
-  if(chosen.length === 0){
-    score -= 10;
-    medsAllCorrect = false;
-  }
+function renderDxPickList(){
+  const list = el("dxPickList");
+  list.innerHTML = "";
 
-  // Exames
-  const requested = Array.from(gameState.requestedExams);
-  const recommended = new Set(c.recommendedExams || []);
+  const dx = current.caseObj.diagnosis || [];
+  dx.forEach((d, idx) => {
+    const item = document.createElement("div");
+    item.className = "pickItem";
+    item.innerHTML = `
+      <input type="radio" name="dxPick" />
+      <div class="pickMeta">
+        <div class="pickTitle">${d.label}</div>
+        <div class="pickSub">Severidade: ${d.severity || "—"}</div>
+      </div>
+    `;
+    const rb = item.querySelector("input");
+
+    item.addEventListener("click", (ev) => {
+      if (ev.target.tagName !== "INPUT") rb.checked = true;
+      current.pickedDx = idx;
+
+      list.querySelectorAll(".pickItem").forEach(x => x.classList.remove("selected"));
+      item.classList.add("selected");
+    });
+
+    list.appendChild(item);
+  });
+}
+
+function renderMedPickList(){
+  const list = el("medPickList");
+  list.innerHTML = "";
+
+  const meds = current.caseObj.medications || [];
+  meds.forEach((m, idx) => {
+    const item = document.createElement("div");
+    item.className = "pickItem";
+    item.innerHTML = `
+      <input type="checkbox" />
+      <div class="pickMeta">
+        <div class="pickTitle">${m.label}</div>
+        <div class="pickSub">Risco: ${m.risk || "—"}</div>
+      </div>
+    `;
+    const cb = item.querySelector("input");
+
+    item.addEventListener("click", (ev) => {
+      if (ev.target.tagName !== "INPUT") cb.checked = !cb.checked;
+
+      if (cb.checked){
+        if (current.pickedMeds.size >= current.maxMeds){
+          cb.checked = false;
+          toast(`Você pode escolher até ${current.maxMeds} condutas.`);
+          return;
+        }
+        current.pickedMeds.add(idx);
+        item.classList.add("selected");
+      }else{
+        current.pickedMeds.delete(idx);
+        item.classList.remove("selected");
+      }
+    });
+
+    list.appendChild(item);
+  });
+}
+
+/* ---------- Scoring ---------- */
+function scoreCase(){
+  const c = current.caseObj;
+  let pointsDelta = 0;
+
+  // Exams: essenciais/recomendados ajudam; fora do caso tira
   const essential = new Set(c.essentialExams || []);
+  const recommended = new Set(c.recommendedExams || []);
 
-  let missingEssential = 0;
-  essential.forEach(examId=>{
-    if(!gameState.requestedExams.has(examId)){
-      score -= 25;
-      missingEssential += 1;
+  let examGood = 0;
+  let examBad = 0;
+
+  current.pickedExams.forEach(exId => {
+    const hasResult = !!((c.examResults || {})[exId]);
+    if (essential.has(exId)) { pointsDelta += 18; examGood++; return; }
+    if (recommended.has(exId)) { pointsDelta += 10; examGood++; return; }
+
+    // Se não existe resultado no caso (exame "sem sentido")
+    if (!hasResult) { pointsDelta -= 10; examBad++; return; }
+
+    // existe resultado mas não era recomendado: leve penalidade
+    pointsDelta -= 4; examBad++;
+  });
+
+  // Dx
+  const dxArr = c.diagnosis || [];
+  if (current.pickedDx == null){
+    pointsDelta -= 20;
+  } else {
+    const chosen = dxArr[current.pickedDx];
+    if (chosen?.correct) pointsDelta += 35;
+    else pointsDelta -= 25;
+  }
+
+  // Meds
+  const meds = c.medications || [];
+  let medGood = 0;
+  let medBad = 0;
+
+  current.pickedMeds.forEach(idx => {
+    const m = meds[idx];
+    if (!m) return;
+    if (m.correct){ pointsDelta += 12; medGood++; }
+    else{
+      // penalidade por risco
+      if (m.risk === "alta") pointsDelta -= 28;
+      else if (m.risk === "media") pointsDelta -= 16;
+      else pointsDelta -= 10;
+      medBad++;
     }
   });
 
-  // penaliza/exalta exames
-  requested.forEach(examId=>{
-    if(recommended.has(examId)) score += 2;
-    else score -= (6 + (gameState.currentEvent.extraPenaltyWrongExam || 0));
-  });
+  // Ajuste final e clamp por caso
+  pointsDelta = clamp(pointsDelta, -80, 80);
 
-  // Estouro tempo
-  const over = Math.max(0, gameState.caseTimerSec - gameState.caseLimitSec);
-  if(over > 0){
-    score -= Math.min(70, Math.floor(over / 10));
+  const success = pointsDelta >= 10;
+
+  state.stats.cases += 1;
+  state.stats.shift += 1;
+
+  if (success){
+    state.stats.correct += 1;
+    state.stats.streak += 1;
+  } else {
+    state.stats.wrong += 1;
+    state.stats.streak = 0;
   }
 
-  // Pressão
-  if(gameState.pressure >= 85) score -= 14;
-  else if(gameState.pressure >= 60) score -= 7;
+  state.stats.points = Math.max(0, state.stats.points + pointsDelta);
 
-  // Evento: multiplicador de score (leve)
-  score = Math.round(score * (gameState.currentEvent.scoreMul || 1.0));
+  // rank progression (simples, você pode refiná-la depois)
+  const pts = state.stats.points;
+  if (pts >= 250) state.doctor.rank = "Médico Pleno";
+  else if (pts >= 120) state.doctor.rank = "Médico Titular";
+  else state.doctor.rank = "Médico Residente";
 
-  // Óbito AAA: vermelho + (dx errado OU conduta alto risco errada) + (essencial faltando OU estourou tempo OU pressão crítica)
-  const tri = normalizeTriage(c.patient.triage);
-  if(tri === "vermelho"){
-    const wrongDx = !dxCorrect;
-    const timeBad = gameState.caseTimerSec > gameState.caseLimitSec;
-    if((wrongDx || hasHighRiskWrong) && (missingEssential > 0 || timeBad || gameState.pressure >= 85)){
-      death = true;
-    }
-  }
+  state.lastCaseId = c.id || null;
 
-  // Evento “Falta de insumos” deixa mais punitivo em caso vermelho
-  if(gameState.currentEvent.id === "supplies_shortage" && tri === "vermelho"){
-    if(!dxCorrect && (missingEssential > 0 || gameState.pressure >= 85)) death = true;
-  }
+  save();
+  refreshOffice();
 
-  if(death){
-    handleDeath("Falha crítica sob condições do plantão/evento.");
+  return {
+    pointsDelta,
+    examGood, examBad,
+    dxChosen: current.pickedDx == null ? null : dxArr[current.pickedDx]?.label,
+    medGood, medBad,
+    success
+  };
+}
+
+/* ---------- Results screen ---------- */
+function showResults(summary){
+  el("resultsTitle").textContent = "Resumo do caso";
+  el("resultsSub").textContent = summary.success ? "Boa condução (simulado)." : "Condução inadequada (simulado).";
+
+  el("resPoints").textContent = `${summary.pointsDelta >= 0 ? "+" : ""}${summary.pointsDelta}`;
+  el("resExams").textContent = `${summary.examGood} ok / ${summary.examBad} ruins`;
+  el("resDx").textContent = summary.dxChosen || "Não selecionado";
+  el("resMeds").textContent = `${summary.medGood} ok / ${summary.medBad} ruins`;
+
+  // gabarito
+  const c = current.caseObj;
+  const dxOk = (c.diagnosis || []).find(d => d.correct)?.label || "—";
+  const ess = (c.essentialExams || []).join(", ") || "—";
+  const rec = (c.recommendedExams || []).join(", ") || "—";
+  const medsOk = (c.medications || []).filter(m => m.correct).map(m => m.label).slice(0,4).join("<br/>") || "—";
+
+  el("answerKey").innerHTML = `
+    <b>Diagnóstico correto:</b> ${dxOk}<br/><br/>
+    <b>Exames essenciais:</b> ${ess}<br/>
+    <b>Exames recomendados:</b> ${rec}<br/><br/>
+    <b>Condutas recomendadas (amostra):</b><br/>${medsOk}
+  `;
+
+  // ranking local
+  pushRanking(state.doctor.name || "Anônimo", state.stats.points);
+
+  showScreen("results");
+}
+
+/* ---------- Ranking (Local) ---------- */
+function pushRanking(name, points){
+  const raw = localStorage.getItem(RANKING_KEY);
+  let arr = [];
+  try { arr = raw ? JSON.parse(raw) : []; } catch { arr = []; }
+
+  arr.push({ name, points, at: Date.now() });
+  arr.sort((a,b) => b.points - a.points);
+  arr = arr.slice(0, 20);
+
+  localStorage.setItem(RANKING_KEY, JSON.stringify(arr));
+}
+
+function renderRanking(){
+  const raw = localStorage.getItem(RANKING_KEY);
+  let arr = [];
+  try { arr = raw ? JSON.parse(raw) : []; } catch { arr = []; }
+
+  if (!arr.length){
+    el("rankList").innerHTML = "Sem dados ainda.";
     return;
   }
 
-  // Stats gerais
-  if(dxCorrect) gameState.hits += 1;
-  else gameState.mistakes += 1;
-
-  // SHIFT: streak e bônus
-  let streakBonus = 0;
-  if(gameState.shift.active){
-    gameState.shift.done += 1;
-
-    // streak só conta se diagnóstico correto e TODAS condutas selecionadas corretas (e pelo menos 1)
-    const streakHit = dxCorrect && medsAllCorrect;
-
-    if(streakHit){
-      gameState.shift.streak += 1;
-      gameState.shift.bestStreak = Math.max(gameState.shift.bestStreak || 0, gameState.shift.streak);
-
-      // bônus progressivo
-      // 2+: +10, 3+: +16, 4+: +22, 5+: +30, acima cresce +6
-      const s = gameState.shift.streak;
-      if(s >= 2 && s <= 5) streakBonus = [0,0,10,16,22,30][s];
-      else if(s > 5) streakBonus = 30 + (s - 5) * 6;
-
-      score += streakBonus;
-    } else {
-      gameState.shift.streak = 0;
-    }
-
-    // auto-encerra ao bater meta
-    if(gameState.shift.done >= gameState.shift.target){
-      // aplica e depois encerra via endShift()
-      gameState.points = Math.max(0, gameState.points + score);
-      gameState.prestige += prestigeDeltaFromCaseScore(score, false);
-      gameState.casesDone += 1;
-
-      applyProgression();
-      saveGame();
-
-      alert(`Atendimento finalizado.\nPontuação do caso: ${score}${streakBonus?` (streak +${streakBonus})`:""}\nPlantão concluído!`);
-      endShift();
-      return;
-    }
-  }
-
-  // Aplica normal
-  gameState.points = Math.max(0, gameState.points + score);
-  gameState.prestige += prestigeDeltaFromCaseScore(score, false);
-  gameState.casesDone += 1;
-
-  applyProgression();
-  updateRanking();
-  saveGame();
-
-  alert(`Atendimento finalizado.\nPontuação do caso: ${score}${streakBonus?` (streak +${streakBonus})`:""}\nTotal: ${gameState.points}\nPrestígio: ${gameState.prestige}\nCargo: ${gameState.doctor.tier}`);
-  enterOffice();
+  el("rankList").innerHTML = arr.map((r, i) => {
+    const p = String(r.points).padStart(3," ");
+    return `<div style="margin:8px 0"><b>#${i+1}</b> — ${r.name} — <b>${p}</b> pts</div>`;
+  }).join("");
 }
 
-/* ===============================
-   AUTO BOOT
-================================ */
-window.addEventListener("load", async ()=>{
-  const loaded = loadSave();
-  if(loaded) gameState = loaded;
-  await registerSW();
-});
+/* ---------- Events ---------- */
+async function onNewGame(){
+  const ok = await loadData();
+  if (!ok) return;
+
+  resetSave();
+  save();
+
+  showScreen("profile");
+}
+
+async function onContinue(){
+  const ok = await loadData();
+  if (!ok) return;
+
+  const has = load();
+  if (!has){
+    toast("Nenhum salvamento encontrado.");
+    return;
+  }
+  refreshOffice();
+  showScreen("office");
+}
+
+function onStartFromProfile(){
+  const name = (el("inputName").value || "").trim();
+  if (name.length < 2){
+    toast("Digite seu nome para iniciar.");
+    return;
+  }
+
+  state.doctor.name = name;
+
+  // se não selecionou avatar, mantém o default
+  save();
+  refreshOffice();
+  showScreen("office");
+}
+
+function onNextCase(){
+  const c = pickNextCase();
+  if (!c){
+    toast("Sem casos disponíveis.");
+    return;
+  }
+  renderCase(c);
+  showScreen("case");
+}
+
+function onFinalize(){
+  if (!current.caseObj){
+    toast("Nenhum caso carregado.");
+    return;
+  }
+  const summary = scoreCase();
+  showResults(summary);
+}
+
+function toggleModal(modalEl, show){
+  if (!modalEl) return;
+  modalEl.classList.toggle("show", !!show);
+}
+
+async function requestFullScreen(){
+  // iOS Safari limita fullscreen real; ainda assim o layout já é 100% “app-like”.
+  const root = document.documentElement;
+  try{
+    if (document.fullscreenElement) await document.exitFullscreen();
+    else if (root.requestFullscreen) await root.requestFullscreen();
+  }catch(e){
+    // sem alert aqui para não irritar; botão segue útil em browsers compatíveis
+    console.warn("Fullscreen não suportado neste navegador.");
+  }
+}
+
+/* ---------- Bootstrap ---------- */
+function wire(){
+  // Home buttons
+  el("btnNewGame").addEventListener("click", onNewGame);
+  el("btnContinue").addEventListener("click", onContinue);
+
+  // Profile
+  bindAvatarGrid();
+  el("btnProfileBack").addEventListener("click", () => showScreen("home"));
+  el("btnStartFromProfile").addEventListener("click", onStartFromProfile);
+
+  // Office
+  el("btnNextCase").addEventListener("click", onNextCase);
+  el("btnResetSave").addEventListener("click", () => {
+    if (confirm("Tem certeza que deseja resetar o salvamento?")){
+      resetSave();
+      save();
+      refreshOffice();
+      showScreen("home");
+    }
+  });
+
+  // Case
+  el("btnBackOffice").addEventListener("click", () => {
+    refreshOffice();
+    showScreen("office");
+  });
+  el("btnFinalize").addEventListener("click", onFinalize);
+
+  // Results
+  el("btnResultsHome").addEventListener("click", () => showScreen("home"));
+  el("btnResultsOffice").addEventListener("click", () => { refreshOffice(); showScreen("office"); });
+
+  // Topbar
+  el("btnFullScreen").addEventListener("click", requestFullScreen);
+
+  // Help / Ranking
+  const helpModal = el("helpModal");
+  const rankModal = el("rankModal");
+
+  el("btnHelp").addEventListener("click", () => toggleModal(helpModal, true));
+  el("btnCloseHelp").addEventListener("click", () => toggleModal(helpModal, false));
+  helpModal.addEventListener("click", (e) => { if (e.target === helpModal) toggleModal(helpModal, false); });
+
+  el("btnRanking").addEventListener("click", () => { renderRanking(); toggleModal(rankModal, true); });
+  el("btnCloseRank").addEventListener("click", () => toggleModal(rankModal, false));
+  rankModal.addEventListener("click", (e) => { if (e.target === rankModal) toggleModal(rankModal, false); });
+}
+
+function bootstrap(){
+  // Se existir save, habilita continuar
+  const hasSave = !!localStorage.getItem(STORAGE_KEY);
+  el("btnContinue").disabled = !hasSave;
+
+  // Tenta carregar save para atualizar label no Office quando entrar por Continue
+  if (hasSave){
+    load();
+  }
+
+  // default avatar selected UI
+  const grid = el("avatarGrid");
+  if (grid){
+    const first = grid.querySelector('.avatarCard[data-avatar="images/doctor_1.jpg"]') || grid.querySelector(".avatarCard");
+    if (first) first.classList.add("selected");
+  }
+
+  refreshOffice();
+  showScreen("home");
+}
+
+wire();
+bootstrap();
