@@ -1,659 +1,1085 @@
 /* =========================================================
-   Emergency Doctor Simulator – Core
+   Emergency Doctor Simulator — script.js (FULL)
+   Fixes:
+   - Robust loading of cases.json + exams.json on GitHub Pages subpath and Vercel
+   - Home buttons (Novo Jogo / Continuar) wired
+   - Full Atendimento (screenCase) rendering + scoring
+   - Fallbacks if a requested exam has no result in the case
    ========================================================= */
 
-const STORAGE_KEY = "eds_save_v1";
-const RANKING_KEY = "eds_ranking_v1";
+(() => {
+  "use strict";
 
-/* ---------- State ---------- */
-let CASES = [];
-let EXAMS = [];
+  // =========================
+  // CONFIG
+  // =========================
+  const STORAGE_KEY = "eds_save_v1";
+  const RANKING_KEY = "eds_ranking_v1"; // local ranking (offline)
 
-let state = {
-  doctor: { name: "", avatar: "images/doctor_1.jpg", rank: "Médico Residente" },
-  stats: { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0 },
-  lastCaseId: null
-};
-
-let current = {
-  caseObj: null,
-  pickedExams: new Set(),
-  pickedDx: null,
-  pickedMeds: new Set(),
-  maxExams: 3,
-  maxMeds: 2
-};
-
-/* ---------- Helpers ---------- */
-const el = (id) => document.getElementById(id);
-const clamp = (n, a, b) => Math.max(a, Math.min(b, n));
-
-function showScreen(name){
-  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
-  const screen = document.querySelector(`.screen[data-screen="${name}"]`);
-  if (screen) screen.classList.add("active");
-}
-
-function toast(msg){
-  alert(msg);
-}
-
-function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-}
-
-function load(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return false;
-  try {
-    const parsed = JSON.parse(raw);
-    if (!parsed || !parsed.doctor || !parsed.stats) return false;
-    state = parsed;
-    return true;
-  } catch {
-    return false;
+  // GitHub Pages often runs under /<repo-name>/ ; Vercel usually under /
+  function getBasePath() {
+    const p = window.location.pathname || "/";
+    // If ends with .html => base is folder
+    if (p.endsWith(".html")) return p.slice(0, p.lastIndexOf("/") + 1);
+    // If ends with / => base is itself
+    if (p.endsWith("/")) return p;
+    // Otherwise base folder
+    return p + "/";
   }
-}
 
-function resetSave(){
-  localStorage.removeItem(STORAGE_KEY);
-  state = {
-    doctor: { name: "", avatar: "images/doctor_1.jpg", rank: "Médico Residente" },
-    stats: { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0 },
-    lastCaseId: null
+  const BASE = getBasePath();
+
+  // Try multiple URL candidates (covers GH Pages + Vercel + SW cache issues)
+  async function loadJsonSmart(fileName) {
+    const cacheBust = `v=${Date.now()}`;
+    const candidates = [
+      `${fileName}?${cacheBust}`,                 // relative (works in most cases)
+      `./${fileName}?${cacheBust}`,
+      `${BASE}${fileName}?${cacheBust}`,          // explicit base (GH Pages safe)
+      `${BASE.replace(/\/+$/, "")}/${fileName}?${cacheBust}`,
+    ];
+
+    const tried = [];
+    for (const url of candidates) {
+      try {
+        tried.push(url);
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) continue;
+        const txt = await res.text();
+        return JSON.parse(txt);
+      } catch (_) {
+        // continue
+      }
+    }
+
+    const err = new Error(
+      `Falha ao carregar ${fileName}. Tentativas:\n- ${tried.join("\n- ")}`
+    );
+    err.tried = tried;
+    throw err;
+  }
+
+  // =========================
+  // DOM HELPERS
+  // =========================
+  const $ = (id) => document.getElementById(id);
+
+  function showScreen(screenId) {
+    const screens = document.querySelectorAll(".screen");
+    screens.forEach((s) => s.classList.remove("active"));
+    const target = $(screenId);
+    if (target) target.classList.add("active");
+    window.scrollTo(0, 0);
+  }
+
+  function setText(id, text) {
+    const el = $(id);
+    if (el) el.textContent = text ?? "";
+  }
+
+  function clamp(n, a, b) {
+    return Math.max(a, Math.min(b, n));
+  }
+
+  function safeLower(s) {
+    return String(s || "").toLowerCase();
+  }
+
+  function formatTriage(t) {
+    const v = safeLower(t);
+    if (v.includes("vermel")) return { label: "VERMELHO", cls: "triageRed" };
+    if (v.includes("amarel")) return { label: "AMARELO", cls: "triageYellow" };
+    return { label: "VERDE", cls: "triageGreen" };
+  }
+
+  // =========================
+  // STATE
+  // =========================
+  let CASES = [];
+  let EXAMS = []; // normalized array: [{id,label,category,timeMin,desc,normalText,image}]
+  let EXAMS_MAP = new Map();
+
+  const defaultState = {
+    player: {
+      name: "",
+      avatar: "images/avatars/doc1.jpg",
+    },
+    stats: {
+      points: 0,
+      casesDone: 0,
+      correctDx: 0,
+      streak: 0,
+      rank: "Interno",
+    },
+    progress: {
+      currentCaseId: null,
+      usedCaseIds: [],
+    },
+    lastCase: null,
   };
-}
 
-/* ---------- Data loading ---------- */
-async function loadData(){
-  try{
-    const [casesRes, examsRes] = await Promise.all([
-      fetch("cases.json", { cache: "no-store" }),
-      fetch("exams.json", { cache: "no-store" })
-    ]);
+  let state = structuredClone(defaultState);
 
-    if (!casesRes.ok || !examsRes.ok) throw new Error("HTTP error");
-    CASES = await casesRes.json();
-    EXAMS = await examsRes.json();
+  function saveState() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  }
 
-    if (!Array.isArray(CASES) || !Array.isArray(EXAMS)) throw new Error("JSON inválido");
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const obj = JSON.parse(raw);
+      if (!obj || typeof obj !== "object") return false;
+      state = { ...structuredClone(defaultState), ...obj };
+      // merge nested with safety
+      state.player = { ...structuredClone(defaultState.player), ...(obj.player || {}) };
+      state.stats = { ...structuredClone(defaultState.stats), ...(obj.stats || {}) };
+      state.progress = { ...structuredClone(defaultState.progress), ...(obj.progress || {}) };
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  function clearState() {
+    state = structuredClone(defaultState);
+    localStorage.removeItem(STORAGE_KEY);
+  }
+
+  // =========================
+  // RANK / PROGRESSION
+  // =========================
+  function computeRank(points) {
+    // You can tune later (upgrade #3)
+    if (points >= 900) return "Chefe de Plantão";
+    if (points >= 650) return "Médico Sênior";
+    if (points >= 420) return "Plantonista";
+    if (points >= 250) return "Residente";
+    return "Interno";
+  }
+
+  function tierForRank(rank) {
+    // Controls which cases appear more (but still mixed)
+    const r = safeLower(rank);
+    if (r.includes("chefe") || r.includes("sênior")) return "pleno";
+    if (r.includes("plantonista")) return "titular";
+    if (r.includes("residente")) return "residente";
+    return "residente";
+  }
+
+  function updateHud() {
+    const pts = state.stats.points | 0;
+    state.stats.rank = computeRank(pts);
+
+    setText("uiName", state.player.name || "—");
+    const avatarImg = $("uiAvatar");
+    if (avatarImg) avatarImg.src = state.player.avatar;
+
+    setText("uiRank", state.stats.rank);
+    setText("uiScore", String(pts));
+    setText("uiCases", String(state.stats.casesDone | 0));
+    setText("uiStreak", String(state.stats.streak | 0));
+
+    const homeContinue = $("btnContinue");
+    if (homeContinue) homeContinue.disabled = !localStorage.getItem(STORAGE_KEY);
+
+    // Update home buttons visually if CSS uses disabled styles
+  }
+
+  // =========================
+  // DATA NORMALIZATION
+  // =========================
+  function normalizeExams(raw) {
+    // Accept formats:
+    // 1) { exams: [...] }
+    // 2) { version, exams: [...], normalFallback: {...} }
+    // 3) [...] direct
+    let list = [];
+    let normalFallback = null;
+
+    if (Array.isArray(raw)) {
+      list = raw;
+    } else if (raw && typeof raw === "object") {
+      if (Array.isArray(raw.exams)) list = raw.exams;
+      if (raw.normalFallback) normalFallback = raw.normalFallback;
+    }
+
+    const normalized = list.map((e) => {
+      const id = e.id || e.key || e.slug;
+      const label = e.label || e.name || id;
+      const category = e.category || e.type || "Laboratório";
+      const timeMin = Number(e.timeMin ?? e.time ?? 30);
+      const desc = e.desc || e.description || "";
+      const normalText =
+        e.normalText ||
+        (normalFallback && normalFallback.text) ||
+        "Sem alterações relevantes (simulado).";
+      const image =
+        e.image ||
+        (normalFallback && normalFallback.image) ||
+        null;
+
+      return { id, label, category, timeMin, desc, normalText, image };
+    }).filter((x) => !!x.id);
+
+    return normalized;
+  }
+
+  // =========================
+  // CASE PICKING
+  // =========================
+  function caseMatchesTier(c, desiredTier) {
+    const t = safeLower(c.tier);
+    if (!desiredTier) return true;
+    if (desiredTier === "residente") return t.includes("residente");
+    if (desiredTier === "titular") return t.includes("titular");
+    if (desiredTier === "pleno") return t.includes("pleno");
     return true;
-  }catch(err){
-    console.error(err);
-    toast("Erro ao carregar cases.json/exams.json. Verifique se os arquivos existem na raiz do projeto.");
-    return false;
-  }
-}
-
-/* ---------- UI: Profile ---------- */
-function bindAvatarGrid(){
-  const grid = el("avatarGrid");
-  if (!grid) return;
-
-  grid.addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".avatarCard");
-    if (!btn) return;
-    const avatar = btn.getAttribute("data-avatar");
-    if (!avatar) return;
-
-    state.doctor.avatar = avatar;
-
-    grid.querySelectorAll(".avatarCard").forEach(b => b.classList.remove("selected"));
-    btn.classList.add("selected");
-  }, { passive: true });
-}
-
-/* ---------- UI: Office ---------- */
-function refreshOffice(){
-  el("uiAvatar").src = state.doctor.avatar || "images/doctor_1.jpg";
-  el("uiName").textContent = state.doctor.name || "—";
-  el("uiRank").textContent = state.doctor.rank || "Médico Residente";
-
-  el("uiPoints").textContent = state.stats.points;
-  el("uiCorrect").textContent = state.stats.correct;
-  el("uiWrong").textContent = state.stats.wrong;
-  el("uiCases").textContent = state.stats.cases;
-  el("uiShift").textContent = state.stats.shift;
-  el("uiStreak").textContent = state.stats.streak;
-}
-
-/* ---------- Triage badge ---------- */
-function applyTriage(triage){
-  const badge = el("triageBadge");
-  badge.classList.remove("triage-green","triage-yellow","triage-red");
-
-  const t = (triage || "").toLowerCase();
-  if (t.includes("verde")) badge.classList.add("triage-green");
-  else if (t.includes("amare")) badge.classList.add("triage-yellow");
-  else if (t.includes("vermel")) badge.classList.add("triage-red");
-
-  el("triageText").textContent = triage || "—";
-}
-
-/* ---------- Case selection ---------- */
-function pickNextCase(){
-  if (!CASES.length) return null;
-
-  // simples: evita repetir o último
-  let pool = CASES.slice();
-  if (state.lastCaseId){
-    pool = pool.filter(c => c.id !== state.lastCaseId);
-    if (!pool.length) pool = CASES.slice();
   }
 
-  // “AAA”: aumenta chance de tiers mais altos conforme pontos
-  const pts = state.stats.points || 0;
-  const tierWanted =
-    pts >= 220 ? "pleno" :
-    pts >= 120 ? "titular" :
-    "residente";
+  function pickNextCase() {
+    // Prefer cases not used yet; if all used, reset used list.
+    const desiredTier = tierForRank(state.stats.rank);
 
-  // prioriza tierWanted, mas mantém mistura
-  const preferred = pool.filter(c => (c.tier || "") === tierWanted);
-  const mixed = preferred.length ? preferred : pool;
-  const chosen = mixed[Math.floor(Math.random() * mixed.length)];
-  return chosen || pool[0];
-}
+    const unused = CASES.filter((c) => !state.progress.usedCaseIds.includes(c.id));
+    let pool = unused.filter((c) => caseMatchesTier(c, desiredTier));
 
-/* ---------- Render Case ---------- */
-function renderCase(c){
-  current.caseObj = c;
-  current.pickedExams = new Set();
-  current.pickedDx = null;
-  current.pickedMeds = new Set();
+    // Keep variety: if pool empty, relax tier filter
+    if (pool.length === 0) pool = unused.length ? unused : CASES.slice();
 
-  // difficulty knobs
-  current.maxExams = 3;
-  current.maxMeds = 2;
+    if (!pool.length) return null;
 
-  el("maxExams").textContent = String(current.maxExams);
-  el("maxMeds").textContent = String(current.maxMeds);
+    // Weighted variety: sprinkle harder cases
+    const roll = Math.random();
+    if (roll < 0.18) {
+      const harder = pool.filter((c) => safeLower(c.tier).includes("pleno"));
+      if (harder.length) pool = harder;
+    } else if (roll < 0.38) {
+      const mid = pool.filter((c) => safeLower(c.tier).includes("titular"));
+      if (mid.length) pool = mid;
+    }
 
-  el("caseTitle").textContent = `Caso: ${c.id || "—"}`;
-  applyTriage(c.patient?.triage);
+    const picked = pool[Math.floor(Math.random() * pool.length)];
+    return picked || null;
+  }
 
-  el("patientPhoto").src = c.patient?.photo || "images/patient_male.jpg";
-  el("patientName").textContent = c.patient?.name || "—";
-  el("patientSub").textContent = `${c.patient?.age ?? "—"} anos • ${c.patient?.sex || "—"}`;
+  // =========================
+  // ATENDIMENTO (SCREEN CASE)
+  // =========================
+  let activeCase = null;
+  let selectedExams = new Set();
+  let selectedDx = null;
+  let selectedMeds = new Set();
 
-  // vitals
-  const vitals = el("vitalsList");
-  vitals.innerHTML = "";
-  (c.vitals || []).forEach(v => {
-    const li = document.createElement("li");
-    li.textContent = v;
-    vitals.appendChild(li);
-  });
+  function resetSelections() {
+    selectedExams = new Set();
+    selectedDx = null;
+    selectedMeds = new Set();
+  }
 
-  el("complaintText").textContent = c.complaint || "—";
-  el("historyText").textContent = c.history || "—";
+  function renderCaseHeader(c) {
+    setText("caseTitle", c.title || "Atendimento");
+    setText("caseSub", `${c.patient?.name || "Paciente"} • ${c.patient?.age ?? "—"} anos • ${c.patient?.sex || "—"}`);
 
-  // questions
-  const qBox = el("questionsList");
-  qBox.innerHTML = "";
-  (c.questions || []).forEach((q) => {
-    const row = document.createElement("div");
-    row.className = "pickItem";
-    row.innerHTML = `
-      <div class="pickMeta">
-        <div class="pickTitle">${q.label || "Pergunta"}</div>
-        <div class="pickSub" style="display:none">${q.answer || "—"}</div>
-      </div>
-      <button class="chip" type="button">Ver resposta</button>
-    `;
-    const btn = row.querySelector("button");
-    const ans = row.querySelector(".pickSub");
-    btn.addEventListener("click", () => {
-      const isHidden = ans.style.display === "none";
-      ans.style.display = isHidden ? "block" : "none";
-      btn.textContent = isHidden ? "Ocultar" : "Ver resposta";
-    });
-    qBox.appendChild(row);
-  });
+    // Triage badge
+    const tri = formatTriage(c.patient?.triage || "Verde");
+    setText("caseTriageLabel", tri.label);
+    const triBar = $("caseTriageBar");
+    if (triBar) {
+      triBar.classList.remove("triageRed", "triageYellow", "triageGreen");
+      triBar.classList.add(tri.cls);
+    }
 
-  // exam results
-  const res = el("examResultsBox");
-  res.innerHTML = `<div class="muted">Nenhum exame solicitado ainda.</div>`;
+    // Vitals
+    const vitalsBox = $("caseVitals");
+    if (vitalsBox) {
+      vitalsBox.innerHTML = "";
+      (c.vitals || []).forEach((v) => {
+        const pill = document.createElement("div");
+        pill.className = "pill";
+        pill.textContent = v;
+        vitalsBox.appendChild(pill);
+      });
+    }
 
-  // picks: exams (shows ALL exams)
-  renderExamPickList();
+    setText("caseComplaint", c.complaint || "—");
+    setText("caseHistory", c.history || "—");
+  }
 
-  // dx
-  renderDxPickList();
+  function renderQuestions(c) {
+    const box = $("caseQuestions");
+    if (!box) return;
+    box.innerHTML = "";
 
-  // meds
-  renderMedPickList();
-}
+    const qs = Array.isArray(c.questions) ? c.questions : [];
+    if (!qs.length) {
+      box.innerHTML = `<div class="muted">Sem perguntas adicionais neste caso.</div>`;
+      return;
+    }
 
-function renderExamPickList(){
-  const list = el("examPickList");
-  list.innerHTML = "";
+    qs.forEach((q, idx) => {
+      const row = document.createElement("div");
+      row.className = "qRow";
 
-  EXAMS.forEach(ex => {
-    const id = ex.id;
-    const item = document.createElement("div");
-    item.className = "pickItem";
-    item.innerHTML = `
-      <input type="checkbox" />
-      <div class="pickMeta">
-        <div class="pickTitle">${ex.label}</div>
-        <div class="pickSub">Tempo: ${ex.time} min • ${ex.type}</div>
-      </div>
-    `;
-    const cb = item.querySelector("input");
+      const left = document.createElement("div");
+      left.className = "qLeft";
+      left.innerHTML = `<div class="qLabel">${q.label || `Pergunta ${idx + 1}`}</div>`;
 
-    item.addEventListener("click", (ev) => {
-      if (ev.target.tagName !== "INPUT") cb.checked = !cb.checked;
+      const right = document.createElement("div");
+      right.className = "qRight";
 
-      if (cb.checked){
-        if (current.pickedExams.size >= current.maxExams){
-          cb.checked = false;
-          toast(`Você pode escolher até ${current.maxExams} exames.`);
-          return;
+      const btn = document.createElement("button");
+      btn.className = "btn small";
+      btn.textContent = "Ver resposta";
+
+      const ans = document.createElement("div");
+      ans.className = "qAnswer hidden";
+      ans.textContent = q.answer || "—";
+
+      btn.addEventListener("click", () => {
+        const hidden = ans.classList.contains("hidden");
+        if (hidden) {
+          ans.classList.remove("hidden");
+          btn.textContent = "Ocultar";
+        } else {
+          ans.classList.add("hidden");
+          btn.textContent = "Ver resposta";
         }
-        current.pickedExams.add(id);
-        item.classList.add("selected");
-      }else{
-        current.pickedExams.delete(id);
-        item.classList.remove("selected");
+      });
+
+      right.appendChild(btn);
+      right.appendChild(ans);
+
+      row.appendChild(left);
+      row.appendChild(right);
+      box.appendChild(row);
+    });
+  }
+
+  function renderExamPicker() {
+    const list = $("examPickList");
+    if (!list) return;
+    list.innerHTML = "";
+
+    // Show all exams (AAA requirement: user must choose among all)
+    EXAMS.forEach((exam) => {
+      const item = document.createElement("button");
+      item.className = "pickItem";
+      item.type = "button";
+      item.dataset.examId = exam.id;
+
+      const isSelected = selectedExams.has(exam.id);
+      if (isSelected) item.classList.add("selected");
+
+      item.innerHTML = `
+        <div class="pickTop">
+          <div class="pickName">${exam.label}</div>
+          <div class="pickMeta">Tempo: ${exam.timeMin} min • ${exam.category}</div>
+        </div>
+        ${exam.desc ? `<div class="pickDesc">${exam.desc}</div>` : ""}
+      `;
+
+      item.addEventListener("click", () => toggleExam(exam.id));
+      list.appendChild(item);
+    });
+
+    renderExamResults();
+  }
+
+  function getExamResultText(examId) {
+    const e = EXAMS_MAP.get(examId);
+    const caseHas = activeCase?.examResults && activeCase.examResults[examId];
+
+    if (caseHas && typeof caseHas === "object") {
+      const txt = caseHas.text || caseHas.result || "Resultado indisponível (simulado).";
+      return { text: txt, image: caseHas.image ?? e?.image ?? null };
+    }
+
+    // Not provided by case => normal fallback
+    return { text: e?.normalText || "Sem alterações relevantes (simulado).", image: e?.image || null };
+  }
+
+  function toggleExam(examId) {
+    if (!activeCase) return;
+
+    if (selectedExams.has(examId)) selectedExams.delete(examId);
+    else selectedExams.add(examId);
+
+    renderExamPicker(); // re-render to update selected style
+  }
+
+  function renderExamResults() {
+    const box = $("examResultsBox");
+    if (!box) return;
+    box.innerHTML = "";
+
+    const chosen = Array.from(selectedExams);
+    if (!chosen.length) {
+      box.innerHTML = `<div class="muted">Nenhum exame solicitado ainda.</div>`;
+      return;
+    }
+
+    chosen.forEach((examId) => {
+      const e = EXAMS_MAP.get(examId);
+      const r = getExamResultText(examId);
+
+      const card = document.createElement("div");
+      card.className = "resultInlineCard";
+      card.innerHTML = `
+        <div class="resultInlineTop">
+          <div class="resultInlineName">${e ? e.label : examId}</div>
+          <div class="resultInlineMeta">${e ? `${e.category} • ${e.timeMin} min` : ""}</div>
+        </div>
+        <div class="resultInlineText">${r.text}</div>
+      `;
+
+      // Optional image
+      if (r.image) {
+        const img = document.createElement("img");
+        img.className = "resultInlineImg";
+        img.alt = e ? e.label : "Imagem do exame";
+        img.src = r.image;
+        card.appendChild(img);
       }
 
-      renderExamResults();
+      box.appendChild(card);
     });
-
-    list.appendChild(item);
-  });
-}
-
-function renderExamResults(){
-  const c = current.caseObj;
-  const res = el("examResultsBox");
-  res.innerHTML = "";
-
-  if (!current.pickedExams.size){
-    res.innerHTML = `<div class="muted">Nenhum exame solicitado ainda.</div>`;
-    return;
   }
 
-  current.pickedExams.forEach((examId) => {
-    const known = (c.examResults || {})[examId];
-    const block = document.createElement("div");
-    block.className = "block";
-    const title = EXAMS.find(e => e.id === examId)?.label || examId;
+  function renderDxPicker() {
+    const list = $("dxPickList");
+    if (!list) return;
+    list.innerHTML = "";
 
-    // Se não existir resultado no caso => "normal"
-    const text = known?.text || "Sem alterações relevantes (resultado normal simulado).";
-    const img = known?.image || null;
+    const dx = Array.isArray(activeCase?.diagnosis) ? activeCase.diagnosis : [];
+    dx.forEach((d, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "pickItem";
+      btn.type = "button";
+      btn.dataset.dxIndex = String(idx);
 
-    block.innerHTML = `
-      <div class="blockTitle">${title}</div>
-      <div class="blockText">${text}</div>
-      ${img ? `<div style="margin-top:10px;"><img src="${img}" alt="Imagem do exame" style="width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.10)"></div>` : ""}
-    `;
-    res.appendChild(block);
-  });
-}
+      const chosen = selectedDx === idx;
+      if (chosen) btn.classList.add("selected");
 
-function renderDxPickList(){
-  const list = el("dxPickList");
-  list.innerHTML = "";
+      const sev = safeLower(d.severity || "leve");
+      const sevLabel = sev.includes("crit") ? "Crítico" : sev.includes("grav") ? "Grave" : "Leve";
 
-  const dx = current.caseObj.diagnosis || [];
-  dx.forEach((d, idx) => {
-    const item = document.createElement("div");
-    item.className = "pickItem";
-    item.innerHTML = `
-      <input type="radio" name="dxPick" />
-      <div class="pickMeta">
-        <div class="pickTitle">${d.label}</div>
-        <div class="pickSub">Severidade: ${d.severity || "—"}</div>
-      </div>
-    `;
-    const rb = item.querySelector("input");
+      btn.innerHTML = `
+        <div class="pickTop">
+          <div class="pickName">${d.label || "Diagnóstico"}</div>
+          <div class="pickMeta">Severidade: ${sevLabel}</div>
+        </div>
+      `;
 
-    item.addEventListener("click", (ev) => {
-      if (ev.target.tagName !== "INPUT") rb.checked = true;
-      current.pickedDx = idx;
+      btn.addEventListener("click", () => {
+        selectedDx = idx;
+        renderDxPicker();
+      });
 
-      list.querySelectorAll(".pickItem").forEach(x => x.classList.remove("selected"));
-      item.classList.add("selected");
+      list.appendChild(btn);
     });
+  }
 
-    list.appendChild(item);
-  });
-}
+  function renderMedPicker() {
+    const list = $("medPickList");
+    if (!list) return;
+    list.innerHTML = "";
 
-function renderMedPickList(){
-  const list = el("medPickList");
-  list.innerHTML = "";
+    const meds = Array.isArray(activeCase?.medications) ? activeCase.medications : [];
+    meds.forEach((m, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "pickItem";
+      btn.type = "button";
+      btn.dataset.medIndex = String(idx);
 
-  const meds = current.caseObj.medications || [];
-  meds.forEach((m, idx) => {
-    const item = document.createElement("div");
-    item.className = "pickItem";
-    item.innerHTML = `
-      <input type="checkbox" />
-      <div class="pickMeta">
-        <div class="pickTitle">${m.label}</div>
-        <div class="pickSub">Risco: ${m.risk || "—"}</div>
-      </div>
-    `;
-    const cb = item.querySelector("input");
+      const chosen = selectedMeds.has(idx);
+      if (chosen) btn.classList.add("selected");
 
-    item.addEventListener("click", (ev) => {
-      if (ev.target.tagName !== "INPUT") cb.checked = !cb.checked;
+      const risk = safeLower(m.risk || "baixa");
+      const riskLabel = risk.includes("alta") ? "Risco ALTO" : risk.includes("media") ? "Risco MÉDIO" : "Risco BAIXO";
 
-      if (cb.checked){
-        if (current.pickedMeds.size >= current.maxMeds){
-          cb.checked = false;
-          toast(`Você pode escolher até ${current.maxMeds} condutas.`);
-          return;
-        }
-        current.pickedMeds.add(idx);
-        item.classList.add("selected");
-      }else{
-        current.pickedMeds.delete(idx);
-        item.classList.remove("selected");
+      btn.innerHTML = `
+        <div class="pickTop">
+          <div class="pickName">${m.label || "Conduta"}</div>
+          <div class="pickMeta">${riskLabel}</div>
+        </div>
+      `;
+
+      btn.addEventListener("click", () => {
+        if (selectedMeds.has(idx)) selectedMeds.delete(idx);
+        else selectedMeds.add(idx);
+        renderMedPicker();
+      });
+
+      list.appendChild(btn);
+    });
+  }
+
+  function startCase(c) {
+    activeCase = c;
+    resetSelections();
+    state.progress.currentCaseId = c.id;
+    saveState();
+
+    renderCaseHeader(c);
+    renderQuestions(c);
+
+    renderExamPicker();
+    renderDxPicker();
+    renderMedPicker();
+
+    // Case CTA
+    const btnFinalize = $("btnFinalizeCase");
+    if (btnFinalize) {
+      btnFinalize.disabled = false;
+    }
+
+    showScreen("screenCase");
+  }
+
+  // =========================
+  // SCORING
+  // =========================
+  function computeExamScore(c) {
+    // Essential = must pick. Recommended = good. Unnecessary = penalty.
+    const essential = new Set((c.essentialExams || []).filter(Boolean));
+    const recommended = new Set((c.recommendedExams || []).filter(Boolean));
+
+    let score = 0;
+    let good = 0;
+    let bad = 0;
+
+    // reward selected essentials + recommended
+    for (const id of selectedExams) {
+      if (essential.has(id)) {
+        score += 8; good++;
+      } else if (recommended.has(id)) {
+        score += 4; good++;
+      } else {
+        score -= 3; bad++;
+      }
+    }
+
+    // penalty for missing essentials
+    for (const id of essential) {
+      if (!selectedExams.has(id)) score -= 6;
+    }
+
+    // clamp to avoid extremes
+    score = clamp(score, -20, 30);
+    return { score, good, bad, essentialCount: essential.size };
+  }
+
+  function computeDxScore(c) {
+    const dx = Array.isArray(c.diagnosis) ? c.diagnosis : [];
+    const chosen = (typeof selectedDx === "number") ? dx[selectedDx] : null;
+    if (!chosen) return { score: -8, correct: false, label: "Nenhum diagnóstico selecionado" };
+
+    const sev = safeLower(chosen.severity || "leve");
+    const sevMult = sev.includes("crit") ? 1.3 : sev.includes("grav") ? 1.1 : 1.0;
+
+    if (chosen.correct) {
+      const s = Math.round(22 * sevMult);
+      return { score: s, correct: true, label: chosen.label || "Correto" };
+    }
+    // wrong dx is worse when the correct dx is severe (case-dependent not known), keep stable:
+    const s = Math.round(-14 * sevMult);
+    return { score: s, correct: false, label: chosen.label || "Incorreto" };
+  }
+
+  function riskPenalty(risk) {
+    const r = safeLower(risk);
+    if (r.includes("alta")) return 12;
+    if (r.includes("media")) return 7;
+    return 4;
+  }
+
+  function computeMedScore(c) {
+    const meds = Array.isArray(c.medications) ? c.medications : [];
+    let score = 0;
+    let good = 0;
+    let bad = 0;
+
+    // reward/penalize selected meds
+    selectedMeds.forEach((idx) => {
+      const m = meds[idx];
+      if (!m) return;
+      if (m.correct) {
+        score += 8; good++;
+      } else {
+        score -= riskPenalty(m.risk); bad++;
       }
     });
 
-    list.appendChild(item);
-  });
-}
+    // small penalty if selected none and case has at least 1 correct option
+    const hasCorrect = meds.some((m) => m && m.correct);
+    if (selectedMeds.size === 0 && hasCorrect) score -= 6;
 
-/* ---------- Scoring ---------- */
-function scoreCase(){
-  const c = current.caseObj;
-  let pointsDelta = 0;
-
-  // Exams: essenciais/recomendados ajudam; fora do caso tira
-  const essential = new Set(c.essentialExams || []);
-  const recommended = new Set(c.recommendedExams || []);
-
-  let examGood = 0;
-  let examBad = 0;
-
-  current.pickedExams.forEach(exId => {
-    const hasResult = !!((c.examResults || {})[exId]);
-    if (essential.has(exId)) { pointsDelta += 18; examGood++; return; }
-    if (recommended.has(exId)) { pointsDelta += 10; examGood++; return; }
-
-    // Se não existe resultado no caso (exame "sem sentido")
-    if (!hasResult) { pointsDelta -= 10; examBad++; return; }
-
-    // existe resultado mas não era recomendado: leve penalidade
-    pointsDelta -= 4; examBad++;
-  });
-
-  // Dx
-  const dxArr = c.diagnosis || [];
-  if (current.pickedDx == null){
-    pointsDelta -= 20;
-  } else {
-    const chosen = dxArr[current.pickedDx];
-    if (chosen?.correct) pointsDelta += 35;
-    else pointsDelta -= 25;
+    score = clamp(score, -25, 30);
+    return { score, good, bad };
   }
 
-  // Meds
-  const meds = c.medications || [];
-  let medGood = 0;
-  let medBad = 0;
+  function finalizeCase() {
+    if (!activeCase) return;
 
-  current.pickedMeds.forEach(idx => {
-    const m = meds[idx];
-    if (!m) return;
-    if (m.correct){ pointsDelta += 12; medGood++; }
-    else{
-      // penalidade por risco
-      if (m.risk === "alta") pointsDelta -= 28;
-      else if (m.risk === "media") pointsDelta -= 16;
-      else pointsDelta -= 10;
-      medBad++;
+    const ex = computeExamScore(activeCase);
+    const dx = computeDxScore(activeCase);
+    const med = computeMedScore(activeCase);
+
+    const total = ex.score + dx.score + med.score;
+
+    // Update global stats
+    state.stats.points = (state.stats.points | 0) + total;
+    state.stats.casesDone = (state.stats.casesDone | 0) + 1;
+
+    if (dx.correct) {
+      state.stats.correctDx = (state.stats.correctDx | 0) + 1;
+      state.stats.streak = (state.stats.streak | 0) + 1;
+    } else {
+      state.stats.streak = 0;
     }
-  });
 
-  // Ajuste final e clamp por caso
-  pointsDelta = clamp(pointsDelta, -80, 80);
+    state.stats.rank = computeRank(state.stats.points);
 
-  const success = pointsDelta >= 10;
-
-  state.stats.cases += 1;
-  state.stats.shift += 1;
-
-  if (success){
-    state.stats.correct += 1;
-    state.stats.streak += 1;
-  } else {
-    state.stats.wrong += 1;
-    state.stats.streak = 0;
-  }
-
-  state.stats.points = Math.max(0, state.stats.points + pointsDelta);
-
-  // rank progression (simples, você pode refiná-la depois)
-  const pts = state.stats.points;
-  if (pts >= 250) state.doctor.rank = "Médico Pleno";
-  else if (pts >= 120) state.doctor.rank = "Médico Titular";
-  else state.doctor.rank = "Médico Residente";
-
-  state.lastCaseId = c.id || null;
-
-  save();
-  refreshOffice();
-
-  return {
-    pointsDelta,
-    examGood, examBad,
-    dxChosen: current.pickedDx == null ? null : dxArr[current.pickedDx]?.label,
-    medGood, medBad,
-    success
-  };
-}
-
-/* ---------- Results screen ---------- */
-function showResults(summary){
-  el("resultsTitle").textContent = "Resumo do caso";
-  el("resultsSub").textContent = summary.success ? "Boa condução (simulado)." : "Condução inadequada (simulado).";
-
-  el("resPoints").textContent = `${summary.pointsDelta >= 0 ? "+" : ""}${summary.pointsDelta}`;
-  el("resExams").textContent = `${summary.examGood} ok / ${summary.examBad} ruins`;
-  el("resDx").textContent = summary.dxChosen || "Não selecionado";
-  el("resMeds").textContent = `${summary.medGood} ok / ${summary.medBad} ruins`;
-
-  // gabarito
-  const c = current.caseObj;
-  const dxOk = (c.diagnosis || []).find(d => d.correct)?.label || "—";
-  const ess = (c.essentialExams || []).join(", ") || "—";
-  const rec = (c.recommendedExams || []).join(", ") || "—";
-  const medsOk = (c.medications || []).filter(m => m.correct).map(m => m.label).slice(0,4).join("<br/>") || "—";
-
-  el("answerKey").innerHTML = `
-    <b>Diagnóstico correto:</b> ${dxOk}<br/><br/>
-    <b>Exames essenciais:</b> ${ess}<br/>
-    <b>Exames recomendados:</b> ${rec}<br/><br/>
-    <b>Condutas recomendadas (amostra):</b><br/>${medsOk}
-  `;
-
-  // ranking local
-  pushRanking(state.doctor.name || "Anônimo", state.stats.points);
-
-  showScreen("results");
-}
-
-/* ---------- Ranking (Local) ---------- */
-function pushRanking(name, points){
-  const raw = localStorage.getItem(RANKING_KEY);
-  let arr = [];
-  try { arr = raw ? JSON.parse(raw) : []; } catch { arr = []; }
-
-  arr.push({ name, points, at: Date.now() });
-  arr.sort((a,b) => b.points - a.points);
-  arr = arr.slice(0, 20);
-
-  localStorage.setItem(RANKING_KEY, JSON.stringify(arr));
-}
-
-function renderRanking(){
-  const raw = localStorage.getItem(RANKING_KEY);
-  let arr = [];
-  try { arr = raw ? JSON.parse(raw) : []; } catch { arr = []; }
-
-  if (!arr.length){
-    el("rankList").innerHTML = "Sem dados ainda.";
-    return;
-  }
-
-  el("rankList").innerHTML = arr.map((r, i) => {
-    const p = String(r.points).padStart(3," ");
-    return `<div style="margin:8px 0"><b>#${i+1}</b> — ${r.name} — <b>${p}</b> pts</div>`;
-  }).join("");
-}
-
-/* ---------- Events ---------- */
-async function onNewGame(){
-  const ok = await loadData();
-  if (!ok) return;
-
-  resetSave();
-  save();
-
-  showScreen("profile");
-}
-
-async function onContinue(){
-  const ok = await loadData();
-  if (!ok) return;
-
-  const has = load();
-  if (!has){
-    toast("Nenhum salvamento encontrado.");
-    return;
-  }
-  refreshOffice();
-  showScreen("office");
-}
-
-function onStartFromProfile(){
-  const name = (el("inputName").value || "").trim();
-  if (name.length < 2){
-    toast("Digite seu nome para iniciar.");
-    return;
-  }
-
-  state.doctor.name = name;
-
-  // se não selecionou avatar, mantém o default
-  save();
-  refreshOffice();
-  showScreen("office");
-}
-
-function onNextCase(){
-  const c = pickNextCase();
-  if (!c){
-    toast("Sem casos disponíveis.");
-    return;
-  }
-  renderCase(c);
-  showScreen("case");
-}
-
-function onFinalize(){
-  if (!current.caseObj){
-    toast("Nenhum caso carregado.");
-    return;
-  }
-  const summary = scoreCase();
-  showResults(summary);
-}
-
-function toggleModal(modalEl, show){
-  if (!modalEl) return;
-  modalEl.classList.toggle("show", !!show);
-}
-
-async function requestFullScreen(){
-  // iOS Safari limita fullscreen real; ainda assim o layout já é 100% “app-like”.
-  const root = document.documentElement;
-  try{
-    if (document.fullscreenElement) await document.exitFullscreen();
-    else if (root.requestFullscreen) await root.requestFullscreen();
-  }catch(e){
-    // sem alert aqui para não irritar; botão segue útil em browsers compatíveis
-    console.warn("Fullscreen não suportado neste navegador.");
-  }
-}
-
-/* ---------- Bootstrap ---------- */
-function wire(){
-  // Home buttons
-  el("btnNewGame").addEventListener("click", onNewGame);
-  el("btnContinue").addEventListener("click", onContinue);
-
-  // Profile
-  bindAvatarGrid();
-  el("btnProfileBack").addEventListener("click", () => showScreen("home"));
-  el("btnStartFromProfile").addEventListener("click", onStartFromProfile);
-
-  // Office
-  el("btnNextCase").addEventListener("click", onNextCase);
-  el("btnResetSave").addEventListener("click", () => {
-    if (confirm("Tem certeza que deseja resetar o salvamento?")){
-      resetSave();
-      save();
-      refreshOffice();
-      showScreen("home");
+    // Mark case as used
+    if (activeCase.id && !state.progress.usedCaseIds.includes(activeCase.id)) {
+      state.progress.usedCaseIds.push(activeCase.id);
     }
-  });
+    state.progress.currentCaseId = null;
 
-  // Case
-  el("btnBackOffice").addEventListener("click", () => {
-    refreshOffice();
-    showScreen("office");
-  });
-  el("btnFinalize").addEventListener("click", onFinalize);
+    // Save last case summary (for "Continuar" and results)
+    state.lastCase = {
+      id: activeCase.id,
+      title: activeCase.title || "Caso",
+      patient: activeCase.patient,
+      points: total,
+      breakdown: { exams: ex, dx, meds: med },
+      selected: {
+        exams: Array.from(selectedExams),
+        dxIndex: selectedDx,
+        medIdx: Array.from(selectedMeds),
+      },
+      ts: Date.now(),
+    };
 
-  // Results
-  el("btnResultsHome").addEventListener("click", () => showScreen("home"));
-  el("btnResultsOffice").addEventListener("click", () => { refreshOffice(); showScreen("office"); });
+    saveState();
+    updateHud();
+    renderResults(state.lastCase);
 
-  // Topbar
-  el("btnFullScreen").addEventListener("click", requestFullScreen);
+    // Also update local ranking
+    upsertLocalRanking();
 
-  // Help / Ranking
-  const helpModal = el("helpModal");
-  const rankModal = el("rankModal");
-
-  el("btnHelp").addEventListener("click", () => toggleModal(helpModal, true));
-  el("btnCloseHelp").addEventListener("click", () => toggleModal(helpModal, false));
-  helpModal.addEventListener("click", (e) => { if (e.target === helpModal) toggleModal(helpModal, false); });
-
-  el("btnRanking").addEventListener("click", () => { renderRanking(); toggleModal(rankModal, true); });
-  el("btnCloseRank").addEventListener("click", () => toggleModal(rankModal, false));
-  rankModal.addEventListener("click", (e) => { if (e.target === rankModal) toggleModal(rankModal, false); });
-}
-
-function bootstrap(){
-  // Se existir save, habilita continuar
-  const hasSave = !!localStorage.getItem(STORAGE_KEY);
-  el("btnContinue").disabled = !hasSave;
-
-  // Tenta carregar save para atualizar label no Office quando entrar por Continue
-  if (hasSave){
-    load();
+    showScreen("screenResults");
   }
 
-  // default avatar selected UI
-  const grid = el("avatarGrid");
-  if (grid){
-    const first = grid.querySelector('.avatarCard[data-avatar="images/doctor_1.jpg"]') || grid.querySelector(".avatarCard");
-    if (first) first.classList.add("selected");
+  // =========================
+  // RESULTS SCREEN
+  // =========================
+  function renderResults(last) {
+    if (!last) return;
+
+    setText("resultsTitle", last.title || "Resumo do caso");
+    const p = last.patient || {};
+    setText("resultsSub", `${p.name || "Paciente"} • ${p.age ?? "—"} anos • ${p.triage || "—"}`);
+
+    setText("resPoints", String(last.points | 0));
+    setText("resExams", String(last.breakdown?.exams?.score ?? 0));
+    setText("resDx", String(last.breakdown?.dx?.score ?? 0));
+    setText("resMeds", String(last.breakdown?.meds?.score ?? 0));
+
+    // small narrative
+    const note = $("resultsNote");
+    if (note) {
+      const ok = !!last.breakdown?.dx?.correct;
+      note.textContent = ok
+        ? "Diagnóstico correto. Boa condução (simulado)."
+        : "Diagnóstico incorreto. Revise hipóteses e critérios (simulado).";
+    }
   }
 
-  refreshOffice();
-  showScreen("home");
-}
+  // =========================
+  // RANKING (OFFLINE)
+  // =========================
+  function getLocalRanking() {
+    try {
+      const raw = localStorage.getItem(RANKING_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      return Array.isArray(arr) ? arr : [];
+    } catch {
+      return [];
+    }
+  }
 
-wire();
-bootstrap();
+  function setLocalRanking(arr) {
+    localStorage.setItem(RANKING_KEY, JSON.stringify(arr));
+  }
+
+  function upsertLocalRanking() {
+    const name = (state.player.name || "").trim();
+    if (!name) return;
+
+    const arr = getLocalRanking();
+    const idx = arr.findIndex((x) => x && x.name === name);
+    const entry = {
+      name,
+      points: state.stats.points | 0,
+      rank: state.stats.rank,
+      casesDone: state.stats.casesDone | 0,
+      ts: Date.now(),
+    };
+
+    if (idx >= 0) arr[idx] = entry;
+    else arr.push(entry);
+
+    // sort desc by points
+    arr.sort((a, b) => (b.points | 0) - (a.points | 0));
+    setLocalRanking(arr);
+  }
+
+  function renderRanking() {
+    const box = $("rankList");
+    if (!box) return;
+
+    const arr = getLocalRanking();
+    if (!arr.length) {
+      box.innerHTML = `<div class="muted">Sem ranking ainda. Jogue alguns casos para registrar.</div>`;
+      return;
+    }
+
+    box.innerHTML = "";
+    arr.slice(0, 50).forEach((r, i) => {
+      const row = document.createElement("div");
+      row.className = "rankRow";
+      row.innerHTML = `
+        <div class="rankPos">${i + 1}</div>
+        <div class="rankMain">
+          <div class="rankName">${r.name}</div>
+          <div class="rankSub">${r.rank} • Casos: ${r.casesDone}</div>
+        </div>
+        <div class="rankPts">${r.points}</div>
+      `;
+      box.appendChild(row);
+    });
+  }
+
+  // =========================
+  // PROFILE / AVATARS
+  // =========================
+  function renderAvatars() {
+    const grid = $("avatarGrid");
+    if (!grid) return;
+    grid.innerHTML = "";
+
+    const avatars = [
+      "images/avatars/doc1.jpg",
+      "images/avatars/doc2.jpg",
+      "images/avatars/doc3.jpg",
+      "images/avatars/doc4.jpg",
+      "images/avatars/doc5.jpg",
+      "images/avatars/doc6.jpg",
+    ];
+
+    avatars.forEach((src) => {
+      const item = document.createElement("button");
+      item.className = "avatarTile";
+      item.type = "button";
+
+      if (state.player.avatar === src) item.classList.add("selected");
+
+      item.innerHTML = `
+        <div class="avatarFrame">
+          <img src="${src}" alt="Avatar" loading="lazy" />
+        </div>
+      `;
+
+      item.addEventListener("click", () => {
+        state.player.avatar = src;
+        saveState();
+        renderAvatars();
+      });
+
+      grid.appendChild(item);
+    });
+  }
+
+  function confirmProfileAndGoOffice() {
+    const nameInput = $("inputName");
+    const name = (nameInput ? nameInput.value : "").trim();
+
+    if (!name) {
+      alert("Digite seu nome para iniciar.");
+      return;
+    }
+
+    state.player.name = name;
+    saveState();
+    updateHud();
+    showScreen("screenOffice");
+  }
+
+  // =========================
+  // OFFICE
+  // =========================
+  function renderOffice() {
+    updateHud();
+    const last = state.lastCase;
+    const lastBox = $("officeLast");
+    if (lastBox) {
+      if (!last) {
+        lastBox.innerHTML = `<div class="muted">Nenhum caso finalizado ainda.</div>`;
+      } else {
+        lastBox.innerHTML = `
+          <div class="lastCard">
+            <div class="lastTop">
+              <div class="lastTitle">${last.title || "Último caso"}</div>
+              <div class="lastPts">${last.points | 0} pts</div>
+            </div>
+            <div class="lastSub">${last.patient?.name || "Paciente"} • ${last.patient?.triage || "—"}</div>
+          </div>
+        `;
+      }
+    }
+  }
+
+  // =========================
+  // HELP / FULLSCREEN
+  // =========================
+  function setupTopButtons() {
+    const btnFs = $("btnFullscreen");
+    if (btnFs) {
+      btnFs.addEventListener("click", async () => {
+        try {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+          } else {
+            await document.exitFullscreen();
+          }
+        } catch {
+          // ignore
+        }
+      });
+    }
+
+    const btnHelp = $("btnHelp");
+    if (btnHelp) {
+      btnHelp.addEventListener("click", () => {
+        alert(
+          "Emergency Doctor Simulator\n\n" +
+          "Objetivo: selecionar exames, diagnóstico e condutas adequadas (simulado).\n" +
+          "Pontuação: escolhas corretas somam; escolhas inadequadas subtraem.\n\n" +
+          "Aviso: simulação educacional. Não é orientação médica real."
+        );
+      });
+    }
+
+    const btnRanking = $("btnRanking");
+    if (btnRanking) {
+      btnRanking.addEventListener("click", () => {
+        renderRanking();
+        showScreen("screenRanking");
+      });
+    }
+
+    const btnBackFromRanking = $("btnBackFromRanking");
+    if (btnBackFromRanking) {
+      btnBackFromRanking.addEventListener("click", () => {
+        // return to office if we have profile; else home
+        if (state.player?.name) showScreen("screenOffice");
+        else showScreen("screenHome");
+      });
+    }
+  }
+
+  // =========================
+  // BOOTSTRAP / EVENTS
+  // =========================
+  async function initData() {
+    // Try load JSON. If fails, keep app usable but warn.
+    try {
+      const [casesRaw, examsRaw] = await Promise.all([
+        loadJsonSmart("cases.json"),
+        loadJsonSmart("exams.json"),
+      ]);
+
+      // cases should be array
+      CASES = Array.isArray(casesRaw) ? casesRaw : (casesRaw?.cases || []);
+      if (!Array.isArray(CASES)) CASES = [];
+
+      EXAMS = normalizeExams(examsRaw);
+      EXAMS_MAP = new Map(EXAMS.map((e) => [e.id, e]));
+
+      if (!CASES.length || !EXAMS.length) {
+        alert(
+          "Arquivos JSON carregaram, mas parecem vazios.\n" +
+          "Verifique se cases.json é um ARRAY e se exams.json contém exams[]."
+        );
+      }
+    } catch (e) {
+      console.error(e);
+      alert(
+        "Erro ao carregar cases.json/exams.json. Verifique se os arquivos existem na raiz do projeto.\n\n" +
+        (e && e.message ? e.message : "")
+      );
+      // Keep minimal fallbacks so UI still opens
+      CASES = [];
+      EXAMS = [];
+      EXAMS_MAP = new Map();
+    }
+  }
+
+  function wireHome() {
+    const btnNew = $("btnNewGame");
+    const btnContinue = $("btnContinue");
+
+    if (btnNew) {
+      btnNew.addEventListener("click", () => {
+        // keep ranking, but reset game state (fresh)
+        clearState();
+        // preselect avatar and empty name
+        saveState();
+        renderAvatars();
+        updateHud();
+        showScreen("screenProfile");
+      });
+    }
+
+    if (btnContinue) {
+      btnContinue.addEventListener("click", () => {
+        const ok = loadState();
+        updateHud();
+        if (ok && state.player?.name) {
+          renderOffice();
+          showScreen("screenOffice");
+        } else {
+          renderAvatars();
+          showScreen("screenProfile");
+        }
+      });
+    }
+  }
+
+  function wireProfile() {
+    const btnStart = $("btnStartProfile");
+    if (btnStart) btnStart.addEventListener("click", confirmProfileAndGoOffice);
+
+    const btnBack = $("btnBackProfile");
+    if (btnBack) btnBack.addEventListener("click", () => showScreen("screenHome"));
+
+    const input = $("inputName");
+    if (input) {
+      input.addEventListener("input", () => {
+        // live store, but do not force until confirm
+        state.player.name = input.value;
+        saveState();
+      });
+    }
+  }
+
+  function wireOffice() {
+    const btnStartCase = $("btnStartCase");
+    if (btnStartCase) {
+      btnStartCase.addEventListener("click", () => {
+        if (!CASES.length) {
+          alert("Sem casos carregados. Verifique cases.json.");
+          return;
+        }
+        const c = pickNextCase();
+        if (!c) {
+          alert("Não foi possível selecionar um caso.");
+          return;
+        }
+        startCase(c);
+      });
+    }
+
+    const btnReset = $("btnResetSave");
+    if (btnReset) {
+      btnReset.addEventListener("click", () => {
+        const sure = confirm("Reiniciar progresso? Isso zera pontuação e casos.");
+        if (!sure) return;
+        clearState();
+        saveState();
+        updateHud();
+        showScreen("screenHome");
+      });
+    }
+  }
+
+  function wireCase() {
+    const btnBack = $("btnBackCase");
+    if (btnBack) btnBack.addEventListener("click", () => {
+      activeCase = null;
+      resetSelections();
+      state.progress.currentCaseId = null;
+      saveState();
+      renderOffice();
+      showScreen("screenOffice");
+    });
+
+    const btnFinalize = $("btnFinalizeCase");
+    if (btnFinalize) btnFinalize.addEventListener("click", () => finalizeCase());
+  }
+
+  function wireResults() {
+    const btnNext = $("btnNextCase");
+    if (btnNext) {
+      btnNext.addEventListener("click", () => {
+        if (!CASES.length) {
+          renderOffice();
+          showScreen("screenOffice");
+          return;
+        }
+        const c = pickNextCase();
+        if (!c) {
+          renderOffice();
+          showScreen("screenOffice");
+          return;
+        }
+        startCase(c);
+      });
+    }
+
+    const btnOffice = $("btnBackOffice");
+    if (btnOffice) {
+      btnOffice.addEventListener("click", () => {
+        renderOffice();
+        showScreen("screenOffice");
+      });
+    }
+  }
+
+  // =========================
+  // START
+  // =========================
+  async function bootstrap() {
+    setupTopButtons();
+
+    // Load state first (so UI doesn’t flash wrong)
+    loadState();
+    updateHud();
+
+    // Data load (cases/exams)
+    await initData();
+
+    // Wire events
+    wireHome();
+    wireProfile();
+    wireOffice();
+    wireCase();
+    wireResults();
+
+    // Render profile UI
+    const nameInput = $("inputName");
+    if (nameInput) nameInput.value = state.player.name || "";
+
+    renderAvatars();
+    renderOffice();
+
+    // Start screen:
+    // If player exists => home; user chooses Continue or New Game.
+    showScreen("screenHome");
+  }
+
+  document.addEventListener("DOMContentLoaded", bootstrap);
+})();
