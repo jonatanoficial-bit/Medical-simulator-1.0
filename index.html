@@ -11,14 +11,13 @@
   <link rel="apple-touch-icon" href="images/icon-192.png" />
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css?v=2.2.1" />
+  <link rel="stylesheet" href="style.css?v=3.0.1" />
 </head>
 
 <body>
 
 <!-- =========================
-     SPLASH / CAPA INICIAL
-     (NÃO DEPENDE do script.js)
+     SPLASH / CAPA (fix à prova de cache)
 ========================= -->
 <div id="splashScreen" class="splash" role="button" tabindex="0" aria-label="Toque para continuar">
   <img src="images/capa.jpg" alt="Emergency Doctor Simulator" />
@@ -26,37 +25,23 @@
 </div>
 
 <script>
-  // FIX DEFINITIVO: fecha a capa independente do script.js (mouse + touch + PWA)
   (function(){
     const splash = document.getElementById("splashScreen");
     if(!splash) return;
 
     function closeSplash(ev){
-      try {
-        if (ev && ev.preventDefault) ev.preventDefault();
-        if (ev && ev.stopPropagation) ev.stopPropagation();
-      } catch {}
-
+      try { ev?.preventDefault?.(); ev?.stopPropagation?.(); } catch {}
       splash.classList.add("splash--hide");
-      // dá tempo para animação/repintura antes de remover do DOM
-      setTimeout(()=> {
-        if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
-      }, 180);
+      setTimeout(()=> splash?.remove?.(), 180);
     }
 
-    // capture=true garante que pega antes de qualquer overlay/handler
-    const opts = { once: true, capture: true, passive: false };
-
+    const opts = { once:true, capture:true, passive:false };
     splash.addEventListener("pointerdown", closeSplash, opts);
     splash.addEventListener("mousedown", closeSplash, opts);
     splash.addEventListener("touchstart", closeSplash, opts);
     splash.addEventListener("click", closeSplash, opts);
-
-    // acessibilidade / fallback teclado
     splash.addEventListener("keydown", (e)=>{
-      if(e.key === "Enter" || e.key === " "){
-        closeSplash(e);
-      }
+      if(e.key === "Enter" || e.key === " ") closeSplash(e);
     }, { once:true, capture:true });
   })();
 </script>
@@ -74,23 +59,24 @@
     </div>
 
     <div class="top-actions">
-      <button id="btnFullScreen" class="chip">Tela cheia</button>
-      <button id="btnRanking" class="chip">Ranking</button>
+      <button id="btnFullScreen" class="chip" type="button">Tela cheia</button>
+      <button id="btnHelp" class="chip" type="button">Ajuda</button>
+      <button id="btnRanking" class="chip" type="button">Ranking</button>
     </div>
   </header>
 
   <!-- =========================
-       HOME
+       MENU (HOME)
   ========================= -->
   <section class="screen active" data-screen="home">
     <div class="panel hero">
       <div>
         <h1>Bem-vindo(a), Doutor(a)</h1>
-        <p>Atenda pacientes contra o tempo. Cada decisão importa.</p>
+        <p>Atenda pacientes, solicite exames, escolha diagnósticos e condutas. Ganhe pontos e suba de cargo.</p>
 
         <div class="hero-actions">
-          <button id="btnNewGame" class="btn primary">Novo jogo</button>
-          <button id="btnContinue" class="btn">Continuar</button>
+          <button id="btnNewGame" class="btn primary" type="button">Novo jogo</button>
+          <button id="btnContinue" class="btn" type="button">Continuar</button>
         </div>
       </div>
 
@@ -101,40 +87,66 @@
   </section>
 
   <!-- =========================
-       PROFILE
+       PERFIL
   ========================= -->
   <section class="screen" data-screen="profile">
     <div class="panel profile">
       <h2>Criar perfil</h2>
 
+      <label class="label">Nome</label>
       <input id="inputName" placeholder="Digite seu nome" maxlength="24"/>
 
+      <label class="label" style="margin-top:10px;">Selecione seu avatar</label>
       <div class="avatarGrid" id="avatarGrid">
-        <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png" alt="Avatar 1"></button>
-        <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png" alt="Avatar 2"></button>
-        <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png" alt="Avatar 3"></button>
-        <button class="avatarCard" data-avatar="images/avatar4.png"><img src="images/avatar4.png" alt="Avatar 4"></button>
-        <button class="avatarCard" data-avatar="images/avatar5.png"><img src="images/avatar5.png" alt="Avatar 5"></button>
-        <button class="avatarCard" data-avatar="images/avatar6.png"><img src="images/avatar6.png" alt="Avatar 6"></button>
+        <button class="avatarCard" type="button" data-avatar="images/avatar1.png"><img src="images/avatar1.png" alt="Avatar 1"></button>
+        <button class="avatarCard" type="button" data-avatar="images/avatar2.png"><img src="images/avatar2.png" alt="Avatar 2"></button>
+        <button class="avatarCard" type="button" data-avatar="images/avatar3.png"><img src="images/avatar3.png" alt="Avatar 3"></button>
+        <button class="avatarCard" type="button" data-avatar="images/avatar4.png"><img src="images/avatar4.png" alt="Avatar 4"></button>
+        <button class="avatarCard" type="button" data-avatar="images/avatar5.png"><img src="images/avatar5.png" alt="Avatar 5"></button>
+        <button class="avatarCard" type="button" data-avatar="images/avatar6.png"><img src="images/avatar6.png" alt="Avatar 6"></button>
       </div>
 
       <div class="profileActions">
-        <button id="btnProfileBack" class="btn">Voltar</button>
-        <button id="btnStartFromProfile" class="btn primary">Iniciar</button>
+        <button id="btnProfileBack" class="btn" type="button">Voltar</button>
+        <button id="btnStartFromProfile" class="btn primary" type="button">Continuar</button>
       </div>
     </div>
   </section>
 
   <!-- =========================
-       OFFICE
+       INTRO (Diretor do hospital) + TYPEWRITER
+  ========================= -->
+  <section class="screen" data-screen="intro">
+    <div class="panel intro">
+      <div class="introHeader">
+        <div class="introBadge">Diretor do Hospital</div>
+        <div class="introMeta">Orientações iniciais</div>
+      </div>
+
+      <div class="introBox">
+        <div id="directorText" class="typewriter" aria-live="polite"></div>
+        <div id="directorCursor" class="cursor" aria-hidden="true">▍</div>
+      </div>
+
+      <div class="introActions">
+        <button id="btnIntroHelp" class="btn" type="button">Manual de ajuda</button>
+        <button id="btnIntroContinue" class="btn primary" type="button">Continuar</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================
+       CONSULTÓRIO (HUB) — com fundo
   ========================= -->
   <section class="screen" data-screen="office">
-    <div class="panel office">
+    <div class="panel office consultorioPanel">
       <div class="officeHeader">
-        <img id="uiAvatar" class="officeAvatar" src="images/avatar1.png" alt="Avatar" />
-        <div>
-          <div id="uiName" class="officeName">—</div>
-          <div id="uiRank" class="officeRank">Interno</div>
+        <div class="officeLeft">
+          <img id="uiAvatar" class="officeAvatar" src="images/avatar1.png" alt="Avatar" />
+          <div>
+            <div id="uiName" class="officeName">—</div>
+            <div id="uiRank" class="officeRank">Interno</div>
+          </div>
         </div>
 
         <div class="timer">
@@ -148,19 +160,28 @@
         <div>Óbitos: <b id="uiDeaths">0</b></div>
       </div>
 
-      <button id="btnNextCase" class="btn primary">Iniciar atendimento</button>
+      <div class="officeActions">
+        <button id="btnNextCase" class="btn primary" type="button">Iniciar plantão</button>
+        <button id="btnOfficeRanking" class="btn" type="button">Ver ranking</button>
+      </div>
     </div>
   </section>
 
   <!-- =========================
-       CASE
+       ATENDIMENTO (CASO REAL do cases.json)
   ========================= -->
   <section class="screen" data-screen="case">
     <div class="panel case">
-      <h2>Paciente em atendimento</h2>
-      <p id="caseStatus">Tempo crítico. Atenda rápido.</p>
+      <h2 id="caseTitle">Paciente em atendimento</h2>
 
-      <button id="btnFinalize" class="btn primary">Finalizar atendimento</button>
+      <div class="caseCard">
+        <div class="caseLine"><span class="caseLabel">Resumo:</span> <span id="caseStatus">Carregando caso...</span></div>
+        <div class="caseLine"><span class="caseLabel">Sinais vitais:</span> <span id="caseVitals">—</span></div>
+      </div>
+
+      <div class="caseActions">
+        <button id="btnFinalize" class="btn primary" type="button">Finalizar atendimento</button>
+      </div>
     </div>
   </section>
 
@@ -170,26 +191,41 @@
   <section class="screen" data-screen="death">
     <div class="panel death">
       <h1>🟥 ÓBITO</h1>
-      <p>O paciente não resistiu.</p>
-      <button id="btnBackOffice" class="btn">Voltar ao hospital</button>
+      <p id="deathReason">O paciente não resistiu.</p>
+      <button id="btnBackOffice" class="btn" type="button">Voltar ao consultório</button>
     </div>
   </section>
 
   <!-- =========================
-       RANKING
+       MODAL: Ranking
   ========================= -->
   <div id="rankingModal" class="modal hidden" aria-hidden="true">
     <div class="modalCard">
       <h2>Ranking</h2>
       <div id="rankingList"></div>
-      <button id="btnCloseRanking" class="btn">Fechar</button>
+      <button id="btnCloseRanking" class="btn" type="button">Fechar</button>
+    </div>
+  </div>
+
+  <!-- =========================
+       MODAL: Ajuda
+  ========================= -->
+  <div id="helpModal" class="modal hidden" aria-hidden="true">
+    <div class="modalCard">
+      <h2>Manual de ajuda</h2>
+      <div class="helpText">
+        <p><b>Objetivo:</b> atender casos com rapidez e precisão para ganhar pontos e subir de cargo.</p>
+        <p><b>Tempo:</b> cada caso tem um cronômetro. Se zerar, pode ocorrer óbito.</p>
+        <p><b>Ranking:</b> sua pontuação entra no Top 20 deste dispositivo.</p>
+      </div>
+      <button id="btnCloseHelp" class="btn" type="button">Fechar</button>
     </div>
   </div>
 
 </div>
 
 <!-- JS principal -->
-<script src="script.js?v=2.2.1"></script>
+<script src="script.js?v=3.0.1"></script>
 
 <!-- PWA SW -->
 <script>
