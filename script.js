@@ -1,34 +1,66 @@
 /* =========================================================
-   Emergency Doctor Simulator — script.js (FULL)
-   - Fix: boot não trava botões
-   - Fix: carregamento robusto de JSON (GitHub Pages/Vercel)
-   - Fix: avatares/imagens com fallback e sem quebrar UI
+   Emergency Doctor Simulator — script.js (v1.1.0 compat)
+   - Corrige carregamento de cases.json (array) e exams.json (objeto com .exams)
+   - Ajusta TODOS os IDs/classes para bater com o index.html enviado
    ========================================================= */
 
 (() => {
   "use strict";
 
   // =========================
-  // CONFIG / VERSÃO
+  // CHAVES DE SAVE
   // =========================
-  const APP_VERSION = "1.0.0-fixed-boot-json-paths";
-  const STORAGE_KEY = "eds_save_v1";
-  const RANKING_KEY = "eds_ranking_v1";
+  const STORAGE_KEY = "edsSave_v1.1.0";
+  const RANKING_KEY = "edsRanking_v1.1.0";
 
-  // IMPORTANTÍSSIMO:
-  // Ajuste os nomes aqui para os ARQUIVOS QUE EXISTEM no seu repo.
-  // (O loader também tenta alguns alternativos automaticamente.)
-  const DEFAULT_AVATARS = [
-    "images/doctor_1.jpg",
-    "images/doctor_2.jpg",
-    "images/doctor_3.jpg",
-    "images/doctor_4.jpg",
-    "images/doctor_5.jpg",
-    "images/doctor_6.jpg",
-  ];
+  // =========================
+  // HELPERS
+  // =========================
+  const $ = (id) => document.getElementById(id);
 
-  const FALLBACK_PATIENT_MALE = "images/patient_male.jpg";
-  const FALLBACK_PATIENT_FEMALE = "images/patient_female.jpg";
+  function safeText(v) {
+    if (v === null || v === undefined) return "";
+    return String(v);
+  }
+
+  function clamp(n, a, b) {
+    return Math.max(a, Math.min(b, n));
+  }
+
+  function toast(msg) {
+    // simples e compatível
+    try { console.log("[EDS]", msg); } catch {}
+  }
+
+  function attachImgFallback(imgEl, fallbackSrc) {
+    if (!imgEl) return;
+    imgEl.addEventListener("error", () => {
+      if (imgEl.dataset._fallbackDone) return;
+      imgEl.dataset._fallbackDone = "1";
+      imgEl.src = fallbackSrc;
+    });
+  }
+
+  function patientFallback(sex) {
+    const s = (sex || "").toLowerCase();
+    return s.startsWith("f") ? "images/patient_female.jpg" : "images/patient_male.jpg";
+  }
+
+  function getBasePath() {
+    // Ex.: https://user.github.io/repo/ -> "/repo/"
+    // Em Vercel normalmente "/"
+    const path = window.location.pathname || "/";
+    if (path.endsWith("/index.html")) return path.replace(/index\.html$/i, "");
+    if (!path.endsWith("/")) return path + "/";
+    return path;
+  }
+
+  function urlJoin(base, rel) {
+    if (!base) base = "/";
+    if (rel.startsWith("/")) return rel;
+    if (!base.endsWith("/")) base += "/";
+    return base + rel;
+  }
 
   // =========================
   // ESTADO
@@ -50,179 +82,182 @@
     },
     data: {
       cases: [],
-      exams: [],
+      exams: [],             // array normalizado
+      examsMeta: {           // extras do exams.json
+        version: null,
+        normalFallback: { text: "Resultado dentro da normalidade (simulado).", image: null },
+      },
     },
     gameplay: {
       currentCase: null,
       selectedExams: new Set(),
-      shownQuestions: new Set(),
-      selectedDiagnosis: null,
-      selectedConduct: null, // (medications no JSON)
-      results: [],
+      selectedDiagnosisIndex: null,
+      selectedMeds: new Set(),
     },
     flags: {
       dataLoaded: false,
     },
+    config: {
+      maxExams: 3,
+      maxMeds: 2,
+    },
   };
 
   // =========================
-  // HELPERS
-  // =========================
-  const $ = (sel, root = document) => root.querySelector(sel);
-  const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
-
-  function clamp(n, a, b) {
-    return Math.max(a, Math.min(b, n));
-  }
-
-  function safeText(s) {
-    return (s ?? "").toString();
-  }
-
-  function nowISO() {
-    return new Date().toISOString();
-  }
-
-  function getBasePath() {
-    // Base do diretório onde o index está.
-    // Ex: https://jonatanoficial-bit.github.io/Medical-simulator-1.0/
-    // new URL('.', location.href) resolve corretamente.
-    return new URL(".", window.location.href).toString();
-  }
-
-  function urlJoin(base, rel) {
-    return new URL(rel, base).toString();
-  }
-
-  function sleep(ms) {
-    return new Promise((r) => setTimeout(r, ms));
-  }
-
-  // =========================
-  // IMAGENS: fallback (não quebra UI)
-  // =========================
-  function attachImgFallback(imgEl, fallbackSrc) {
-    if (!imgEl) return;
-    imgEl.addEventListener(
-      "error",
-      () => {
-        if (imgEl.dataset.fallbackApplied === "1") return;
-        imgEl.dataset.fallbackApplied = "1";
-        imgEl.src = fallbackSrc;
-      },
-      { once: true }
-    );
-  }
-
-  function patientFallback(sex) {
-    return sex === "Feminino" ? FALLBACK_PATIENT_FEMALE : FALLBACK_PATIENT_MALE;
-  }
-
-  // =========================
-  // UI: telas
+  // TELAS / MODAIS
   // =========================
   function showScreen(name) {
-    const screens = $$("[data-screen]");
-    screens.forEach((el) => {
-      el.classList.toggle("is-active", el.dataset.screen === name);
-      el.style.display = el.dataset.screen === name ? "" : "none";
+    const screens = document.querySelectorAll(".screen[data-screen]");
+    screens.forEach((s) => {
+      const isTarget = s.getAttribute("data-screen") === name;
+      s.classList.toggle("active", isTarget);
     });
   }
 
-  function toast(msg) {
-    // Se você tiver componente de toast no CSS, use.
-    // Caso não, fallback em alert leve.
-    console.log("[EDS]", msg);
+  function openModal(modalId) {
+    const m = $(modalId);
+    if (!m) return;
+    m.classList.remove("hidden");
+    m.setAttribute("aria-hidden", "false");
+  }
+
+  function closeModal(modalId) {
+    const m = $(modalId);
+    if (!m) return;
+    m.classList.add("hidden");
+    m.setAttribute("aria-hidden", "true");
   }
 
   // =========================
-  // STORAGE
+  // FULLSCREEN
   // =========================
-  function saveGame() {
-    const payload = {
-      version: APP_VERSION,
-      savedAt: nowISO(),
+  async function toggleFullscreen() {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      // ignora
+    }
+  }
+
+  // =========================
+  // SAVE / LOAD
+  // =========================
+  function serializeState() {
+    return {
       doctor: state.doctor,
       stats: state.stats,
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+  }
+
+  function saveGame() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(serializeState()));
+      updateRankingLocal();
+    } catch {}
   }
 
   function loadGame() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
     try {
-      const payload = JSON.parse(raw);
-      if (!payload || typeof payload !== "object") return false;
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return false;
+      const obj = JSON.parse(raw);
 
-      state.doctor = {
-        name: safeText(payload.doctor?.name),
-        avatar: safeText(payload.doctor?.avatar),
-        rank: safeText(payload.doctor?.rank || "Interno"),
-      };
-
-      state.stats = {
-        points: Number(payload.stats?.points || 0),
-        correct: Number(payload.stats?.correct || 0),
-        wrong: Number(payload.stats?.wrong || 0),
-        cases: Number(payload.stats?.cases || 0),
-        shift: Number(payload.stats?.shift || 0),
-        streak: Number(payload.stats?.streak || 0),
-        bestStreak: Number(payload.stats?.bestStreak || 0),
-      };
-
+      if (obj && obj.doctor) {
+        state.doctor.name = safeText(obj.doctor.name || "");
+        state.doctor.avatar = safeText(obj.doctor.avatar || "");
+        state.doctor.rank = safeText(obj.doctor.rank || "Interno") || "Interno";
+      }
+      if (obj && obj.stats) {
+        state.stats.points = Number(obj.stats.points || 0);
+        state.stats.correct = Number(obj.stats.correct || 0);
+        state.stats.wrong = Number(obj.stats.wrong || 0);
+        state.stats.cases = Number(obj.stats.cases || 0);
+        state.stats.shift = Number(obj.stats.shift || 0);
+        state.stats.streak = Number(obj.stats.streak || 0);
+        state.stats.bestStreak = Number(obj.stats.bestStreak || 0);
+      }
       return true;
-    } catch (e) {
-      console.warn("loadGame parse error", e);
+    } catch {
       return false;
     }
   }
 
   function resetSave() {
-    localStorage.removeItem(STORAGE_KEY);
-    // Mantém ranking (se quiser apagar ranking também, apague RANKING_KEY).
+    try { localStorage.removeItem(STORAGE_KEY); } catch {}
     state.doctor = { name: "", avatar: "", rank: "Interno" };
     state.stats = { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0, bestStreak: 0 };
-    state.gameplay = {
-      currentCase: null,
-      selectedExams: new Set(),
-      shownQuestions: new Set(),
-      selectedDiagnosis: null,
-      selectedConduct: null,
-      results: [],
-    };
+    saveGame();
     updateOfficeHUD();
-    showScreen("home");
+    toast("Save resetado.");
   }
 
   // =========================
-  // RANKING (local)
+  // RANKING LOCAL
   // =========================
-  function pushRankingEntry() {
+  function getRankingLocal() {
+    try {
+      const raw = localStorage.getItem(RANKING_KEY);
+      if (!raw) return [];
+      const list = JSON.parse(raw);
+      return Array.isArray(list) ? list : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function updateRankingLocal() {
+    const list = getRankingLocal();
+
+    // Atualiza/insere pelo nome
+    const nameKey = (state.doctor.name || "Sem Nome").trim();
+    const idx = list.findIndex((x) => x && x.name === nameKey);
+
     const entry = {
-      name: state.doctor.name || "Sem nome",
+      name: nameKey,
       points: state.stats.points,
-      correct: state.stats.correct,
-      wrong: state.stats.wrong,
+      rank: state.doctor.rank,
       cases: state.stats.cases,
-      bestStreak: state.stats.bestStreak,
-      at: nowISO(),
+      updatedAt: Date.now(),
     };
 
-    const raw = localStorage.getItem(RANKING_KEY);
-    let list = [];
-    try {
-      list = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(list)) list = [];
-    } catch {
-      list = [];
+    if (idx >= 0) list[idx] = entry;
+    else list.push(entry);
+
+    // Ordena por pontos desc
+    list.sort((a, b) => (b.points || 0) - (a.points || 0));
+
+    // Limita
+    const trimmed = list.slice(0, 50);
+
+    try { localStorage.setItem(RANKING_KEY, JSON.stringify(trimmed)); } catch {}
+  }
+
+  function renderRankingModal() {
+    const wrap = $("rankList");
+    if (!wrap) return;
+    const list = getRankingLocal();
+
+    if (!list.length) {
+      wrap.innerHTML = `<div class="muted">Sem ranking ainda.</div>`;
+      return;
     }
 
-    list.push(entry);
-    list.sort((a, b) => (b.points || 0) - (a.points || 0));
-    list = list.slice(0, 50);
-
-    localStorage.setItem(RANKING_KEY, JSON.stringify(list));
+    wrap.innerHTML = "";
+    list.slice(0, 20).forEach((r, i) => {
+      const row = document.createElement("div");
+      row.className = "rankRow";
+      row.innerHTML = `
+        <div class="rankPos">${i + 1}º</div>
+        <div class="rankName">${safeText(r.name)}</div>
+        <div class="rankMeta">${safeText(r.rank)} • ${safeText(r.cases)} casos</div>
+        <div class="rankPts">${safeText(r.points)} pts</div>
+      `;
+      wrap.appendChild(row);
+    });
   }
 
   // =========================
@@ -231,25 +266,15 @@
   async function loadJsonRobust(primaryName, alternates = []) {
     const base = getBasePath();
 
-    // Estratégia: tentar:
-    // 1) relativo ao base (./file)
-    // 2) direto no base sem ./ (file)
-    // 3) absoluto a partir do host (/file) — útil em Vercel
-    // 4) (alternates) inclusive com espaços/parenteses
     const candidates = [];
-
     const addCandidate = (rel) => {
-      // se rel já é URL absoluta, usa direto
-      if (/^https?:\/\//i.test(rel)) {
-        candidates.push(rel);
-      } else {
-        candidates.push(urlJoin(base, rel));
-      }
+      if (/^https?:\/\//i.test(rel)) candidates.push(rel);
+      else candidates.push(urlJoin(base, rel));
     };
 
     addCandidate(`./${primaryName}`);
     addCandidate(primaryName);
-    candidates.push(`${window.location.origin}/${primaryName}`); // absoluto no host
+    candidates.push(`${window.location.origin}/${primaryName}`);
 
     alternates.forEach((a) => {
       addCandidate(`./${a}`);
@@ -257,19 +282,19 @@
       candidates.push(`${window.location.origin}/${a}`);
     });
 
-    // remove duplicados
     const unique = Array.from(new Set(candidates));
 
     let lastErr = null;
     for (const url of unique) {
       try {
-        const res = await fetch(url, { cache: "no-store" });
+        // cache-buster para evitar SW/Cache antigo preso
+        const bust = url.includes("?") ? `&t=${Date.now()}` : `?t=${Date.now()}`;
+        const res = await fetch(url + bust, { cache: "no-store" });
         if (!res.ok) {
           lastErr = new Error(`HTTP ${res.status} @ ${url}`);
           continue;
         }
-        const data = await res.json();
-        return data;
+        return await res.json();
       } catch (e) {
         lastErr = e;
       }
@@ -279,58 +304,59 @@
   }
 
   async function loadData() {
-    // IMPORTANTÍSSIMO:
-    // Se no seu repo os arquivos estão com nomes tipo "cases (8).json",
-    // esta função ainda consegue carregar.
-    const casesAlternates = [
-      "cases (8).json",
-      "cases (7).json",
-      "cases (6).json",
-      "cases.json",
-    ];
-    const examsAlternates = [
-      "exams (2).json",
-      "exams (1).json",
-      "exams.json",
-    ];
+    const casesAlternates = ["cases (1).json", "case.json", "casos.json", "cases.json"];
+    const examsAlternates = ["exams (1).json", "exame.json", "exams.json"];
 
     const casesData = await loadJsonRobust("cases.json", casesAlternates);
-    const examsData = await loadJsonRobust("exams.json", examsAlternates);
+    const examsDataRaw = await loadJsonRobust("exams.json", examsAlternates);
 
-    // validações mínimas
+    // cases.json: esperado array
     if (!Array.isArray(casesData)) throw new Error("cases.json inválido (esperado array).");
-    if (!Array.isArray(examsData)) throw new Error("exams.json inválido (esperado array).");
+
+    // exams.json: pode ser array OU objeto com .exams (seu formato atual)
+    let examsArr = null;
+    let normalFallback = { text: "Resultado dentro da normalidade (simulado).", image: null };
+    let version = null;
+
+    if (Array.isArray(examsDataRaw)) {
+      examsArr = examsDataRaw;
+    } else if (examsDataRaw && Array.isArray(examsDataRaw.exams)) {
+      examsArr = examsDataRaw.exams;
+      version = examsDataRaw.version ?? null;
+      if (examsDataRaw.normalFallback) normalFallback = examsDataRaw.normalFallback;
+    } else {
+      throw new Error("exams.json inválido (esperado array OU objeto com campo 'exams').");
+    }
 
     state.data.cases = casesData;
-    state.data.exams = examsData;
+    state.data.exams = examsArr;
+    state.data.examsMeta.version = version;
+    state.data.examsMeta.normalFallback = normalFallback || normalFallback;
+
     state.flags.dataLoaded = true;
+    toast(`Dados carregados: ${state.data.cases.length} casos, ${state.data.exams.length} exames.`);
   }
 
   // =========================
-  // UI: HOME (Novo / Continuar)
+  // HOME
   // =========================
   function bindHomeButtons() {
-    const btnNew = $("#btnNewGame");
-    const btnContinue = $("#btnContinue");
+    const btnNew = $("btnNewGame");
+    const btnContinue = $("btnContinue");
 
     if (btnNew) {
       btnNew.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        // Novo jogo sempre vai para profile, e limpa save
-        localStorage.removeItem(STORAGE_KEY);
+
+        // limpa save e vai profile
+        try { localStorage.removeItem(STORAGE_KEY); } catch {}
         state.doctor = { name: "", avatar: "", rank: "Interno" };
         state.stats = { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0, bestStreak: 0 };
-        state.gameplay = {
-          currentCase: null,
-          selectedExams: new Set(),
-          shownQuestions: new Set(),
-          selectedDiagnosis: null,
-          selectedConduct: null,
-          results: [],
-        };
         updateOfficeHUD();
-        renderProfileAvatars();
+
+        // limpa seleções visuais do profile
+        clearProfileSelectionVisual();
         showScreen("profile");
       });
     }
@@ -339,19 +365,22 @@
       btnContinue.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
+
         const ok = loadGame();
         if (!ok) {
-          toast("Sem save. Iniciando novo jogo.");
-          renderProfileAvatars();
+          toast("Sem save: iniciando novo.");
+          clearProfileSelectionVisual();
           showScreen("profile");
           return;
         }
-        // Se tem save mas falta nome/avatar, volta profile
+
         if (!state.doctor.name || !state.doctor.avatar) {
-          renderProfileAvatars();
+          // precisa completar profile
+          syncProfileUIFromState();
           showScreen("profile");
           return;
         }
+
         updateOfficeHUD();
         showScreen("office");
       });
@@ -359,78 +388,46 @@
   }
 
   // =========================
-  // PROFILE (nome + avatar)
+  // PROFILE
   // =========================
-  function renderProfileAvatars() {
-    const grid = $("#avatarGrid");
-    if (!grid) return;
-
-    grid.innerHTML = "";
-    const avatars = DEFAULT_AVATARS;
-
-    avatars.forEach((src, idx) => {
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "avatar-card";
-      card.dataset.avatar = src;
-
-      const img = document.createElement("img");
-      img.alt = `Avatar ${idx + 1}`;
-      img.src = src;
-      img.loading = "lazy";
-      img.decoding = "async";
-      attachImgFallback(img, "images/avatar_fallback.png"); // opcional (se existir)
-
-      const label = document.createElement("div");
-      label.className = "avatar-label";
-      label.textContent = `Avatar ${idx + 1}`;
-
-      card.appendChild(img);
-      card.appendChild(label);
-
-      card.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        $$(".avatar-card", grid).forEach((c) => c.classList.remove("is-selected"));
-        card.classList.add("is-selected");
-        state.doctor.avatar = src;
-        updateProfileStartButton();
-      });
-
-      grid.appendChild(card);
-    });
-
-    // se já tinha avatar no state, marca
-    if (state.doctor.avatar) {
-      const sel = grid.querySelector(`.avatar-card[data-avatar="${CSS.escape(state.doctor.avatar)}"]`);
-      if (sel) sel.classList.add("is-selected");
-    }
-
-    updateProfileStartButton();
+  function clearProfileSelectionVisual() {
+    const cards = document.querySelectorAll("#avatarGrid .avatarCard");
+    cards.forEach((c) => c.classList.remove("selected"));
+    const input = $("inputName");
+    if (input) input.value = "";
   }
 
-  function updateProfileStartButton() {
-    const btnStart = $("#btnProfileStart");
-    const name = $("#doctorName")?.value?.trim() || state.doctor.name.trim();
-    const ok = Boolean(name) && Boolean(state.doctor.avatar);
+  function syncProfileUIFromState() {
+    const input = $("inputName");
+    if (input) input.value = state.doctor.name || "";
 
-    if (btnStart) {
-      btnStart.disabled = !ok;
-      btnStart.classList.toggle("is-disabled", !ok);
-    }
+    const cards = document.querySelectorAll("#avatarGrid .avatarCard");
+    cards.forEach((c) => {
+      const av = c.getAttribute("data-avatar") || "";
+      c.classList.toggle("selected", av === state.doctor.avatar);
+    });
   }
 
   function bindProfile() {
-    const inputName = $("#doctorName");
-    const btnStart = $("#btnProfileStart");
-    const btnBack = $("#btnProfileBack");
+    const inputName = $("inputName");
+    const btnBack = $("btnProfileBack");
+    const btnStart = $("btnStartFromProfile");
 
-    if (inputName) {
-      inputName.addEventListener("input", () => {
-        state.doctor.name = inputName.value.trim();
-        updateProfileStartButton();
+    // Avatares já existem no HTML — só bind
+    const cards = document.querySelectorAll("#avatarGrid .avatarCard");
+    cards.forEach((card) => {
+      card.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const av = card.getAttribute("data-avatar") || "";
+        if (!av) return;
+
+        state.doctor.avatar = av;
+
+        cards.forEach((c) => c.classList.remove("selected"));
+        card.classList.add("selected");
       });
-    }
+    });
 
     if (btnBack) {
       btnBack.addEventListener("click", (e) => {
@@ -444,12 +441,19 @@
       btnStart.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        const name = inputName?.value?.trim() || "";
-        if (!name || !state.doctor.avatar) return;
+
+        const name = (inputName?.value || "").trim();
+        if (!name) {
+          alert("Digite seu nome para iniciar.");
+          return;
+        }
+        if (!state.doctor.avatar) {
+          alert("Selecione um avatar para iniciar.");
+          return;
+        }
 
         state.doctor.name = name;
-        // rank inicial
-        state.doctor.rank = "Interno";
+        state.doctor.rank = state.doctor.rank || "Interno";
 
         saveGame();
         updateOfficeHUD();
@@ -459,39 +463,40 @@
   }
 
   // =========================
-  // OFFICE (consultório)
+  // OFFICE HUD
   // =========================
   function updateOfficeHUD() {
-    const elName = $("#hudName");
-    const elRank = $("#hudRank");
-    const elAvatar = $("#hudAvatar");
+    const elName = $("uiName");
+    const elRank = $("uiRank");
+    const elAvatar = $("uiAvatar");
 
-    if (elName) elName.textContent = state.doctor.name || "Doutor(a)";
+    if (elName) elName.textContent = state.doctor.name || "—";
     if (elRank) elRank.textContent = state.doctor.rank || "Interno";
 
-    if (elAvatar && state.doctor.avatar) {
-      elAvatar.src = state.doctor.avatar;
-      attachImgFallback(elAvatar, "images/avatar_fallback.png"); // opcional
+    if (elAvatar) {
+      const src = state.doctor.avatar || "images/doctor_1.jpg";
+      elAvatar.src = src;
+      attachImgFallback(elAvatar, "images/doctor_1.jpg");
     }
 
     const map = {
-      hudPoints: state.stats.points,
-      hudCorrect: state.stats.correct,
-      hudWrong: state.stats.wrong,
-      hudCases: state.stats.cases,
-      hudShift: state.stats.shift,
-      hudStreak: state.stats.streak,
+      uiPoints: state.stats.points,
+      uiCorrect: state.stats.correct,
+      uiWrong: state.stats.wrong,
+      uiCases: state.stats.cases,
+      uiShift: state.stats.shift,
+      uiStreak: state.stats.streak,
     };
 
     Object.entries(map).forEach(([id, val]) => {
-      const el = document.getElementById(id);
+      const el = $(id);
       if (el) el.textContent = String(val);
     });
   }
 
   function bindOffice() {
-    const btnNext = $("#btnNextCase");
-    const btnReset = $("#btnResetSave");
+    const btnNext = $("btnNextCase");
+    const btnReset = $("btnResetSave");
 
     if (btnNext) {
       btnNext.addEventListener("click", (e) => {
@@ -505,7 +510,11 @@
       btnReset.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
-        resetSave();
+        const ok = confirm("Tem certeza que deseja resetar o save?");
+        if (ok) {
+          resetSave();
+          showScreen("home");
+        }
       });
     }
   }
@@ -514,8 +523,6 @@
   // CASE FLOW
   // =========================
   function pickCaseForRank() {
-    // MVP: escolhe aleatório filtrando tier aproximado
-    // tiers no seu JSON: residente / titular / pleno
     const tiersByRank = {
       Interno: ["residente"],
       Residente: ["residente", "titular"],
@@ -533,15 +540,12 @@
 
   function resetCaseSelections() {
     state.gameplay.selectedExams = new Set();
-    state.gameplay.shownQuestions = new Set();
-    state.gameplay.selectedDiagnosis = null;
-    state.gameplay.selectedConduct = null;
-    state.gameplay.results = [];
+    state.gameplay.selectedDiagnosisIndex = null;
+    state.gameplay.selectedMeds = new Set();
   }
 
   function startNextCase() {
     if (!state.flags.dataLoaded) {
-      // Mesmo sem dados, não trava UI (apenas avisa)
       alert("Dados ainda não carregaram. Verifique cases.json e exams.json no projeto.");
       return;
     }
@@ -554,64 +558,81 @@
 
     state.gameplay.currentCase = c;
     resetCaseSelections();
-
     renderCaseScreen();
     showScreen("case");
   }
 
-  function renderCaseScreen() {
+  function setTriageBadge(levelRaw) {
+    const badge = $("triageBadge");
+    const text = $("triageText");
+    if (!badge || !text) return;
+
+    const lvl = (levelRaw || "").toLowerCase();
+    badge.classList.remove("triageGreen", "triageYellow", "triageRed");
+
+    if (lvl.includes("verde")) badge.classList.add("triageGreen");
+    else if (lvl.includes("amare")) badge.classList.add("triageYellow");
+    else if (lvl.includes("vermel")) badge.classList.add("triageRed");
+
+    text.textContent = safeText(levelRaw || "—");
+  }
+
+  function renderCaseLeft() {
     const c = state.gameplay.currentCase;
     if (!c) return;
 
-    // LEFT: patient
-    const elPatientName = $("#casePatientName");
-    const elPatientMeta = $("#casePatientMeta");
-    const elPatientPhoto = $("#casePatientPhoto");
-    const elTriage = $("#caseTriage");
-    const elVitals = $("#caseVitals");
-    const elComplaint = $("#caseComplaint");
-    const elHistory = $("#caseHistory");
+    const title = $("caseTitle");
+    if (title) title.textContent = "Caso";
 
-    if (elPatientName) elPatientName.textContent = safeText(c.patient?.name);
-    if (elPatientMeta) elPatientMeta.textContent = `${c.patient?.age ?? "?"} anos • ${safeText(c.patient?.sex)}`;
+    setTriageBadge(c.patient?.triage);
 
-    if (elPatientPhoto) {
+    const photo = $("patientPhoto");
+    const name = $("patientName");
+    const sub = $("patientSub");
+    const vitalsList = $("vitalsList");
+    const complaint = $("complaintText");
+    const history = $("historyText");
+
+    if (photo) {
       const src = safeText(c.patient?.photo) || patientFallback(c.patient?.sex);
-      elPatientPhoto.src = src;
-      attachImgFallback(elPatientPhoto, patientFallback(c.patient?.sex));
+      photo.src = src;
+      attachImgFallback(photo, patientFallback(c.patient?.sex));
+    }
+    if (name) name.textContent = safeText(c.patient?.name || "—");
+
+    if (sub) {
+      const age = c.patient?.age ?? "?";
+      const sex = safeText(c.patient?.sex || "—");
+      sub.textContent = `${age} anos • ${sex}`;
     }
 
-    if (elTriage) {
-      elTriage.textContent = `TRIAGEM ${safeText(c.patient?.triage || "N/A")}`;
-      elTriage.dataset.level = safeText(c.patient?.triage || "").toLowerCase();
-    }
-
-    if (elVitals) {
-      elVitals.innerHTML = "";
+    if (vitalsList) {
+      vitalsList.innerHTML = "";
       (c.vitals || []).forEach((v) => {
         const li = document.createElement("li");
-        li.textContent = v;
-        elVitals.appendChild(li);
+        li.textContent = safeText(v);
+        vitalsList.appendChild(li);
       });
     }
 
-    if (elComplaint) elComplaint.textContent = safeText(c.complaint);
-    if (elHistory) elHistory.textContent = safeText(c.history);
-
-    // MID: questions + results
-    renderQuestions();
-    renderSelectedExamResults();
-    renderExamPicker();
-    bindCaseButtons();
+    if (complaint) complaint.textContent = safeText(c.complaint || "—");
+    if (history) history.textContent = safeText(c.history || "—");
   }
 
   function renderQuestions() {
     const c = state.gameplay.currentCase;
-    const wrap = $("#questionsList");
-    if (!wrap) return;
+    const wrap = $("questionsList");
+    if (!wrap || !c) return;
 
     wrap.innerHTML = "";
-    (c.questions || []).forEach((q, idx) => {
+
+    const qs = Array.isArray(c.questions) ? c.questions : [];
+    if (!qs.length) {
+      wrap.innerHTML = `<div class="muted">Sem perguntas adicionais.</div>`;
+      return;
+    }
+
+    qs.forEach((q, idx) => {
       const row = document.createElement("div");
       row.className = "q-row";
 
@@ -627,7 +648,7 @@
       const ans = document.createElement("div");
       ans.className = "q-answer";
       ans.style.display = "none";
-      ans.textContent = safeText(q.answer);
+      ans.textContent = safeText(q.answer || "");
 
       btn.addEventListener("click", (e) => {
         e.preventDefault();
@@ -644,107 +665,205 @@
     });
   }
 
-  function renderExamPicker() {
-    const list = $("#examList");
+  function renderExamResultsBox() {
     const c = state.gameplay.currentCase;
+    const box = $("examResultsBox");
+    if (!box || !c) return;
+
+    const selected = Array.from(state.gameplay.selectedExams);
+    if (!selected.length) {
+      box.innerHTML = `<div class="muted">Nenhum exame solicitado ainda.</div>`;
+      return;
+    }
+
+    box.innerHTML = "";
+    selected.forEach((examId) => {
+      const exMeta = state.data.exams.find((x) => x.id === examId);
+      const label = exMeta ? exMeta.label : examId;
+
+      const result = (c.examResults && c.examResults[examId]) ? c.examResults[examId] : null;
+      const fallback = state.data.examsMeta.normalFallback || { text: "Normal (simulado).", image: null };
+
+      const text = safeText(result?.text || fallback.text);
+      const img = result?.image ?? fallback.image ?? null;
+
+      const card = document.createElement("div");
+      card.className = "resultItem";
+
+      const h = document.createElement("div");
+      h.className = "resultHead";
+      h.textContent = safeText(label);
+
+      const p = document.createElement("div");
+      p.className = "resultText";
+      p.textContent = text;
+
+      card.appendChild(h);
+      card.appendChild(p);
+
+      if (img) {
+        const im = document.createElement("img");
+        im.className = "resultImg";
+        im.alt = "Resultado";
+        im.src = img;
+        attachImgFallback(im, "images/labs.jpg");
+        card.appendChild(im);
+      }
+
+      box.appendChild(card);
+    });
+  }
+
+  function makePickCard(label, subtitle, isSelected) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "pickCard";
+    if (isSelected) btn.classList.add("selected");
+
+    const t = document.createElement("div");
+    t.className = "pickTitle";
+    t.textContent = label;
+
+    btn.appendChild(t);
+
+    if (subtitle) {
+      const s = document.createElement("div");
+      s.className = "pickSub";
+      s.textContent = subtitle;
+      btn.appendChild(s);
+    }
+
+    return btn;
+  }
+
+  function renderExamPicker() {
+    const list = $("examPickList");
+    const maxSpan = $("maxExams");
     if (!list) return;
+
+    if (maxSpan) maxSpan.textContent = String(state.config.maxExams);
 
     list.innerHTML = "";
 
-    // Mostra TODOS os exames do exams.json para o usuário escolher (como você pediu).
     state.data.exams.forEach((ex) => {
       const id = safeText(ex.id);
-      const card = document.createElement("button");
-      card.type = "button";
-      card.className = "exam-card";
-      card.dataset.examId = id;
+      const label = safeText(ex.label || id);
+      const cat = safeText(ex.category || "");
+      const time = ex.time ? `${ex.time} min` : "";
+      const sub = [cat, time].filter(Boolean).join(" • ");
 
-      const name = document.createElement("div");
-      name.className = "exam-name";
-      name.textContent = safeText(ex.name);
-
-      const meta = document.createElement("div");
-      meta.className = "exam-meta";
-      meta.textContent = `${safeText(ex.category)} • ${safeText(ex.time)}`;
-
-      card.appendChild(name);
-      card.appendChild(meta);
-
-      const isSelected = state.gameplay.selectedExams.has(id);
-      card.classList.toggle("is-selected", isSelected);
+      const selected = state.gameplay.selectedExams.has(id);
+      const card = makePickCard(label, sub, selected);
 
       card.addEventListener("click", (e) => {
         e.preventDefault();
         e.stopPropagation();
 
-        // regra atual (MVP): até 3 exames
-        if (state.gameplay.selectedExams.has(id)) {
+        const isSel = state.gameplay.selectedExams.has(id);
+        if (isSel) {
           state.gameplay.selectedExams.delete(id);
         } else {
-          if (state.gameplay.selectedExams.size >= 3) return;
+          if (state.gameplay.selectedExams.size >= state.config.maxExams) {
+            alert(`Você só pode escolher até ${state.config.maxExams} exames.`);
+            return;
+          }
           state.gameplay.selectedExams.add(id);
         }
-
         renderExamPicker();
-        renderSelectedExamResults();
+        renderExamResultsBox();
       });
 
       list.appendChild(card);
     });
   }
 
-  function renderSelectedExamResults() {
+  function renderDxPicker() {
+    const list = $("dxPickList");
     const c = state.gameplay.currentCase;
-    const wrap = $("#examResults");
-    if (!wrap) return;
+    if (!list || !c) return;
 
-    wrap.innerHTML = "";
+    list.innerHTML = "";
 
-    const selected = Array.from(state.gameplay.selectedExams);
-    if (!selected.length) {
-      wrap.textContent = "Nenhum exame solicitado ainda.";
+    const dxs = Array.isArray(c.diagnosis) ? c.diagnosis : [];
+    if (!dxs.length) {
+      list.innerHTML = `<div class="muted">Sem diagnósticos configurados neste caso.</div>`;
       return;
     }
 
-    selected.forEach((examId) => {
-      const box = document.createElement("div");
-      box.className = "exam-result";
+    dxs.forEach((dx, idx) => {
+      const label = safeText(dx.label || `Opção ${idx + 1}`);
+      const sev = safeText(dx.severity || "");
+      const selected = state.gameplay.selectedDiagnosisIndex === idx;
 
-      const h = document.createElement("div");
-      h.className = "exam-result-title";
-      const ex = state.data.exams.find((x) => x.id === examId);
-      h.textContent = ex ? ex.name : examId;
+      const card = makePickCard(label, sev ? `Severidade: ${sev}` : "", selected);
 
-      const result = c.examResults?.[examId];
-      const p = document.createElement("div");
-      p.className = "exam-result-text";
+      card.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        state.gameplay.selectedDiagnosisIndex = idx;
+        renderDxPicker();
+      });
 
-      if (result?.text) {
-        p.textContent = result.text;
-      } else {
-        // exame fora do caso → "normal" (e pode tirar ponto)
-        p.textContent = "Resultado: dentro da normalidade (simulado).";
-      }
-
-      box.appendChild(h);
-      box.appendChild(p);
-
-      if (result?.image) {
-        const img = document.createElement("img");
-        img.className = "exam-result-img";
-        img.alt = "Imagem do exame";
-        img.src = result.image;
-        attachImgFallback(img, "images/exam_fallback.png"); // opcional
-        box.appendChild(img);
-      }
-
-      wrap.appendChild(box);
+      list.appendChild(card);
     });
   }
 
+  function renderMedPicker() {
+    const list = $("medPickList");
+    const maxSpan = $("maxMeds");
+    const c = state.gameplay.currentCase;
+    if (!list || !c) return;
+
+    if (maxSpan) maxSpan.textContent = String(state.config.maxMeds);
+
+    list.innerHTML = "";
+
+    const meds = Array.isArray(c.medications) ? c.medications : [];
+    if (!meds.length) {
+      list.innerHTML = `<div class="muted">Sem condutas configuradas neste caso.</div>`;
+      return;
+    }
+
+    meds.forEach((m, idx) => {
+      const label = safeText(m.label || `Conduta ${idx + 1}`);
+      const risk = safeText(m.risk || "");
+      const selected = state.gameplay.selectedMeds.has(idx);
+
+      const card = makePickCard(label, risk ? `Risco: ${risk}` : "", selected);
+
+      card.addEventListener("click", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        const isSel = state.gameplay.selectedMeds.has(idx);
+        if (isSel) {
+          state.gameplay.selectedMeds.delete(idx);
+        } else {
+          if (state.gameplay.selectedMeds.size >= state.config.maxMeds) {
+            alert(`Você só pode escolher até ${state.config.maxMeds} condutas/medicações.`);
+            return;
+          }
+          state.gameplay.selectedMeds.add(idx);
+        }
+        renderMedPicker();
+      });
+
+      list.appendChild(card);
+    });
+  }
+
+  function renderCaseScreen() {
+    renderCaseLeft();
+    renderQuestions();
+    renderExamPicker();
+    renderDxPicker();
+    renderMedPicker();
+    renderExamResultsBox();
+  }
+
   function bindCaseButtons() {
-    const btnBack = $("#btnBackOffice");
-    const btnFinalize = $("#btnFinalizeCase");
+    const btnBack = $("btnBackOffice");
+    const btnFinalize = $("btnFinalize");
 
     if (btnBack) {
       btnBack.onclick = (e) => {
@@ -763,39 +882,92 @@
     }
   }
 
+  // =========================
+  // PONTUAÇÃO / PROGRESSÃO
+  // =========================
+  function computeCaseScore() {
+    const c = state.gameplay.currentCase;
+    if (!c) return { total: 0, examsPts: 0, dxPts: 0, medsPts: 0, correctDx: false };
+
+    // Exames
+    const essential = new Set(c.essentialExams || []);
+    const recommended = new Set(c.recommendedExams || []);
+    const selectedExams = Array.from(state.gameplay.selectedExams);
+
+    let examsPts = 0;
+
+    // +20 por essencial escolhido
+    selectedExams.forEach((id) => {
+      if (essential.has(id)) examsPts += 20;
+      else if (recommended.has(id)) examsPts += 10;    // recomendado
+      else examsPts -= 10;                              // desnecessário
+    });
+
+    // -15 por essencial faltando (se houver essenciais)
+    if (essential.size > 0) {
+      essential.forEach((id) => {
+        if (!state.gameplay.selectedExams.has(id)) examsPts -= 15;
+      });
+    }
+
+    // Diagnóstico
+    let dxPts = 0;
+    let correctDx = false;
+
+    const dxs = Array.isArray(c.diagnosis) ? c.diagnosis : [];
+    if (state.gameplay.selectedDiagnosisIndex === null) {
+      dxPts -= 10; // não escolheu
+    } else {
+      const chosen = dxs[state.gameplay.selectedDiagnosisIndex];
+      if (chosen && chosen.correct) {
+        dxPts += 40;
+        correctDx = true;
+      } else {
+        dxPts -= 30;
+      }
+    }
+
+    // Meds/conduta
+    let medsPts = 0;
+    const meds = Array.isArray(c.medications) ? c.medications : [];
+    const selectedMedsIdx = Array.from(state.gameplay.selectedMeds);
+
+    if (!selectedMedsIdx.length) {
+      medsPts -= 5; // não escolheu nada
+    } else {
+      selectedMedsIdx.forEach((idx) => {
+        const m = meds[idx];
+        if (!m) return;
+        medsPts += m.correct ? 15 : -20;
+      });
+    }
+
+    const total = clamp(examsPts + dxPts + medsPts, -100, 120);
+
+    return { total, examsPts, dxPts, medsPts, correctDx };
+  }
+
+  function updateRankByPoints() {
+    const p = state.stats.points;
+    // simples e previsível
+    let r = "Interno";
+    if (p >= 250) r = "Pleno";
+    else if (p >= 160) r = "Titular";
+    else if (p >= 80) r = "Residente";
+    state.doctor.rank = r;
+  }
+
   function finalizeCase() {
     const c = state.gameplay.currentCase;
     if (!c) return;
 
-    // Pontuação: essencial certo +5, recomendado certo +2, exame desnecessário -2
-    // Diagnóstico e conduta (medications) ainda entram em "results" screen no seu HTML,
-    // mas aqui já computamos a base pelos exames (AAA step 0).
-    let delta = 0;
-    let criticalFail = false;
+    const { total, examsPts, dxPts, medsPts, correctDx } = computeCaseScore();
 
-    const selected = Array.from(state.gameplay.selectedExams);
-
-    const essential = new Set(c.essentialExams || []);
-    const recommended = new Set(c.recommendedExams || []);
-
-    // faltou essencial? penaliza
-    essential.forEach((id) => {
-      if (!selected.includes(id)) delta -= 3;
-    });
-
-    selected.forEach((id) => {
-      if (essential.has(id)) delta += 5;
-      else if (recommended.has(id)) delta += 2;
-      else delta -= 2;
-    });
-
-    // (placeholder) se escolher algo “grave” errado futuramente => criticalFail = true
-
-    // Atualiza stats
+    state.stats.points += total;
     state.stats.cases += 1;
     state.stats.shift += 1;
 
-    if (delta > 0) {
+    if (correctDx) {
       state.stats.correct += 1;
       state.stats.streak += 1;
       state.stats.bestStreak = Math.max(state.stats.bestStreak, state.stats.streak);
@@ -804,53 +976,39 @@
       state.stats.streak = 0;
     }
 
-    state.stats.points = Math.max(0, state.stats.points + delta);
-
-    // Rank básico (placeholder) — você pediu progressão automática nos próximos upgrades.
-    // MVP: sobe a cada 50 pontos.
-    const p = state.stats.points;
-    if (p >= 150) state.doctor.rank = "Pleno";
-    else if (p >= 100) state.doctor.rank = "Titular";
-    else if (p >= 50) state.doctor.rank = "Residente";
-    else state.doctor.rank = "Interno";
-
+    updateRankByPoints();
     saveGame();
     updateOfficeHUD();
 
-    // Ranking local
-    pushRankingEntry();
-
-    // Render results screen simples
-    renderResultsScreen(delta, criticalFail);
+    renderResultsScreen(total, examsPts, dxPts, medsPts);
     showScreen("results");
   }
 
-  function renderResultsScreen(delta, criticalFail) {
-    const c = state.gameplay.currentCase;
-    const elTitle = $("#resultsTitle");
-    const elSummary = $("#resultsSummary");
-    const elDelta = $("#resultsDelta");
+  function renderResultsScreen(total, examsPts, dxPts, medsPts) {
+    const title = $("resultsTitle");
+    const sub = $("resultsSub");
 
-    if (elTitle) elTitle.textContent = "Resumo do Caso";
-    if (elSummary) {
-      const triage = safeText(c?.patient?.triage || "");
-      elSummary.textContent =
-        `Paciente: ${safeText(c?.patient?.name)} • Triagem: ${triage}\n` +
-        `Escolhas de exames foram avaliadas (simulado).`;
-    }
-    if (elDelta) {
-      elDelta.textContent = `Pontuação neste caso: ${delta >= 0 ? "+" : ""}${delta}`;
-      elDelta.classList.toggle("is-bad", delta < 0 || criticalFail);
-    }
+    const resPoints = $("resPoints");
+    const resExams = $("resExams");
+    const resDx = $("resDx");
+    const resMeds = $("resMeds");
 
-    const btnNext = $("#btnResultsNext");
-    const btnOffice = $("#btnResultsOffice");
+    if (title) title.textContent = "Resultado do Caso";
+    if (sub) sub.textContent = `Total: ${total} pts • Rank atual: ${state.doctor.rank} • Pontuação geral: ${state.stats.points}`;
 
-    if (btnNext) {
-      btnNext.onclick = (e) => {
+    if (resPoints) resPoints.textContent = String(total);
+    if (resExams) resExams.textContent = String(examsPts);
+    if (resDx) resDx.textContent = String(dxPts);
+    if (resMeds) resMeds.textContent = String(medsPts);
+
+    const btnHome = $("btnResultsHome");
+    const btnOffice = $("btnResultsOffice");
+
+    if (btnHome) {
+      btnHome.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
-        startNextCase();
+        showScreen("home");
       };
     }
 
@@ -864,107 +1022,73 @@
   }
 
   // =========================
-  // FULLSCREEN + HELP + RANKING modal
+  // TOPBAR / MODAIS
   // =========================
-  function bindTopBar() {
-    const btnFS = $("#btnFullscreen");
-    const btnHelp = $("#btnHelp");
-    const btnRanking = $("#btnRanking");
+  function bindTopbar() {
+    const btnFS = $("btnFullScreen");
+    const btnHelp = $("btnHelp");
+    const btnRanking = $("btnRanking");
 
-    if (btnFS) {
-      btnFS.addEventListener("click", async (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        try {
-          if (!document.fullscreenElement) {
-            await document.documentElement.requestFullscreen();
-          } else {
-            await document.exitFullscreen();
-          }
-        } catch (err) {
-          console.warn("fullscreen err", err);
-        }
-      });
-    }
+    const btnCloseHelp = $("btnCloseHelp");
+    const btnCloseRank = $("btnCloseRank");
+
+    if (btnFS) btnFS.addEventListener("click", toggleFullscreen);
 
     if (btnHelp) {
-      btnHelp.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        alert(
-          "Emergency Doctor Simulator\n\n" +
-            "• Jogo educacional (simulado)\n" +
-            "• Escolha exames (até 3), finalize, e acompanhe pontuação.\n" +
-            "• Futuras etapas: cronômetro/pressão/óbito, progressão, ranking online e PWA."
-        );
-      });
+      btnHelp.addEventListener("click", () => openModal("helpModal"));
     }
-
     if (btnRanking) {
-      btnRanking.addEventListener("click", (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showRanking();
+      btnRanking.addEventListener("click", () => {
+        renderRankingModal();
+        openModal("rankModal");
+      });
+    }
+
+    if (btnCloseHelp) btnCloseHelp.addEventListener("click", () => closeModal("helpModal"));
+    if (btnCloseRank) btnCloseRank.addEventListener("click", () => closeModal("rankModal"));
+
+    // clique fora para fechar (opcional)
+    const helpModal = $("helpModal");
+    if (helpModal) {
+      helpModal.addEventListener("click", (e) => {
+        if (e.target === helpModal) closeModal("helpModal");
+      });
+    }
+    const rankModal = $("rankModal");
+    if (rankModal) {
+      rankModal.addEventListener("click", (e) => {
+        if (e.target === rankModal) closeModal("rankModal");
       });
     }
   }
 
-  function showRanking() {
-    const raw = localStorage.getItem(RANKING_KEY);
-    let list = [];
-    try {
-      list = raw ? JSON.parse(raw) : [];
-      if (!Array.isArray(list)) list = [];
-    } catch {
-      list = [];
-    }
-
-    const top = list.slice(0, 10);
-    const lines = top.map((x, i) => `${i + 1}. ${x.name} — ${x.points} pts (casos ${x.cases}, best ${x.bestStreak})`);
-    alert("Ranking (local)\n\n" + (lines.join("\n") || "Sem dados ainda."));
-  }
-
   // =========================
-  // BOOT (NÃO TRAVA UI)
+  // INIT
   // =========================
-  async function boot() {
-    // 1) Bind de UI primeiro (para botões funcionarem mesmo se JSON falhar)
-    bindTopBar();
+  async function init() {
+    bindTopbar();
     bindHomeButtons();
     bindProfile();
     bindOffice();
+    bindCaseButtons();
 
-    // Tenta carregar save (não obriga)
+    // tenta carregar save
     loadGame();
-
-    // 2) Render inicial
-    renderProfileAvatars();
     updateOfficeHUD();
-    showScreen("home");
+    syncProfileUIFromState();
 
-    // 3) Carrega dados em paralelo — se falhar, não mata o app
+    // carrega dados
     try {
       await loadData();
-      console.log("[EDS] data loaded:", state.data.cases.length, "cases,", state.data.exams.length, "exams");
     } catch (e) {
-      console.warn("Data load failed:", e);
-      alert(
-        "Erro ao carregar cases.json/exams.json.\n" +
-          "Verifique se os arquivos existem na mesma pasta do index.html (root do projeto).\n\n" +
-          "Dica: no GitHub Pages, eles devem estar em: /Medical-simulator-1.0/cases.json e /Medical-simulator-1.0/exams.json"
-      );
-      // NÃO retorna; mantém botões funcionando.
+      console.error(e);
+      alert("Falha ao carregar cases.json/exams.json. Verifique se estão na raiz do projeto (mesmo nível do index.html).");
     }
 
-    // 4) Atualiza botão continuar (habilita fluxo)
-    // Se já tem save com doctor ok, pode deixar pronto para ir office
-    // (mas a navegação continua pelo botão continuar)
+    // tela inicial
+    showScreen("home");
   }
 
-  // =========================
-  // START
-  // =========================
-  document.addEventListener("DOMContentLoaded", () => {
-    boot();
-  });
+  // Start
+  window.addEventListener("DOMContentLoaded", init);
 })();
