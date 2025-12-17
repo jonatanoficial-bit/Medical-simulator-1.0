@@ -962,7 +962,143 @@
   "correctConduct": "Antibiótico EV + volume",
   "educationalFeedback": "Sepse mata rápido.",
   "timeLimitSec": 60
-}
+},
+      {
+  "id": "PED-09",
+  "type": "pediatria",
+  "title": "Broncoaspiração",
+  "complaint": "Engasgo e cianose",
+  "history": "Lactente de 9 meses engasgou durante alimentação.",
+  "vitals": ["SatO2 82%", "FR 60"],
+  "diagnoses": ["Broncoaspiração", "Asma", "Laringite"],
+  "correctDiagnosis": "Broncoaspiração",
+  "conducts": ["Aspiração de vias aéreas + O2", "Alta", "Antibiótico oral"],
+  "correctConduct": "Aspiração de vias aéreas + O2",
+  "educationalFeedback": "Broncoaspiração pode levar a insuficiência respiratória rapidamente.",
+  "timeLimitSec": 60
+},
+{
+  "id": "PED-10",
+  "type": "pediatria",
+  "title": "Hipoglicemia infantil",
+  "complaint": "Convulsão",
+  "history": "Criança de 6 anos diabética, uso irregular de insulina.",
+  "vitals": ["Glicemia 32 mg/dL", "FC 140"],
+  "diagnoses": ["Hipoglicemia", "Epilepsia", "AVC"],
+  "correctDiagnosis": "Hipoglicemia",
+  "conducts": ["Glicose EV imediata", "Anticonvulsivante", "Alta"],
+  "correctConduct": "Glicose EV imediata",
+  "educationalFeedback": "Hipoglicemia é causa comum e reversível de convulsão.",
+  "timeLimitSec": 50
+},
+{
+  "id": "PED-11",
+  "type": "pediatria",
+  "title": "Meningite bacteriana",
+  "complaint": "Febre e rigidez de nuca",
+  "history": "Criança de 5 anos, febre alta e vômitos.",
+  "vitals": ["Temp 40°C", "FC 150"],
+  "diagnoses": ["Meningite", "Virosses", "Sinusite"],
+  "correctDiagnosis": "Meningite",
+  "conducts": ["Antibiótico EV imediato", "Alta", "Analgésico"],
+  "correctConduct": "Antibiótico EV imediato",
+  "educationalFeedback": "Atraso no antibiótico aumenta mortalidade.",
+  "timeLimitSec": 60,
+  "stages": [
+    {
+      "id": "initial",
+      "status": "Rebaixamento progressivo",
+      "vitals": ["ECG 12"],
+      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
+    },
+    {
+      "id": "worsening",
+      "status": "Choque séptico",
+      "vitals": ["PA indetectável"],
+      "outcome": "death"
+    },
+    {
+      "id": "stabilized",
+      "status": "Resposta ao antibiótico",
+      "vitals": ["FC 110"],
+      "outcome": "survive"
+    }
+  ]
+},
+{
+  "id": "PED-12",
+  "type": "pediatria",
+  "title": "Cetoacidose diabética",
+  "complaint": "Respiração ofegante",
+  "history": "Adolescente 14 anos, DM1, vômitos e hálito cetônico.",
+  "vitals": ["FR 32", "Glicemia 420"],
+  "diagnoses": ["Cetoacidose diabética", "Asma", "Ansiedade"],
+  "correctDiagnosis": "Cetoacidose diabética",
+  "conducts": ["Insulina EV + hidratação", "Alta", "Antibiótico"],
+  "correctConduct": "Insulina EV + hidratação",
+  "educationalFeedback": "Correção lenta evita edema cerebral.",
+  "timeLimitSec": 90
+},
+      {
+  "id": "AD-04",
+  "type": "adulto",
+  "title": "TEP agudo",
+  "complaint": "Dispneia súbita",
+  "history": "Mulher 45 anos, pós-operatório recente.",
+  "vitals": ["SatO2 85%", "FC 120"],
+  "diagnoses": ["TEP", "Asma", "Ansiedade"],
+  "correctDiagnosis": "TEP",
+  "conducts": ["AngioTC + anticoagulação", "Alta", "Broncodilatador"],
+  "correctConduct": "AngioTC + anticoagulação",
+  "educationalFeedback": "TEP é causa importante de morte súbita.",
+  "timeLimitSec": 70
+},
+{
+  "id": "AD-05",
+  "type": "adulto",
+  "title": "Hemorragia digestiva alta",
+  "complaint": "Vômitos com sangue",
+  "history": "Homem etilista, melena.",
+  "vitals": ["PA 90/60", "FC 130"],
+  "diagnoses": ["HDA", "Gastrite", "Pancreatite"],
+  "correctDiagnosis": "HDA",
+  "conducts": ["Volume + endoscopia", "Alta", "Analgésico"],
+  "correctConduct": "Volume + endoscopia",
+  "educationalFeedback": "Instabilidade indica sangramento ativo.",
+  "timeLimitSec": 60
+},
+{
+  "id": "AD-06",
+  "type": "adulto",
+  "title": "Pneumotórax hipertensivo",
+  "complaint": "Dor torácica e dispneia",
+  "history": "Trauma torácico fechado.",
+  "vitals": ["SatO2 80%", "PA 85/50"],
+  "diagnoses": ["Pneumotórax hipertensivo", "IAM", "Asma"],
+  "correctDiagnosis": "Pneumotórax hipertensivo",
+  "conducts": ["Drenagem torácica imediata", "TC antes", "Alta"],
+  "correctConduct": "Drenagem torácica imediata",
+  "educationalFeedback": "Não se espera exame em pneumotórax hipertensivo.",
+  "timeLimitSec": 45,
+  "stages": [
+    {
+      "id": "initial",
+      "status": "Desvio de traqueia",
+      "vitals": ["SatO2 80%"],
+      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
+    },
+    {
+      "id": "worsening",
+      "status": "PCR",
+      "vitals": ["Pulso ausente"],
+      "outcome": "death"
+    },
+    {
+      "id": "stabilized",
+      "status": "Expansão pulmonar",
+      "vitals": ["SatO2 96%"],
+      "outcome": "survive"
+    }
     ]
   }
 ]
