@@ -1,21 +1,15 @@
 /* =========================================================
-   Emergency Doctor Simulator — script.js (v1.1.0 compat)
-   - Corrige carregamento de cases.json (array) e exams.json (objeto com .exams)
-   - Ajusta TODOS os IDs/classes para bater com o index.html enviado
+   Emergency Doctor Simulator — script.js (v1.1.1)
+   - Corrige caminhos de avatar (avatar1.png..avatar6.png)
+   - Mantém loader robusto de JSON (cases.json + exams.json)
    ========================================================= */
 
 (() => {
   "use strict";
 
-  // =========================
-  // CHAVES DE SAVE
-  // =========================
   const STORAGE_KEY = "edsSave_v1.1.0";
   const RANKING_KEY = "edsRanking_v1.1.0";
 
-  // =========================
-  // HELPERS
-  // =========================
   const $ = (id) => document.getElementById(id);
 
   function safeText(v) {
@@ -25,11 +19,6 @@
 
   function clamp(n, a, b) {
     return Math.max(a, Math.min(b, n));
-  }
-
-  function toast(msg) {
-    // simples e compatível
-    try { console.log("[EDS]", msg); } catch {}
   }
 
   function attachImgFallback(imgEl, fallbackSrc) {
@@ -47,8 +36,6 @@
   }
 
   function getBasePath() {
-    // Ex.: https://user.github.io/repo/ -> "/repo/"
-    // Em Vercel normalmente "/"
     const path = window.location.pathname || "/";
     if (path.endsWith("/index.html")) return path.replace(/index\.html$/i, "");
     if (!path.endsWith("/")) return path + "/";
@@ -62,28 +49,23 @@
     return base + rel;
   }
 
-  // =========================
-  // ESTADO
-  // =========================
+  const DEFAULT_AVATARS = [
+    "images/avatar1.png",
+    "images/avatar2.png",
+    "images/avatar3.png",
+    "images/avatar4.png",
+    "images/avatar5.png",
+    "images/avatar6.png",
+  ];
+  const FALLBACK_AVATAR = "images/avatar1.png";
+
   const state = {
-    doctor: {
-      name: "",
-      avatar: "",
-      rank: "Interno",
-    },
-    stats: {
-      points: 0,
-      correct: 0,
-      wrong: 0,
-      cases: 0,
-      shift: 0,
-      streak: 0,
-      bestStreak: 0,
-    },
+    doctor: { name: "", avatar: "", rank: "Interno" },
+    stats: { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0, bestStreak: 0 },
     data: {
       cases: [],
-      exams: [],             // array normalizado
-      examsMeta: {           // extras do exams.json
+      exams: [],
+      examsMeta: {
         version: null,
         normalFallback: { text: "Resultado dentro da normalidade (simulado).", image: null },
       },
@@ -94,18 +76,10 @@
       selectedDiagnosisIndex: null,
       selectedMeds: new Set(),
     },
-    flags: {
-      dataLoaded: false,
-    },
-    config: {
-      maxExams: 3,
-      maxMeds: 2,
-    },
+    flags: { dataLoaded: false },
+    config: { maxExams: 3, maxMeds: 2 },
   };
 
-  // =========================
-  // TELAS / MODAIS
-  // =========================
   function showScreen(name) {
     const screens = document.querySelectorAll(".screen[data-screen]");
     screens.forEach((s) => {
@@ -128,29 +102,15 @@
     m.setAttribute("aria-hidden", "true");
   }
 
-  // =========================
-  // FULLSCREEN
-  // =========================
   async function toggleFullscreen() {
     try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen();
-      } else {
-        await document.exitFullscreen();
-      }
-    } catch {
-      // ignora
-    }
+      if (!document.fullscreenElement) await document.documentElement.requestFullscreen();
+      else await document.exitFullscreen();
+    } catch {}
   }
 
-  // =========================
-  // SAVE / LOAD
-  // =========================
   function serializeState() {
-    return {
-      doctor: state.doctor,
-      stats: state.stats,
-    };
+    return { doctor: state.doctor, stats: state.stats };
   }
 
   function saveGame() {
@@ -192,12 +152,8 @@
     state.stats = { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0, bestStreak: 0 };
     saveGame();
     updateOfficeHUD();
-    toast("Save resetado.");
   }
 
-  // =========================
-  // RANKING LOCAL
-  // =========================
   function getRankingLocal() {
     try {
       const raw = localStorage.getItem(RANKING_KEY);
@@ -211,8 +167,6 @@
 
   function updateRankingLocal() {
     const list = getRankingLocal();
-
-    // Atualiza/insere pelo nome
     const nameKey = (state.doctor.name || "Sem Nome").trim();
     const idx = list.findIndex((x) => x && x.name === nameKey);
 
@@ -227,10 +181,7 @@
     if (idx >= 0) list[idx] = entry;
     else list.push(entry);
 
-    // Ordena por pontos desc
     list.sort((a, b) => (b.points || 0) - (a.points || 0));
-
-    // Limita
     const trimmed = list.slice(0, 50);
 
     try { localStorage.setItem(RANKING_KEY, JSON.stringify(trimmed)); } catch {}
@@ -260,9 +211,6 @@
     });
   }
 
-  // =========================
-  // JSON LOADER ROBUSTO
-  // =========================
   async function loadJsonRobust(primaryName, alternates = []) {
     const base = getBasePath();
 
@@ -287,7 +235,6 @@
     let lastErr = null;
     for (const url of unique) {
       try {
-        // cache-buster para evitar SW/Cache antigo preso
         const bust = url.includes("?") ? `&t=${Date.now()}` : `?t=${Date.now()}`;
         const res = await fetch(url + bust, { cache: "no-store" });
         if (!res.ok) {
@@ -310,10 +257,8 @@
     const casesData = await loadJsonRobust("cases.json", casesAlternates);
     const examsDataRaw = await loadJsonRobust("exams.json", examsAlternates);
 
-    // cases.json: esperado array
     if (!Array.isArray(casesData)) throw new Error("cases.json inválido (esperado array).");
 
-    // exams.json: pode ser array OU objeto com .exams (seu formato atual)
     let examsArr = null;
     let normalFallback = { text: "Resultado dentro da normalidade (simulado).", image: null };
     let version = null;
@@ -334,12 +279,8 @@
     state.data.examsMeta.normalFallback = normalFallback || normalFallback;
 
     state.flags.dataLoaded = true;
-    toast(`Dados carregados: ${state.data.cases.length} casos, ${state.data.exams.length} exames.`);
   }
 
-  // =========================
-  // HOME
-  // =========================
   function bindHomeButtons() {
     const btnNew = $("btnNewGame");
     const btnContinue = $("btnContinue");
@@ -349,13 +290,11 @@
         e.preventDefault();
         e.stopPropagation();
 
-        // limpa save e vai profile
         try { localStorage.removeItem(STORAGE_KEY); } catch {}
         state.doctor = { name: "", avatar: "", rank: "Interno" };
         state.stats = { points: 0, correct: 0, wrong: 0, cases: 0, shift: 0, streak: 0, bestStreak: 0 };
         updateOfficeHUD();
 
-        // limpa seleções visuais do profile
         clearProfileSelectionVisual();
         showScreen("profile");
       });
@@ -368,14 +307,12 @@
 
         const ok = loadGame();
         if (!ok) {
-          toast("Sem save: iniciando novo.");
           clearProfileSelectionVisual();
           showScreen("profile");
           return;
         }
 
         if (!state.doctor.name || !state.doctor.avatar) {
-          // precisa completar profile
           syncProfileUIFromState();
           showScreen("profile");
           return;
@@ -387,9 +324,6 @@
     }
   }
 
-  // =========================
-  // PROFILE
-  // =========================
   function clearProfileSelectionVisual() {
     const cards = document.querySelectorAll("#avatarGrid .avatarCard");
     cards.forEach((c) => c.classList.remove("selected"));
@@ -413,7 +347,6 @@
     const btnBack = $("btnProfileBack");
     const btnStart = $("btnStartFromProfile");
 
-    // Avatares já existem no HTML — só bind
     const cards = document.querySelectorAll("#avatarGrid .avatarCard");
     cards.forEach((card) => {
       card.addEventListener("click", (e) => {
@@ -443,14 +376,8 @@
         e.stopPropagation();
 
         const name = (inputName?.value || "").trim();
-        if (!name) {
-          alert("Digite seu nome para iniciar.");
-          return;
-        }
-        if (!state.doctor.avatar) {
-          alert("Selecione um avatar para iniciar.");
-          return;
-        }
+        if (!name) { alert("Digite seu nome para iniciar."); return; }
+        if (!state.doctor.avatar) { alert("Selecione um avatar para iniciar."); return; }
 
         state.doctor.name = name;
         state.doctor.rank = state.doctor.rank || "Interno";
@@ -462,9 +389,6 @@
     }
   }
 
-  // =========================
-  // OFFICE HUD
-  // =========================
   function updateOfficeHUD() {
     const elName = $("uiName");
     const elRank = $("uiRank");
@@ -474,9 +398,9 @@
     if (elRank) elRank.textContent = state.doctor.rank || "Interno";
 
     if (elAvatar) {
-      const src = state.doctor.avatar || "images/doctor_1.jpg";
+      const src = state.doctor.avatar || FALLBACK_AVATAR;
       elAvatar.src = src;
-      attachImgFallback(elAvatar, "images/doctor_1.jpg");
+      attachImgFallback(elAvatar, FALLBACK_AVATAR);
     }
 
     const map = {
@@ -511,17 +435,11 @@
         e.preventDefault();
         e.stopPropagation();
         const ok = confirm("Tem certeza que deseja resetar o save?");
-        if (ok) {
-          resetSave();
-          showScreen("home");
-        }
+        if (ok) { resetSave(); showScreen("home"); }
       });
     }
   }
 
-  // =========================
-  // CASE FLOW
-  // =========================
   function pickCaseForRank() {
     const tiersByRank = {
       Interno: ["residente"],
@@ -530,10 +448,8 @@
       Pleno: ["pleno"],
     };
     const allowed = tiersByRank[state.doctor.rank] || ["residente"];
-
     const pool = state.data.cases.filter((c) => allowed.includes(c.tier));
     const list = pool.length ? pool : state.data.cases;
-
     const idx = Math.floor(Math.random() * list.length);
     return list[idx] || null;
   }
@@ -546,15 +462,11 @@
 
   function startNextCase() {
     if (!state.flags.dataLoaded) {
-      alert("Dados ainda não carregaram. Verifique cases.json e exams.json no projeto.");
+      alert("Dados ainda não carregaram. Verifique cases.json e exams.json.");
       return;
     }
-
     const c = pickCaseForRank();
-    if (!c) {
-      alert("Nenhum caso disponível.");
-      return;
-    }
+    if (!c) { alert("Nenhum caso disponível."); return; }
 
     state.gameplay.currentCase = c;
     resetCaseSelections();
@@ -625,8 +537,8 @@
     if (!wrap || !c) return;
 
     wrap.innerHTML = "";
-
     const qs = Array.isArray(c.questions) ? c.questions : [];
+
     if (!qs.length) {
       wrap.innerHTML = `<div class="muted">Sem perguntas adicionais.</div>`;
       return;
@@ -742,7 +654,6 @@
     if (!list) return;
 
     if (maxSpan) maxSpan.textContent = String(state.config.maxExams);
-
     list.innerHTML = "";
 
     state.data.exams.forEach((ex) => {
@@ -783,8 +694,8 @@
     if (!list || !c) return;
 
     list.innerHTML = "";
-
     const dxs = Array.isArray(c.diagnosis) ? c.diagnosis : [];
+
     if (!dxs.length) {
       list.innerHTML = `<div class="muted">Sem diagnósticos configurados neste caso.</div>`;
       return;
@@ -815,10 +726,10 @@
     if (!list || !c) return;
 
     if (maxSpan) maxSpan.textContent = String(state.config.maxMeds);
-
     list.innerHTML = "";
 
     const meds = Array.isArray(c.medications) ? c.medications : [];
+
     if (!meds.length) {
       list.innerHTML = `<div class="muted">Sem condutas configuradas neste caso.</div>`;
       return;
@@ -866,75 +777,52 @@
     const btnFinalize = $("btnFinalize");
 
     if (btnBack) {
-      btnBack.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showScreen("office");
-      };
+      btnBack.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showScreen("office"); };
     }
-
     if (btnFinalize) {
-      btnFinalize.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        finalizeCase();
-      };
+      btnFinalize.onclick = (e) => { e.preventDefault(); e.stopPropagation(); finalizeCase(); };
     }
   }
 
-  // =========================
-  // PONTUAÇÃO / PROGRESSÃO
-  // =========================
   function computeCaseScore() {
     const c = state.gameplay.currentCase;
     if (!c) return { total: 0, examsPts: 0, dxPts: 0, medsPts: 0, correctDx: false };
 
-    // Exames
     const essential = new Set(c.essentialExams || []);
     const recommended = new Set(c.recommendedExams || []);
     const selectedExams = Array.from(state.gameplay.selectedExams);
 
     let examsPts = 0;
-
-    // +20 por essencial escolhido
     selectedExams.forEach((id) => {
       if (essential.has(id)) examsPts += 20;
-      else if (recommended.has(id)) examsPts += 10;    // recomendado
-      else examsPts -= 10;                              // desnecessário
+      else if (recommended.has(id)) examsPts += 10;
+      else examsPts -= 10;
     });
 
-    // -15 por essencial faltando (se houver essenciais)
     if (essential.size > 0) {
       essential.forEach((id) => {
         if (!state.gameplay.selectedExams.has(id)) examsPts -= 15;
       });
     }
 
-    // Diagnóstico
     let dxPts = 0;
     let correctDx = false;
 
     const dxs = Array.isArray(c.diagnosis) ? c.diagnosis : [];
     if (state.gameplay.selectedDiagnosisIndex === null) {
-      dxPts -= 10; // não escolheu
+      dxPts -= 10;
     } else {
       const chosen = dxs[state.gameplay.selectedDiagnosisIndex];
-      if (chosen && chosen.correct) {
-        dxPts += 40;
-        correctDx = true;
-      } else {
-        dxPts -= 30;
-      }
+      if (chosen && chosen.correct) { dxPts += 40; correctDx = true; }
+      else dxPts -= 30;
     }
 
-    // Meds/conduta
     let medsPts = 0;
     const meds = Array.isArray(c.medications) ? c.medications : [];
     const selectedMedsIdx = Array.from(state.gameplay.selectedMeds);
 
-    if (!selectedMedsIdx.length) {
-      medsPts -= 5; // não escolheu nada
-    } else {
+    if (!selectedMedsIdx.length) medsPts -= 5;
+    else {
       selectedMedsIdx.forEach((idx) => {
         const m = meds[idx];
         if (!m) return;
@@ -943,13 +831,11 @@
     }
 
     const total = clamp(examsPts + dxPts + medsPts, -100, 120);
-
     return { total, examsPts, dxPts, medsPts, correctDx };
   }
 
   function updateRankByPoints() {
     const p = state.stats.points;
-    // simples e previsível
     let r = "Interno";
     if (p >= 250) r = "Pleno";
     else if (p >= 160) r = "Titular";
@@ -1004,26 +890,10 @@
     const btnHome = $("btnResultsHome");
     const btnOffice = $("btnResultsOffice");
 
-    if (btnHome) {
-      btnHome.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showScreen("home");
-      };
-    }
-
-    if (btnOffice) {
-      btnOffice.onclick = (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        showScreen("office");
-      };
-    }
+    if (btnHome) btnHome.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showScreen("home"); };
+    if (btnOffice) btnOffice.onclick = (e) => { e.preventDefault(); e.stopPropagation(); showScreen("office"); };
   }
 
-  // =========================
-  // TOPBAR / MODAIS
-  // =========================
   function bindTopbar() {
     const btnFS = $("btnFullScreen");
     const btnHelp = $("btnHelp");
@@ -1034,37 +904,19 @@
 
     if (btnFS) btnFS.addEventListener("click", toggleFullscreen);
 
-    if (btnHelp) {
-      btnHelp.addEventListener("click", () => openModal("helpModal"));
-    }
-    if (btnRanking) {
-      btnRanking.addEventListener("click", () => {
-        renderRankingModal();
-        openModal("rankModal");
-      });
-    }
+    if (btnHelp) btnHelp.addEventListener("click", () => openModal("helpModal"));
+    if (btnRanking) btnRanking.addEventListener("click", () => { renderRankingModal(); openModal("rankModal"); });
 
     if (btnCloseHelp) btnCloseHelp.addEventListener("click", () => closeModal("helpModal"));
     if (btnCloseRank) btnCloseRank.addEventListener("click", () => closeModal("rankModal"));
 
-    // clique fora para fechar (opcional)
     const helpModal = $("helpModal");
-    if (helpModal) {
-      helpModal.addEventListener("click", (e) => {
-        if (e.target === helpModal) closeModal("helpModal");
-      });
-    }
+    if (helpModal) helpModal.addEventListener("click", (e) => { if (e.target === helpModal) closeModal("helpModal"); });
+
     const rankModal = $("rankModal");
-    if (rankModal) {
-      rankModal.addEventListener("click", (e) => {
-        if (e.target === rankModal) closeModal("rankModal");
-      });
-    }
+    if (rankModal) rankModal.addEventListener("click", (e) => { if (e.target === rankModal) closeModal("rankModal"); });
   }
 
-  // =========================
-  // INIT
-  // =========================
   async function init() {
     bindTopbar();
     bindHomeButtons();
@@ -1072,23 +924,18 @@
     bindOffice();
     bindCaseButtons();
 
-    // tenta carregar save
     loadGame();
     updateOfficeHUD();
     syncProfileUIFromState();
 
-    // carrega dados
-    try {
-      await loadData();
-    } catch (e) {
+    try { await loadData(); }
+    catch (e) {
       console.error(e);
-      alert("Falha ao carregar cases.json/exams.json. Verifique se estão na raiz do projeto (mesmo nível do index.html).");
+      alert("Falha ao carregar cases.json/exams.json. Verifique se estão na raiz do projeto.");
     }
 
-    // tela inicial
     showScreen("home");
   }
 
-  // Start
   window.addEventListener("DOMContentLoaded", init);
 })();
