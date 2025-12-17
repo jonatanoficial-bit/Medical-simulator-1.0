@@ -16,21 +16,36 @@
 
 <body>
 
-<!-- ================= SPLASH / CAPA ================= -->
-<div id="splashScreen" class="splash">
+<!-- =====================================================
+     SPLASH / CAPA
+===================================================== -->
+<div id="splashScreen" class="splash" role="button" tabindex="0">
   <img src="images/capa.jpg" alt="Emergency Doctor Simulator" />
-  <div class="splashHint">Toque para iniciar</div>
+  <div class="splashHint">Toque ou clique para iniciar</div>
 </div>
 
 <script>
-  const splash = document.getElementById("splashScreen");
-  ["click","touchstart","pointerdown"].forEach(evt=>{
-    splash.addEventListener(evt, ()=>{
-      splash.remove();
-    }, { once:true });
-  });
+  (function () {
+    const splash = document.getElementById("splashScreen");
+    if (!splash) return;
+
+    const close = () => {
+      splash.classList.add("splash--hide");
+      setTimeout(() => splash.remove(), 200);
+    };
+
+    ["click", "touchstart", "pointerdown", "keydown"].forEach(evt => {
+      splash.addEventListener(evt, e => {
+        if (evt === "keydown" && e.key !== "Enter" && e.key !== " ") return;
+        close();
+      }, { once: true });
+    });
+  })();
 </script>
 
+<!-- =====================================================
+     APP
+===================================================== -->
 <div class="app">
 
 <!-- ================= TOPBAR ================= -->
@@ -39,7 +54,9 @@
     <div class="brand-title">Emergency Doctor Simulator</div>
     <div class="brand-sub">Simulador de Pronto-Socorro</div>
   </div>
+
   <div class="top-actions">
+    <button id="btnFullScreen" class="btn">Tela cheia</button>
     <button id="btnRanking" class="btn">Ranking</button>
     <button id="btnHelp" class="btn">Ajuda</button>
   </div>
@@ -49,9 +66,15 @@
 <section class="screen active" data-screen="home">
   <div class="panel">
     <h1>Bem-vindo(a), Doutor(a)</h1>
-    <p>Atenda casos reais, solicite exames e tome decisões clínicas.</p>
-    <button id="btnNewGame" class="btn primary">Novo jogo</button>
-    <button id="btnContinue" class="btn">Continuar</button>
+    <p>
+      Atenda casos clínicos reais, solicite exames,
+      tome decisões médicas e salve vidas.
+    </p>
+
+    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button id="btnNewGame" class="btn primary">Novo jogo</button>
+      <button id="btnContinue" class="btn">Continuar</button>
+    </div>
   </div>
 </section>
 
@@ -59,13 +82,41 @@
 <section class="screen" data-screen="profile">
   <div class="panel">
     <h2>Criar Perfil</h2>
-    <input id="inputName" placeholder="Seu nome" />
+
+    <label>Nome</label>
+    <input id="inputName" placeholder="Digite seu nome" />
+
+    <h3 style="margin-top:14px;">Escolha seu avatar</h3>
     <div class="avatarGrid">
-      <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png"></button>
-      <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png"></button>
-      <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png"></button>
+      <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png" /></button>
+      <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png" /></button>
+      <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png" /></button>
+      <button class="avatarCard" data-avatar="images/avatar4.png"><img src="images/avatar4.png" /></button>
+      <button class="avatarCard" data-avatar="images/avatar5.png"><img src="images/avatar5.png" /></button>
+      <button class="avatarCard" data-avatar="images/avatar6.png"><img src="images/avatar6.png" /></button>
     </div>
-    <button id="btnStartGame" class="btn primary">Entrar</button>
+
+    <div style="margin-top:16px; display:flex; justify-content:space-between;">
+      <button id="btnProfileBack" class="btn">Voltar</button>
+      <button id="btnStartFromProfile" class="btn primary">Entrar</button>
+    </div>
+  </div>
+</section>
+
+<!-- ================= INTRO (DIRETOR) ================= -->
+<section class="screen" data-screen="intro">
+  <div class="panel">
+    <h2>Diretor do Hospital</h2>
+
+    <div style="margin-top:12px; border:1px solid rgba(255,255,255,0.15); padding:14px; border-radius:14px;">
+      <div id="directorText"></div>
+      <div class="cursor">▍</div>
+    </div>
+
+    <div style="margin-top:16px; display:flex; justify-content:space-between;">
+      <button id="btnIntroHelp" class="btn">Ajuda</button>
+      <button id="btnIntroContinue" class="btn primary">Ir ao consultório</button>
+    </div>
   </div>
 </section>
 
@@ -89,7 +140,10 @@
       <div>Óbitos: <b id="uiDeaths">0</b></div>
     </div>
 
-    <button id="btnNextCase" class="btn primary">Iniciar Plantão</button>
+    <div style="margin-top:16px;">
+      <button id="btnNextCase" class="btn primary">Iniciar plantão</button>
+      <button id="btnOfficeRanking" class="btn">Ver ranking</button>
+    </div>
   </div>
 </section>
 
@@ -103,9 +157,9 @@
       <div class="caseLine"><b>Sinais vitais:</b> <span id="caseVitals"></span></div>
     </div>
 
-    <div style="margin-top:14px; display:flex; gap:10px;">
-      <button id="btnExams" class="btn primary">Solicitar Exames</button>
-      <button id="btnFinalize" class="btn">Finalizar Atendimento</button>
+    <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button id="btnExams" class="btn primary">Solicitar exames</button>
+      <button id="btnFinalize" class="btn">Finalizar atendimento</button>
     </div>
   </div>
 </section>
@@ -116,8 +170,8 @@
     <h2>Solicitar Exames</h2>
     <div id="examList"></div>
 
-    <div style="margin-top:14px;">
-      <button id="btnBackCase" class="btn">Voltar</button>
+    <div style="margin-top:16px;">
+      <button id="btnBackCase" class="btn">Voltar ao caso</button>
     </div>
   </div>
 </section>
@@ -128,32 +182,48 @@
     <h2>Resultados dos Exames</h2>
     <div id="examResults"></div>
 
-    <button id="btnReturnCase" class="btn primary">Voltar ao Caso</button>
+    <div style="margin-top:16px;">
+      <button id="btnReturnCase" class="btn primary">Voltar ao caso</button>
+    </div>
   </div>
 </section>
 
-<!-- ================= MODAIS ================= -->
+<!-- ================= ÓBITO ================= -->
+<section class="screen" data-screen="death">
+  <div class="panel death">
+    <h1>🟥 ÓBITO</h1>
+    <p id="deathReason"></p>
+    <button id="btnBackOffice" class="btn">Voltar ao consultório</button>
+  </div>
+</section>
+
+<!-- ================= MODAL RANKING ================= -->
 <div id="rankingModal" class="modal hidden">
   <div class="modalCard">
     <h2>Ranking</h2>
     <div id="rankingList"></div>
-    <button onclick="this.closest('.modal').classList.add('hidden')" class="btn">Fechar</button>
+    <button id="btnCloseRanking" class="btn">Fechar</button>
   </div>
 </div>
 
+<!-- ================= MODAL AJUDA ================= -->
 <div id="helpModal" class="modal hidden">
   <div class="modalCard">
     <h2>Ajuda</h2>
-    <p>Solicite exames relevantes, evite atrasos e salve vidas.</p>
-    <button onclick="this.closest('.modal').classList.add('hidden')" class="btn">Fechar</button>
+    <p>
+      Solicite exames coerentes, evite atrasos e tome decisões clínicas corretas.
+      Tempo e precisão salvam vidas.
+    </p>
+    <button id="btnCloseHelp" class="btn">Fechar</button>
   </div>
 </div>
 
 </div>
 
-<!-- JS -->
+<!-- ================= JS ================= -->
 <script src="script.js"></script>
 
+<!-- ================= PWA ================= -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
