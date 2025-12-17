@@ -837,7 +837,132 @@
         "status": "Após contenção/sedação adequadas, sinais estabilizam e avaliação completa é possível.",
         "vitals": ["PA 130/85", "FC 105", "FR 18", "SpO2 97%"],
         "outcome": "survive"
-      }
+      },
+      {
+  "id": "PED-06",
+  "type": "pediatria",
+  "title": "Sepse neonatal precoce",
+  "complaint": "Letargia e recusa alimentar",
+  "history": "RN de 5 dias, hipoativo, hipotérmico.",
+  "vitals": ["FC 190", "Temp 35,5°C", "SatO2 91%"],
+  "diagnoses": ["Sepse neonatal", "Hipoglicemia", "Refluxo"],
+  "correctDiagnosis": "Sepse neonatal",
+  "conducts": ["Antibiótico EV imediato", "Alta com orientação", "Antitérmico"],
+  "correctConduct": "Antibiótico EV imediato",
+  "educationalFeedback": "Sepse neonatal é emergência absoluta.",
+  "timeLimitSec": 60,
+  "stages": [
+    {
+      "id": "initial",
+      "status": "Perfusão ruim e letargia",
+      "vitals": ["TEC >4s"],
+      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
+    },
+    {
+      "id": "worsening",
+      "status": "Choque séptico",
+      "vitals": ["PA indetectável"],
+      "outcome": "death"
+    },
+    {
+      "id": "stabilized",
+      "status": "Melhora clínica",
+      "vitals": ["FC 150"],
+      "outcome": "survive"
+    }
+  ]
+},
+{
+  "id": "PED-07",
+  "type": "pediatria",
+  "title": "Crise asmática grave",
+  "complaint": "Falta de ar",
+  "history": "Criança de 8 anos, asmática, sem resposta ao broncodilatador em casa.",
+  "vitals": ["FR 40", "SatO2 89%"],
+  "diagnoses": ["Asma grave", "Pneumonia", "Ansiedade"],
+  "correctDiagnosis": "Asma grave",
+  "conducts": ["Beta-agonista inalatório + corticoide", "Alta", "Antibiótico"],
+  "correctConduct": "Beta-agonista inalatório + corticoide",
+  "educationalFeedback": "Crise grave exige tratamento imediato.",
+  "timeLimitSec": 80
+},
+{
+  "id": "PED-08",
+  "type": "pediatria",
+  "title": "TCE infantil",
+  "complaint": "Queda de altura",
+  "history": "Criança de 3 anos caiu da escada, sonolenta.",
+  "vitals": ["FC 130", "ECG 13"],
+  "diagnoses": ["Traumatismo craniano", "Convulsão", "AVC"],
+  "correctDiagnosis": "Traumatismo craniano",
+  "conducts": ["TC de crânio + observação", "Alta imediata", "Antitérmico"],
+  "correctConduct": "TC de crânio + observação",
+  "educationalFeedback": "TCE em criança exige vigilância.",
+  "timeLimitSec": 90
+},
+
+{
+  "id": "AD-01",
+  "type": "adulto",
+  "title": "IAM com supra de ST",
+  "complaint": "Dor torácica intensa",
+  "history": "Homem, 58 anos, hipertenso, dor há 40 min.",
+  "vitals": ["PA 150/90", "FC 104"],
+  "diagnoses": ["IAM com supra", "Ansiedade", "Refluxo"],
+  "correctDiagnosis": "IAM com supra",
+  "conducts": ["AAS + reperfusão imediata", "Dipirona", "Alta"],
+  "correctConduct": "AAS + reperfusão imediata",
+  "educationalFeedback": "Tempo é músculo.",
+  "timeLimitSec": 70,
+  "stages": [
+    {
+      "id": "initial",
+      "status": "Dor intensa e sudorese",
+      "vitals": ["FC 104"],
+      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
+    },
+    {
+      "id": "worsening",
+      "status": "FV / PCR",
+      "vitals": ["Pulso ausente"],
+      "outcome": "death"
+    },
+    {
+      "id": "stabilized",
+      "status": "Dor aliviada",
+      "vitals": ["FC 78"],
+      "outcome": "survive"
+    }
+  ]
+},
+{
+  "id": "AD-02",
+  "type": "adulto",
+  "title": "AVC isquêmico agudo",
+  "complaint": "Déficit neurológico",
+  "history": "Mulher 72 anos, início há 1h.",
+  "vitals": ["PA 180/100"],
+  "diagnoses": ["AVC isquêmico", "Hipoglicemia", "Crise convulsiva"],
+  "correctDiagnosis": "AVC isquêmico",
+  "conducts": ["TC imediata + trombólise", "Alta", "Anticonvulsivante"],
+  "correctConduct": "TC imediata + trombólise",
+  "educationalFeedback": "Janela terapêutica é crítica.",
+  "timeLimitSec": 90
+},
+{
+  "id": "AD-03",
+  "type": "adulto",
+  "title": "Sepse de foco pulmonar",
+  "complaint": "Febre e confusão",
+  "history": "Idoso com pneumonia.",
+  "vitals": ["PA 85/50", "FC 120"],
+  "diagnoses": ["Sepse", "Desidratação", "Insuficiência cardíaca"],
+  "correctDiagnosis": "Sepse",
+  "conducts": ["Antibiótico EV + volume", "Alta", "Analgésico"],
+  "correctConduct": "Antibiótico EV + volume",
+  "educationalFeedback": "Sepse mata rápido.",
+  "timeLimitSec": 60
+}
     ]
   }
 ]
