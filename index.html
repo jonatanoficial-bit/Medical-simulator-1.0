@@ -16,170 +16,266 @@
 
 <body>
 
-<!-- ================= SPLASH ================= -->
-<div id="splashScreen" class="splash">
+<!-- ================= SPLASH / CAPA ================= -->
+<div id="splashScreen" class="splash" role="button" tabindex="0">
   <img src="images/capa.jpg" alt="Emergency Doctor Simulator" />
-  <div class="splashHint">Toque para iniciar</div>
+  <div class="splashHint">Toque ou clique para iniciar</div>
 </div>
 
 <script>
-  (function(){
+  (function () {
     const splash = document.getElementById("splashScreen");
-    const close = () => splash.remove();
-    ["click","touchstart","pointerdown","keydown"].forEach(e=>{
-      splash.addEventListener(e, close, { once:true });
+    if (!splash) return;
+
+    const close = () => {
+      splash.classList.add("splash--hide");
+      setTimeout(() => splash.remove(), 200);
+    };
+
+    ["click", "touchstart", "pointerdown", "keydown"].forEach(evt => {
+      splash.addEventListener(evt, (e) => {
+        if (evt === "keydown" && e.key !== "Enter" && e.key !== " ") return;
+        close();
+      }, { once: true });
     });
   })();
 </script>
 
 <div class="app">
 
-<!-- ================= TOPBAR ================= -->
-<header class="topbar">
-  <div>
-    <div class="brand-title">Emergency Doctor Simulator</div>
-    <div class="brand-sub">Simulador de Pronto-Socorro</div>
-  </div>
-  <div class="top-actions">
-    <button id="btnRanking" class="btn">Ranking</button>
-    <button id="btnHelp" class="btn">Ajuda</button>
-  </div>
-</header>
-
-<!-- ================= HOME ================= -->
-<section class="screen active" data-screen="home">
-  <div class="panel">
-    <h1>Bem-vindo(a), Doutor(a)</h1>
-    <button id="btnNewGame" class="btn primary">Novo jogo</button>
-    <button id="btnContinue" class="btn">Continuar</button>
-  </div>
-</section>
-
-<!-- ================= PROFILE ================= -->
-<section class="screen" data-screen="profile">
-  <div class="panel">
-    <h2>Criar Perfil</h2>
-    <input id="inputName" placeholder="Seu nome" />
-    <div class="avatarGrid">
-      <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png"></button>
-      <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png"></button>
-      <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png"></button>
+  <!-- ================= TOPBAR ================= -->
+  <header class="topbar">
+    <div>
+      <div class="brand-title">Emergency Doctor Simulator</div>
+      <div class="brand-sub">Simulador de Pronto-Socorro</div>
     </div>
-    <button id="btnStartFromProfile" class="btn primary">Entrar</button>
-  </div>
-</section>
 
-<!-- ================= INTRO ================= -->
-<section class="screen" data-screen="intro">
-  <div class="panel">
-    <h2>Diretor do Hospital</h2>
-    <div id="directorText"></div>
-    <button id="btnIntroContinue" class="btn primary">Ir ao consultório</button>
-  </div>
-</section>
+    <div class="top-actions">
+      <button id="btnFullScreen" class="btn">Tela cheia</button>
+      <button id="btnRanking" class="btn">Ranking</button>
+      <button id="btnHelp" class="btn">Ajuda</button>
+    </div>
+  </header>
 
-<!-- ================= OFFICE ================= -->
-<section class="screen" data-screen="office">
-  <div class="panel consultorioPanel">
-    <div class="officeHeader">
-      <img id="uiAvatar" class="officeAvatar" />
-      <div>
-        <div id="uiName"></div>
-        <div id="uiRank"></div>
+  <!-- ================= HOME ================= -->
+  <section class="screen active" data-screen="home">
+    <div class="panel">
+      <h1>Bem-vindo(a), Doutor(a)</h1>
+      <p>
+        Atenda casos clínicos, solicite exames, escolha diagnóstico e conduta.
+        A dificuldade aumenta automaticamente com sua carreira.
+      </p>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnNewGame" class="btn primary">Novo jogo</button>
+        <button id="btnContinue" class="btn">Continuar</button>
       </div>
-      <div class="timer">⏱ <span id="caseTimer">00:00</span></div>
     </div>
+  </section>
 
-    <div class="stats">
-      <div>Pontos: <b id="uiPoints">0</b></div>
-      <div>Casos: <b id="uiCases">0</b></div>
-      <div>Óbitos: <b id="uiDeaths">0</b></div>
+  <!-- ================= PERFIL ================= -->
+  <section class="screen" data-screen="profile">
+    <div class="panel">
+      <h2>Criar Perfil</h2>
+
+      <label>Nome</label>
+      <input id="inputName" placeholder="Digite seu nome" />
+
+      <h3 style="margin-top:14px;">Escolha seu avatar</h3>
+      <div class="avatarGrid">
+        <button class="avatarCard" data-avatar="images/avatar1.png"><img src="images/avatar1.png" /></button>
+        <button class="avatarCard" data-avatar="images/avatar2.png"><img src="images/avatar2.png" /></button>
+        <button class="avatarCard" data-avatar="images/avatar3.png"><img src="images/avatar3.png" /></button>
+        <button class="avatarCard" data-avatar="images/avatar4.png"><img src="images/avatar4.png" /></button>
+        <button class="avatarCard" data-avatar="images/avatar5.png"><img src="images/avatar5.png" /></button>
+        <button class="avatarCard" data-avatar="images/avatar6.png"><img src="images/avatar6.png" /></button>
+      </div>
+
+      <div style="margin-top:16px; display:flex; justify-content:space-between;">
+        <button id="btnProfileBack" class="btn">Voltar</button>
+        <button id="btnStartFromProfile" class="btn primary">Entrar</button>
+      </div>
     </div>
+  </section>
 
-    <button id="btnNextCase" class="btn primary">Iniciar Plantão</button>
-  </div>
-</section>
+  <!-- ================= INTRO (DIRETOR) ================= -->
+  <section class="screen" data-screen="intro">
+    <div class="panel">
+      <h2>Diretor do Hospital</h2>
 
-<!-- ================= CASE ================= -->
-<section class="screen" data-screen="case">
-  <div class="panel">
-    <h2 id="caseTitle"></h2>
-    <div class="caseCard">
-      <div id="caseStatus"></div>
-      <div><b>Sinais vitais:</b> <span id="caseVitals"></span></div>
+      <div style="margin-top:12px; border:1px solid rgba(255,255,255,0.15); padding:14px; border-radius:14px;">
+        <div id="directorText"></div>
+        <div class="cursor">▍</div>
+      </div>
+
+      <div style="margin-top:16px; display:flex; justify-content:space-between;">
+        <button id="btnIntroHelp" class="btn">Ajuda</button>
+        <button id="btnIntroContinue" class="btn primary">Ir ao consultório</button>
+      </div>
     </div>
+  </section>
 
-    <button id="btnExams" class="btn primary">Solicitar Exames</button>
-    <button id="btnToDiagnosis" class="btn">Escolher Diagnóstico</button>
-  </div>
-</section>
+  <!-- ================= CONSULTÓRIO ================= -->
+  <section class="screen" data-screen="office">
+    <div class="panel consultorioPanel">
+      <div class="officeHeader">
+        <div class="officeLeft">
+          <img id="uiAvatar" class="officeAvatar" />
+          <div>
+            <div id="uiName"></div>
+            <div id="uiRank"></div>
+            <div style="margin-top:4px; font-size:.8rem; opacity:.9;">
+              Dificuldade atual: <b id="uiDifficulty">—</b>
+            </div>
+          </div>
+        </div>
+        <div class="timer">⏱️ <span id="caseTimer">00:00</span></div>
+      </div>
 
-<!-- ================= EXAMS ================= -->
-<section class="screen" data-screen="exams">
-  <div class="panel">
-    <h2>Exames</h2>
-    <div id="examList"></div>
-    <button id="btnBackCase" class="btn">Voltar</button>
-  </div>
-</section>
+      <div class="stats">
+        <div>Pontos: <b id="uiPoints">0</b></div>
+        <div>Casos: <b id="uiCases">0</b></div>
+        <div>Óbitos: <b id="uiDeaths">0</b></div>
+      </div>
 
-<!-- ================= RESULTS ================= -->
-<section class="screen" data-screen="results">
-  <div class="panel">
-    <h2>Resultados</h2>
-    <div id="examResults"></div>
-    <button id="btnReturnCase" class="btn primary">Voltar ao Caso</button>
-  </div>
-</section>
+      <div style="margin-top:16px;">
+        <button id="btnNextCase" class="btn primary">Iniciar plantão</button>
+        <button id="btnOfficeRanking" class="btn">Ver ranking</button>
+      </div>
+    </div>
+  </section>
 
-<!-- ================= DIAGNOSIS ================= -->
-<section class="screen" data-screen="diagnosis">
-  <div class="panel">
-    <h2>Escolha o Diagnóstico</h2>
-    <div id="diagnosisList"></div>
-    <button id="btnToConduct" class="btn primary">Confirmar Diagnóstico</button>
-  </div>
-</section>
+  <!-- ================= ATENDIMENTO ================= -->
+  <section class="screen" data-screen="case">
+    <div class="panel">
+      <h2 id="caseTitle">Caso Clínico</h2>
 
-<!-- ================= CONDUCT ================= -->
-<section class="screen" data-screen="conduct">
-  <div class="panel">
-    <h2>Escolha a Conduta</h2>
-    <div id="conductList"></div>
-    <button id="btnFinalizeCase" class="btn primary">Finalizar Caso</button>
-  </div>
-</section>
+      <div class="caseCard">
+        <div class="caseLine" id="caseStatus"></div>
+        <div class="caseLine"><b>Sinais vitais:</b> <span id="caseVitals"></span></div>
+      </div>
 
-<!-- ================= DEATH ================= -->
-<section class="screen" data-screen="death">
-  <div class="panel death">
-    <h1>Óbito</h1>
-    <p id="deathReason"></p>
-    <button id="btnBackOffice" class="btn">Voltar</button>
-  </div>
-</section>
+      <div style="margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnExams" class="btn primary">Solicitar exames</button>
+        <button id="btnToDiagnosis" class="btn">Escolher diagnóstico</button>
+      </div>
+    </div>
+  </section>
 
-<!-- ================= MODALS ================= -->
-<div id="rankingModal" class="modal hidden">
-  <div class="modalCard">
-    <h2>Ranking</h2>
-    <div id="rankingList"></div>
-    <button id="btnCloseRanking" class="btn">Fechar</button>
+  <!-- ================= EXAMES ================= -->
+  <section class="screen" data-screen="exams">
+    <div class="panel">
+      <h2>Solicitar Exames</h2>
+      <div id="examList"></div>
+
+      <div style="margin-top:16px;">
+        <button id="btnBackCase" class="btn">Voltar ao caso</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RESULTADOS ================= -->
+  <section class="screen" data-screen="results">
+    <div class="panel">
+      <h2>Resultados dos Exames</h2>
+      <div id="examResults"></div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnReturnCase" class="btn primary">Voltar ao caso</button>
+        <button id="btnToDiagnosisFromResults" class="btn">Ir para diagnóstico</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= DIAGNÓSTICO ================= -->
+  <section class="screen" data-screen="diagnosis">
+    <div class="panel">
+      <h2>Escolha o Diagnóstico</h2>
+      <div id="diagnosisList"></div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnDiagnosisBack" class="btn">Voltar</button>
+        <button id="btnToConduct" class="btn primary">Confirmar diagnóstico</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONDUTA ================= -->
+  <section class="screen" data-screen="conduct">
+    <div class="panel">
+      <h2>Escolha a Conduta</h2>
+      <div id="conductList"></div>
+
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <button id="btnConductBack" class="btn">Voltar</button>
+        <button id="btnFinalizeCase" class="btn primary">Finalizar caso</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= RELATÓRIO PÓS-CASO ================= -->
+  <section class="screen" data-screen="report">
+    <div class="panel">
+      <h2>Relatório do Caso</h2>
+
+      <div class="caseCard" id="reportSummary"></div>
+
+      <div class="caseCard">
+        <div><b>Diagnóstico escolhido:</b> <span id="reportDxChosen">—</span></div>
+        <div><b>Diagnóstico correto:</b> <span id="reportDxCorrect">—</span></div>
+        <div style="margin-top:8px;"><b>Conduta escolhida:</b> <span id="reportConductChosen">—</span></div>
+        <div><b>Conduta correta:</b> <span id="reportConductCorrect">—</span></div>
+      </div>
+
+      <div class="caseCard">
+        <div><b>Tempo:</b> <span id="reportTime">—</span></div>
+        <div style="margin-top:6px;"><b>Pontuação do caso:</b> <span id="reportScore">—</span></div>
+        <div style="margin-top:10px; opacity:.95;"><b>Feedback educacional:</b><br /><span id="reportFeedback">—</span></div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button id="btnReportContinue" class="btn primary">Voltar ao consultório</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= ÓBITO ================= -->
+  <section class="screen" data-screen="death">
+    <div class="panel death">
+      <h1>ÓBITO</h1>
+      <p id="deathReason"></p>
+      <button id="btnBackOffice" class="btn">Voltar ao consultório</button>
+    </div>
+  </section>
+
+  <!-- ================= MODAL RANKING ================= -->
+  <div id="rankingModal" class="modal hidden">
+    <div class="modalCard">
+      <h2>Ranking</h2>
+      <div id="rankingList"></div>
+      <button id="btnCloseRanking" class="btn">Fechar</button>
+    </div>
   </div>
+
+  <!-- ================= MODAL AJUDA ================= -->
+  <div id="helpModal" class="modal hidden">
+    <div class="modalCard">
+      <h2>Ajuda</h2>
+      <p>
+        A dificuldade aumenta automaticamente com a carreira.
+        Faça exames coerentes, escolha o diagnóstico correto e aplique a conduta adequada.
+        Erros e atrasos aumentam óbitos e reduzem sua pontuação.
+      </p>
+      <button id="btnCloseHelp" class="btn">Fechar</button>
+    </div>
+  </div>
+
 </div>
 
-<div id="helpModal" class="modal hidden">
-  <div class="modalCard">
-    <h2>Ajuda</h2>
-    <p>Tome decisões clínicas corretas e dentro do tempo.</p>
-    <button id="btnCloseHelp" class="btn">Fechar</button>
-  </div>
-</div>
-
-</div>
-
+<!-- ================= JS ================= -->
 <script src="script.js"></script>
 
+<!-- ================= PWA ================= -->
 <script>
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("sw.js");
