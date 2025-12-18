@@ -1,1104 +1,173 @@
 [
   {
-    "id": "LIN_001_IAM_TIPICO",
-    "title": "Dor torácica típica",
-    "patient": { "name": "Carlos", "age": 58, "sex": "M" },
-    "complaint": "Dor torácica em aperto, irradiando para braço esquerdo.",
-    "history": "Hipertenso, tabagista, sudorese fria e náuseas.",
-    "vitals": ["PA 160/100", "FC 104", "FR 22", "SpO2 95%"],
-    "timeLimitSec": 120,
-    "severity": "alta",
-    "diagnoses": ["Síndrome coronariana aguda", "Refluxo gastroesofágico", "Ansiedade", "Dissecção de aorta"],
-    "correctDiagnosis": "Síndrome coronariana aguda",
-    "conducts": ["Alta", "Observação", "Internação em UTI + protocolo IAM", "Analgésico simples"],
-    "correctConduct": "Internação em UTI + protocolo IAM",
-    "educationalFeedback": "Dor torácica típica com fatores de risco deve ser tratada como IAM até prova em contrário."
+    "title": "Lactente com bronquiolite",
+    "description": "Bebê de 8 meses apresenta tosse, chiado no peito, desconforto respiratório e saturação de 91%.",
+    "difficulty": 1,
+    "timeLimit": 45,
+    "actions": [
+      { "text": "Administrar oxigênio e aspirar vias aéreas", "correct": true },
+      { "text": "Prescrever antibiótico imediatamente", "correct": false },
+      { "text": "Liberar paciente sem observação", "correct": false }
+    ]
   },
   {
-    "id": "LIN_002_ARITMIA_INSTAVEL",
-    "title": "Palpitações e instabilidade",
-    "patient": { "name": "Sérgio", "age": 63, "sex": "M" },
-    "complaint": "Palpitações intensas com tontura e sudorese.",
-    "history": "Histórico de cardiopatia. Início súbito há 20 minutos.",
-    "vitals": ["PA 85/55", "FC 180", "FR 24", "SpO2 94%"],
-    "timeLimitSec": 90,
-    "severity": "critica",
-    "diagnoses": ["Taquiarritmia instável", "Crise de ansiedade", "Hipoglicemia", "AVC"],
-    "correctDiagnosis": "Taquiarritmia instável",
-    "conducts": ["Alta", "Hidratação oral", "Cardioversão + UTI", "Analgésico"],
-    "correctConduct": "Cardioversão + UTI",
-    "educationalFeedback": "Taquiarritmia com hipotensão é instável: prioridade é cardioversão elétrica."
+    "title": "Criança com crise asmática",
+    "description": "Paciente de 7 anos com histórico de asma, apresenta dispneia, sibilos difusos e uso de musculatura acessória.",
+    "difficulty": 1,
+    "timeLimit": 40,
+    "actions": [
+      { "text": "Iniciar broncodilatador inalatório e oxigênio", "correct": true },
+      { "text": "Aguardar melhora espontânea", "correct": false },
+      { "text": "Administrar sedativo", "correct": false }
+    ]
   },
   {
-    "id": "LIN_003_IC_AGUDA",
-    "title": "Dispneia e ortopneia",
-    "patient": { "name": "Lourdes", "age": 74, "sex": "F" },
-    "complaint": "Falta de ar ao deitar, piorando à noite.",
-    "history": "ICC prévia, edema de membros inferiores e ganho de peso recente.",
-    "vitals": ["PA 170/95", "FC 110", "FR 30", "SpO2 88%"],
-    "timeLimitSec": 100,
-    "severity": "alta",
-    "diagnoses": ["Edema agudo de pulmão", "Asma", "Pneumonia", "Ansiedade"],
-    "correctDiagnosis": "Edema agudo de pulmão",
-    "conducts": ["Alta", "Nebulização apenas", "VNI/O2 + diurético + UTI", "Antibiótico oral"],
-    "correctConduct": "VNI/O2 + diurético + UTI",
-    "educationalFeedback": "EAP exige suporte ventilatório e diurético; hipoxemia grave demanda monitorização intensiva."
+    "title": "Febre alta em criança",
+    "description": "Criança de 4 anos com febre de 39,5°C, prostração e recusa alimentar.",
+    "difficulty": 1,
+    "timeLimit": 50,
+    "actions": [
+      { "text": "Avaliar foco infeccioso e administrar antitérmico", "correct": true },
+      { "text": "Dar alta imediata sem exames", "correct": false },
+      { "text": "Ignorar sinais clínicos", "correct": false }
+    ]
   },
   {
-    "id": "LIN_004_TEP",
-    "title": "Dispneia súbita com dor pleurítica",
-    "patient": { "name": "Patrícia", "age": 41, "sex": "F" },
-    "complaint": "Falta de ar súbita e dor torácica ao respirar.",
-    "history": "Uso de anticoncepcional e viagem longa recente.",
-    "vitals": ["PA 110/70", "FC 122", "FR 28", "SpO2 90%"],
-    "timeLimitSec": 95,
-    "severity": "alta",
-    "diagnoses": ["Tromboembolismo pulmonar", "Asma", "Pneumonia", "Ansiedade"],
-    "correctDiagnosis": "Tromboembolismo pulmonar",
-    "conducts": ["Alta", "Observação", "Anticoagulação + investigação + internação", "Analgésico simples"],
-    "correctConduct": "Anticoagulação + investigação + internação",
-    "educationalFeedback": "TEP deve ser suspeitado em dispneia súbita com taquicardia e fatores de risco."
+    "title": "Convulsão febril",
+    "description": "Criança de 2 anos apresentou convulsão associada à febre alta.",
+    "difficulty": 2,
+    "timeLimit": 35,
+    "actions": [
+      { "text": "Proteger vias aéreas e controlar febre", "correct": true },
+      { "text": "Amarrar a criança", "correct": false },
+      { "text": "Estimular durante a crise", "correct": false }
+    ]
   },
   {
-    "id": "LIN_005_AVC_ISQUEMICO",
-    "title": "Déficit neurológico focal",
-    "patient": { "name": "Marina", "age": 72, "sex": "F" },
-    "complaint": "Fraqueza em hemicorpo direito e fala arrastada.",
-    "history": "Início há 40 minutos, hipertensa.",
-    "vitals": ["PA 180/95", "FC 90", "FR 18", "SpO2 96%"],
-    "timeLimitSec": 110,
-    "severity": "alta",
-    "diagnoses": ["AVC isquêmico", "AVC hemorrágico", "Hipoglicemia", "Crise conversiva"],
-    "correctDiagnosis": "AVC isquêmico",
-    "conducts": ["Alta", "Sedação", "Protocolo AVC + UTI", "Analgésico"],
-    "correctConduct": "Protocolo AVC + UTI",
-    "educationalFeedback": "Tempo é cérebro: ativar protocolo AVC reduz sequelas e mortalidade."
-  },
-  {
-    "id": "LIN_006_CONVULSAO",
-    "title": "Crise convulsiva",
-    "patient": { "name": "Thiago", "age": 19, "sex": "M" },
-    "complaint": "Convulsão tônico-clônica há 2 minutos, pós-ictal.",
-    "history": "Primeiro episódio, febre negada.",
-    "vitals": ["PA 130/80", "FC 110", "FR 22", "SpO2 93%"],
-    "timeLimitSec": 100,
-    "severity": "alta",
-    "diagnoses": ["Crise convulsiva", "Crise de ansiedade", "Hipoglicemia", "AVC"],
-    "correctDiagnosis": "Crise convulsiva",
-    "conducts": ["Alta", "Observação + investigação + internação", "Sedação contínua", "Analgésico"],
-    "correctConduct": "Observação + investigação + internação",
-    "educationalFeedback": "Primeira crise convulsiva requer avaliação de causas e monitorização."
-  },
-  {
-    "id": "LIN_007_MENINGITE",
-    "title": "Cefaleia, febre e rigidez de nuca",
-    "patient": { "name": "Paula", "age": 26, "sex": "F" },
-    "complaint": "Cefaleia intensa e rigidez de nuca.",
-    "history": "Febre alta e fotofobia.",
-    "vitals": ["PA 110/70", "FC 105", "FR 22", "SpO2 97%"],
-    "timeLimitSec": 90,
-    "severity": "alta",
-    "diagnoses": ["Meningite bacteriana", "Enxaqueca", "Sinusite", "Ansiedade"],
-    "correctDiagnosis": "Meningite bacteriana",
-    "conducts": ["Alta", "Analgésico", "Antibiótico EV + UTI", "Observação"],
-    "correctConduct": "Antibiótico EV + UTI",
-    "educationalFeedback": "Atraso no antibiótico na meningite aumenta significativamente mortalidade e sequelas."
-  },
-  {
-    "id": "LIN_008_SEPSE_URINARIA",
-    "title": "Sepse de foco urinário",
-    "patient": { "name": "Antônio", "age": 67, "sex": "M" },
-    "complaint": "Confusão mental e febre alta.",
-    "history": "Disúria e calafrios há 3 dias.",
-    "vitals": ["PA 90/60", "FC 120", "FR 26", "SpO2 94%"],
-    "timeLimitSec": 90,
-    "severity": "critica",
-    "diagnoses": ["Sepse", "ITU simples", "Desidratação", "AVC"],
-    "correctDiagnosis": "Sepse",
-    "conducts": ["Alta", "Antibiótico oral", "Protocolo sepse + UTI", "Hidratação oral"],
-    "correctConduct": "Protocolo sepse + UTI",
-    "educationalFeedback": "Sepse exige antibiótico e ressuscitação volêmica precoces."
-  },
-  {
-    "id": "LIN_009_PNEUMONIA_GRAVE",
-    "title": "Pneumonia com hipoxemia",
-    "patient": { "name": "José", "age": 79, "sex": "M" },
-    "complaint": "Tosse produtiva e falta de ar.",
-    "history": "Febre há 4 dias, prostração.",
-    "vitals": ["PA 95/60", "FC 112", "FR 32", "SpO2 86%"],
-    "timeLimitSec": 90,
-    "severity": "critica",
-    "diagnoses": ["Pneumonia grave", "Asma", "Ansiedade", "Insuficiência cardíaca"],
-    "correctDiagnosis": "Pneumonia grave",
-    "conducts": ["Alta", "Antibiótico oral", "Antibiótico EV + suporte O2/UTI", "Observação"],
-    "correctConduct": "Antibiótico EV + suporte O2/UTI",
-    "educationalFeedback": "Hipoxemia e instabilidade sugerem pneumonia grave com necessidade de internação."
-  },
-  {
-    "id": "LIN_010_ASMA_GRAVE",
-    "title": "Crise asmática grave",
-    "patient": { "name": "Beatriz", "age": 24, "sex": "F" },
-    "complaint": "Sibilância intensa e dispneia.",
-    "history": "Asma desde infância, uso irregular de medicação.",
-    "vitals": ["PA 120/70", "FC 130", "FR 34", "SpO2 89%"],
-    "timeLimitSec": 85,
-    "severity": "alta",
-    "diagnoses": ["Asma grave", "Pneumonia", "TEP", "Ansiedade"],
-    "correctDiagnosis": "Asma grave",
-    "conducts": ["Alta", "Nebulização + corticoide + observação", "Antibiótico oral", "Analgésico"],
-    "correctConduct": "Nebulização + corticoide + observação",
-    "educationalFeedback": "Crise grave precisa broncodilatador, corticoide e monitorização; hipoxemia é sinal de gravidade."
-  },
-  {
-    "id": "LIN_011_ANAFILAXIA",
-    "title": "Anafilaxia",
-    "patient": { "name": "Fernanda", "age": 34, "sex": "F" },
-    "complaint": "Dispneia e edema de lábios após alimento.",
-    "history": "Alergia conhecida a amendoim.",
-    "vitals": ["PA 80/50", "FC 130", "FR 30", "SpO2 90%"],
-    "timeLimitSec": 60,
-    "severity": "critica",
-    "diagnoses": ["Anafilaxia", "Asma", "Ansiedade", "Choque séptico"],
-    "correctDiagnosis": "Anafilaxia",
-    "conducts": ["Antialérgico oral", "Adrenalina IM + UTI", "Alta", "Observação"],
-    "correctConduct": "Adrenalina IM + UTI",
-    "educationalFeedback": "Adrenalina IM é a intervenção imediata que reduz mortalidade na anafilaxia."
-  },
-  {
-    "id": "LIN_012_PNEUMOTORAX_HIPERTENSIVO",
-    "title": "Pneumotórax hipertensivo pós-trauma",
-    "patient": { "name": "Rafael", "age": 29, "sex": "M" },
-    "complaint": "Dispneia súbita e dor torácica após trauma.",
-    "history": "Acidente de moto, piora progressiva.",
-    "vitals": ["PA 85/60", "FC 125", "FR 32", "SpO2 88%"],
-    "timeLimitSec": 70,
-    "severity": "critica",
-    "diagnoses": ["Pneumotórax hipertensivo", "Contusão pulmonar", "IAM", "Asma"],
-    "correctDiagnosis": "Pneumotórax hipertensivo",
-    "conducts": ["Oxigênio apenas", "Toracocentese imediata", "Observação", "Alta"],
-    "correctConduct": "Toracocentese imediata",
-    "educationalFeedback": "Em pneumotórax hipertensivo a descompressão não deve esperar exames."
-  },
-  {
-    "id": "LIN_013_POLITRAUMA",
-    "title": "Politrauma e choque hemorrágico",
-    "patient": { "name": "Eduardo", "age": 35, "sex": "M" },
-    "complaint": "Dor generalizada após colisão.",
-    "history": "Capotamento, possível hemorragia interna.",
-    "vitals": ["PA 80/40", "FC 140", "FR 30", "SpO2 86%"],
-    "timeLimitSec": 60,
-    "severity": "critica",
-    "diagnoses": ["Choque hemorrágico", "Ansiedade", "Contusão simples", "IAM"],
-    "correctDiagnosis": "Choque hemorrágico",
-    "conducts": ["Alta", "Analgesia", "ATLS + cirurgia imediata", "Observação"],
-    "correctConduct": "ATLS + cirurgia imediata",
-    "educationalFeedback": "Controle de via aérea, respiração e hemorragia é prioridade em trauma grave."
-  },
-  {
-    "id": "LIN_014_TCE",
-    "title": "Trauma cranioencefálico",
-    "patient": { "name": "Diego", "age": 27, "sex": "M" },
-    "complaint": "Perda breve de consciência após queda.",
-    "history": "Amnésia do evento, cefaleia e vômitos.",
-    "vitals": ["PA 140/85", "FC 95", "FR 18", "SpO2 98%"],
-    "timeLimitSec": 100,
-    "severity": "alta",
-    "diagnoses": ["TCE com risco de sangramento", "Enxaqueca", "Ansiedade", "Sinusite"],
-    "correctDiagnosis": "TCE com risco de sangramento",
-    "conducts": ["Alta imediata", "Observação + neuroimagem + internação", "Analgésico e alta", "Sedação contínua"],
-    "correctConduct": "Observação + neuroimagem + internação",
-    "educationalFeedback": "Vômitos e amnésia pós-trauma aumentam risco de lesão intracraniana."
-  },
-  {
-    "id": "LIN_015_HIPOGLECEMIA",
-    "title": "Hipoglicemia sintomática",
-    "patient": { "name": "Vera", "age": 62, "sex": "F" },
-    "complaint": "Tremores, sudorese e confusão.",
-    "history": "Diabetes em uso de insulina, refeição atrasada.",
-    "vitals": ["PA 130/80", "FC 110", "FR 18", "SpO2 98%"],
-    "timeLimitSec": 100,
-    "severity": "alta",
-    "diagnoses": ["Hipoglicemia", "AVC", "Crise de ansiedade", "Sepse"],
-    "correctDiagnosis": "Hipoglicemia",
-    "conducts": ["Alta", "Glicose EV/VO + observação", "Sedação", "Antibiótico EV"],
-    "correctConduct": "Glicose EV/VO + observação",
-    "educationalFeedback": "Hipoglicemia é causa reversível de alteração do nível de consciência."
-  },
-  {
-    "id": "LIN_016_CETOACIDOSE",
-    "title": "Cetoacidose diabética",
-    "patient": { "name": "Lucas", "age": 21, "sex": "M" },
-    "complaint": "Náuseas, vômitos e respiração ofegante.",
-    "history": "DM1, abandono de insulina há 2 dias.",
-    "vitals": ["PA 100/60", "FC 118", "FR 28", "SpO2 97%"],
-    "timeLimitSec": 100,
-    "severity": "alta",
-    "diagnoses": ["Cetoacidose diabética", "Gastroenterite", "Hipoglicemia", "Ansiedade"],
-    "correctDiagnosis": "Cetoacidose diabética",
-    "conducts": ["Alta", "Insulina SC e alta", "Protocolo DKA + UTI", "Antiemético apenas"],
-    "correctConduct": "Protocolo DKA + UTI",
-    "educationalFeedback": "DKA exige reposição volêmica, insulina EV e monitorização eletrolítica."
-  },
-  {
-    "id": "LIN_017_OPIOIDE",
-    "title": "Intoxicação por opioide",
-    "patient": { "name": "Bruno", "age": 38, "sex": "M" },
-    "complaint": "Sonolência extrema e respiração lenta.",
-    "history": "Uso de substâncias; encontrado desacordado.",
-    "vitals": ["PA 100/70", "FC 60", "FR 8", "SpO2 85%"],
-    "timeLimitSec": 80,
-    "severity": "critica",
-    "diagnoses": ["Intoxicação por opioide", "AVC", "Hipoglicemia", "Trauma craniano"],
-    "correctDiagnosis": "Intoxicação por opioide",
-    "conducts": ["Alta", "Naloxona + suporte ventilatório", "Observação sem intervenção", "Sedação"],
-    "correctConduct": "Naloxona + suporte ventilatório",
-    "educationalFeedback": "Bradipneia é o principal risco letal na intoxicação por opioides."
-  },
-  {
-    "id": "LIN_018_BZD_ALCOOL",
-    "title": "Intoxicação por benzodiazepínico/álcool",
-    "patient": { "name": "Mônica", "age": 33, "sex": "F" },
-    "complaint": "Rebaixamento do nível de consciência.",
-    "history": "Ingestão alcoólica e uso de sedativos.",
-    "vitals": ["PA 105/65", "FC 72", "FR 10", "SpO2 92%"],
-    "timeLimitSec": 95,
-    "severity": "alta",
-    "diagnoses": ["Intoxicação por sedativos", "AVC", "Hipoglicemia", "Sepse"],
-    "correctDiagnosis": "Intoxicação por sedativos",
-    "conducts": ["Alta", "Suporte ventilatório + observação", "Sedação", "Antibiótico EV"],
-    "correctConduct": "Suporte ventilatório + observação",
-    "educationalFeedback": "Prioridade é via aérea e ventilação; observar depressão respiratória."
-  },
-  {
-    "id": "LIN_019_GI_BLEED",
-    "title": "Hemorragia digestiva alta",
-    "patient": { "name": "João", "age": 64, "sex": "M" },
-    "complaint": "Vômitos com sangue escuro.",
-    "history": "Etilista crônico; melena referida.",
-    "vitals": ["PA 90/55", "FC 115", "FR 20", "SpO2 96%"],
-    "timeLimitSec": 100,
-    "severity": "alta",
-    "diagnoses": ["Hemorragia digestiva alta", "Gastrite simples", "Intoxicação alimentar", "Ansiedade"],
-    "correctDiagnosis": "Hemorragia digestiva alta",
-    "conducts": ["Alta", "IBP oral e alta", "Internação + estabilização + endoscopia", "Observação sem medidas"],
-    "correctConduct": "Internação + estabilização + endoscopia",
-    "educationalFeedback": "Instabilidade sugere sangramento significativo: estabilização e endoscopia precoce."
-  },
-  {
-    "id": "LIN_020_APENDICITE",
-    "title": "Dor abdominal em fossa ilíaca direita",
-    "patient": { "name": "Igor", "age": 18, "sex": "M" },
-    "complaint": "Dor abdominal migratória para fossa ilíaca direita.",
-    "history": "Náuseas, febre baixa, dor à descompressão.",
-    "vitals": ["PA 120/75", "FC 102", "FR 18", "SpO2 98%"],
-    "timeLimitSec": 110,
-    "severity": "alta",
-    "diagnoses": ["Apendicite aguda", "Gastroenterite", "Cólica renal", "Ansiedade"],
-    "correctDiagnosis": "Apendicite aguda",
-    "conducts": ["Alta", "Analgésico e alta", "Cirurgia + internação", "Antibiótico oral e alta"],
-    "correctConduct": "Cirurgia + internação",
-    "educationalFeedback": "Apendicite é diagnóstico clínico importante; atrasos aumentam risco de perfuração."
-  },
-  {
-    "id": "LIN_021_COLICA_RENAL",
-    "title": "Cólica renal",
-    "patient": { "name": "Aline", "age": 36, "sex": "F" },
-    "complaint": "Dor lombar intensa irradiando para virilha.",
-    "history": "Hematúria referida, sem febre.",
-    "vitals": ["PA 145/85", "FC 110", "FR 20", "SpO2 98%"],
-    "timeLimitSec": 120,
-    "severity": "media",
-    "diagnoses": ["Cólica renal", "Apendicite", "Gastroenterite", "Ansiedade"],
-    "correctDiagnosis": "Cólica renal",
-    "conducts": ["Alta com analgesia e orientação", "Cirurgia imediata", "Antibiótico EV + UTI", "Sedação contínua"],
-    "correctConduct": "Alta com analgesia e orientação",
-    "educationalFeedback": "Cólica renal sem sinais de sepse geralmente é manejo clínico com analgesia e seguimento."
-  },
-  {
-    "id": "LIN_022_PANCREATITE",
-    "title": "Dor epigástrica intensa",
-    "patient": { "name": "Nivaldo", "age": 52, "sex": "M" },
-    "complaint": "Dor epigástrica irradiando para dorso.",
-    "history": "Etilismo; vômitos frequentes.",
-    "vitals": ["PA 140/90", "FC 115", "FR 22", "SpO2 97%"],
-    "timeLimitSec": 110,
-    "severity": "alta",
-    "diagnoses": ["Pancreatite aguda", "Gastrite", "IAM", "Apendicite"],
-    "correctDiagnosis": "Pancreatite aguda",
-    "conducts": ["Alta", "Hidratação EV + analgesia + internação", "Antibiótico oral e alta", "Observação sem medidas"],
-    "correctConduct": "Hidratação EV + analgesia + internação",
-    "educationalFeedback": "Pancreatite aguda exige suporte, analgesia e avaliação de gravidade."
-  },
-  {
-    "id": "LIN_023_GASTROENTERITE_DESIDRATACAO",
-    "title": "Diarreia e desidratação",
-    "patient": { "name": "Camila", "age": 29, "sex": "F" },
-    "complaint": "Diarreia e vômitos há 24 horas.",
-    "history": "Sinais de fraqueza e tontura ao levantar.",
-    "vitals": ["PA 95/60", "FC 120", "FR 18", "SpO2 98%"],
-    "timeLimitSec": 120,
-    "severity": "alta",
-    "diagnoses": ["Gastroenterite com desidratação", "Sepse", "Apendicite", "Ansiedade"],
-    "correctDiagnosis": "Gastroenterite com desidratação",
-    "conducts": ["Alta sem hidratação", "Hidratação EV + observação", "Antibiótico EV + UTI", "Cirurgia imediata"],
-    "correctConduct": "Hidratação EV + observação",
-    "educationalFeedback": "Taquicardia e hipotensão sugerem desidratação importante: reposição volêmica é prioridade."
-  },
-  {
-    "id": "LIN_024_DENGUE_ALARME",
-    "title": "Suspeita de dengue com sinais de alarme",
-    "patient": { "name": "Rogério", "age": 37, "sex": "M" },
-    "complaint": "Febre alta, dor no corpo e dor abdominal.",
-    "history": "Vômitos persistentes; sangramento gengival leve.",
-    "vitals": ["PA 100/65", "FC 112", "FR 18", "SpO2 98%"],
-    "timeLimitSec": 110,
-    "severity": "alta",
-    "diagnoses": ["Dengue com sinais de alarme", "Gripe", "Gastroenterite", "Ansiedade"],
-    "correctDiagnosis": "Dengue com sinais de alarme",
-    "conducts": ["Alta", "Hidratação EV + observação/monitorização", "Antibiótico EV + UTI", "Anti-inflamatório e alta"],
-    "correctConduct": "Hidratação EV + observação/monitorização",
-    "educationalFeedback": "Sinais de alarme em dengue exigem hidratação e monitorização, evitando AINEs."
-  },
-  {
-    "id": "LIN_025_CETOSE_ALCOOLICA",
-    "title": "Vômitos e confusão em etilista",
-    "patient": { "name": "Valdir", "age": 48, "sex": "M" },
-    "complaint": "Vômitos persistentes e confusão leve.",
-    "history": "Etilismo pesado, alimentação precária.",
-    "vitals": ["PA 110/70", "FC 108", "FR 22", "SpO2 97%"],
-    "timeLimitSec": 115,
-    "severity": "alta",
-    "diagnoses": ["Cetoacidose alcoólica", "Gastroenterite", "Sepse", "AVC"],
-    "correctDiagnosis": "Cetoacidose alcoólica",
-    "conducts": ["Alta", "Hidratação EV + tiamina + observação", "Antibiótico EV + UTI", "Sedação"],
-    "correctConduct": "Hidratação EV + tiamina + observação",
-    "educationalFeedback": "Em etilistas, tiamina antes de glicose reduz risco de encefalopatia de Wernicke."
-  },
-  {
-    "id": "LIN_026_ECLAMPSIA",
-    "title": "Convulsão em gestante",
-    "patient": { "name": "Juliana", "age": 28, "sex": "F" },
-    "complaint": "Convulsão e cefaleia intensa.",
-    "history": "Gestante 33 semanas, edema e visão turva.",
-    "vitals": ["PA 190/120", "FC 110", "FR 24", "SpO2 95%"],
-    "timeLimitSec": 80,
-    "severity": "critica",
-    "diagnoses": ["Eclâmpsia", "Enxaqueca", "Hipoglicemia", "Crise de ansiedade"],
-    "correctDiagnosis": "Eclâmpsia",
-    "conducts": ["Alta", "Sulfato de magnésio + UTI/obstetrícia", "Analgésico simples", "Sedação sem medidas obstétricas"],
-    "correctConduct": "Sulfato de magnésio + UTI/obstetrícia",
-    "educationalFeedback": "Eclâmpsia é emergência obstétrica: MgSO4 e estabilização imediata."
-  },
-  {
-    "id": "LIN_027_HEMORRAGIA_POSPARTO",
-    "title": "Hemorragia pós-parto",
-    "patient": { "name": "Débora", "age": 31, "sex": "F" },
-    "complaint": "Sangramento vaginal intenso após parto.",
-    "history": "Parto recente, tontura e fraqueza.",
-    "vitals": ["PA 85/50", "FC 135", "FR 26", "SpO2 94%"],
-    "timeLimitSec": 70,
-    "severity": "critica",
-    "diagnoses": ["Hemorragia pós-parto", "Ansiedade", "Gastroenterite", "Asma"],
-    "correctDiagnosis": "Hemorragia pós-parto",
-    "conducts": ["Alta", "Observação", "Protocolo hemorragia + cirurgia/UTI", "Analgésico simples"],
-    "correctConduct": "Protocolo hemorragia + cirurgia/UTI",
-    "educationalFeedback": "Hemorragia pós-parto é causa importante de choque: reposição volêmica e controle do sangramento."
-  },
-  {
-    "id": "LIN_028_PSIQ_AGITACAO",
-    "title": "Agitação psicomotora com risco",
-    "patient": { "name": "Henrique", "age": 30, "sex": "M" },
-    "complaint": "Agitação intensa e comportamento agressivo.",
-    "history": "Uso de substâncias e ideação persecutória.",
-    "vitals": ["PA 150/95", "FC 125", "FR 22", "SpO2 97%"],
-    "timeLimitSec": 120,
-    "severity": "alta",
-    "diagnoses": ["Agitação psicomotora por intoxicação/psicose", "AVC", "Hipoglicemia", "Sepse"],
-    "correctDiagnosis": "Agitação psicomotora por intoxicação/psicose",
-    "conducts": ["Alta", "Contenção + sedação + avaliação psiquiátrica", "Antibiótico EV + UTI", "Analgésico"],
-    "correctConduct": "Contenção + sedação + avaliação psiquiátrica",
-    "educationalFeedback": "Segurança do paciente/equipe é prioridade; avaliar causas orgânicas e intoxicações."
+    "title": "Engasgo em lactente",
+    "description": "Bebê de 1 ano engasgou durante alimentação, apresenta tosse intensa.",
+    "difficulty": 2,
+    "timeLimit": 30,
+    "actions": [
+      { "text": "Realizar manobras de desobstrução adequadas", "correct": true },
+      { "text": "Oferecer água", "correct": false },
+      { "text": "Balançar a criança", "correct": false }
+    ]
   },
 
   {
-    "id": "BR_001_IAM_RAMO",
-    "title": "Dor torácica com evolução",
-    "patient": { "name": "Cláudio", "age": 61, "sex": "M" },
-    "complaint": "Dor torácica em aperto, sudorese e náuseas.",
-    "history": "Hipertenso, tabagista, dor há 45 minutos.",
-    "vitals": ["PA 150/95", "FC 108", "FR 22", "SpO2 95%"],
-    "timeLimitSec": 120,
-    "severity": "alta",
-    "diagnoses": ["Síndrome coronariana aguda", "Refluxo", "Ansiedade", "Pericardite"],
-    "correctDiagnosis": "Síndrome coronariana aguda",
-    "conducts": ["Alta", "Observação", "Protocolo IAM + UTI", "Analgésico simples"],
-    "correctConduct": "Protocolo IAM + UTI",
-    "educationalFeedback": "Em dor torácica típica, atraso e conduta inadequada podem evoluir para choque cardiogênico.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Dor intensa e ansiedade, possível SCA.",
-        "vitals": ["PA 150/95", "FC 108", "FR 22", "SpO2 95%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Piora súbita: hipotensão e rebaixamento, sinais de choque cardiogênico.",
-        "vitals": ["PA 75/45", "FC 140", "FR 28", "SpO2 90%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Dor alivia parcialmente com suporte e protocolo iniciado; paciente estabiliza.",
-        "vitals": ["PA 120/80", "FC 86", "FR 18", "SpO2 97%"],
-        "outcome": "survive"
-      }
+    "title": "Trauma craniano leve",
+    "description": "Adulto sofreu queda da própria altura, apresenta dor de cabeça e náuseas.",
+    "difficulty": 2,
+    "timeLimit": 45,
+    "actions": [
+      { "text": "Avaliar escala de Glasgow e observar", "correct": true },
+      { "text": "Liberar sem avaliação neurológica", "correct": false },
+      { "text": "Administrar sedativo forte", "correct": false }
     ]
   },
   {
-    "id": "BR_002_SEPSE_RAMO",
-    "title": "Sepse com resposta ao tempo",
-    "patient": { "name": "Vanda", "age": 69, "sex": "F" },
-    "complaint": "Confusão, febre e tremores.",
-    "history": "Suspeita de foco urinário; prostração.",
-    "vitals": ["PA 92/58", "FC 124", "FR 26", "SpO2 94%"],
-    "timeLimitSec": 95,
-    "severity": "critica",
-    "diagnoses": ["Sepse", "Desidratação", "AVC", "Hipoglicemia"],
-    "correctDiagnosis": "Sepse",
-    "conducts": ["Alta", "Antibiótico oral", "Protocolo sepse + UTI", "Hidratação oral"],
-    "correctConduct": "Protocolo sepse + UTI",
-    "educationalFeedback": "Sepse é tempo-dependente: antibiótico e volume precoces melhoram desfecho.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Sepse provável com hipotensão limítrofe.",
-        "vitals": ["PA 92/58", "FC 124", "FR 26", "SpO2 94%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Choque séptico: rebaixamento, extremidades frias, piora rápida.",
-        "vitals": ["PA 70/40", "FC 140", "FR 32", "SpO2 90%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Após protocolo, melhora hemodinâmica e perfusão.",
-        "vitals": ["PA 110/70", "FC 96", "FR 20", "SpO2 96%"],
-        "outcome": "survive"
-      }
+    "title": "Hipoglicemia",
+    "description": "Paciente diabético apresenta confusão mental, sudorese e glicemia de 48 mg/dL.",
+    "difficulty": 2,
+    "timeLimit": 30,
+    "actions": [
+      { "text": "Administrar glicose imediatamente", "correct": true },
+      { "text": "Aplicar insulina", "correct": false },
+      { "text": "Aguardar melhora espontânea", "correct": false }
     ]
   },
   {
-    "id": "BR_003_ASMA_RAMO",
-    "title": "Asma: melhora ou fadiga respiratória",
-    "patient": { "name": "Lívia", "age": 22, "sex": "F" },
-    "complaint": "Falta de ar intensa e chiado.",
-    "history": "Asma; piora nas últimas horas.",
-    "vitals": ["PA 120/75", "FC 135", "FR 34", "SpO2 88%"],
-    "timeLimitSec": 85,
-    "severity": "alta",
-    "diagnoses": ["Asma grave", "Pneumonia", "Ansiedade", "TEP"],
-    "correctDiagnosis": "Asma grave",
-    "conducts": ["Alta", "Nebulização + corticoide + observação", "Antibiótico oral", "Analgésico"],
-    "correctConduct": "Nebulização + corticoide + observação",
-    "educationalFeedback": "Asma grave pode evoluir para fadiga e insuficiência respiratória se subtratada.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Sibilância difusa e esforço respiratório importante.",
-        "vitals": ["PA 120/75", "FC 135", "FR 34", "SpO2 88%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Silêncio auscultatório, fadiga e sonolência: iminência de parada respiratória.",
-        "vitals": ["PA 95/60", "FC 150", "FR 8", "SpO2 78%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Melhora ventilatória com terapêutica; redução de esforço.",
-        "vitals": ["PA 118/72", "FC 105", "FR 20", "SpO2 95%"],
-        "outcome": "survive"
-      }
+    "title": "Infarto agudo do miocárdio",
+    "description": "Homem de 58 anos com dor torácica intensa irradiando para braço esquerdo.",
+    "difficulty": 3,
+    "timeLimit": 30,
+    "actions": [
+      { "text": "Iniciar protocolo de dor torácica e ECG", "correct": true },
+      { "text": "Administrar analgésico comum e liberar", "correct": false },
+      { "text": "Ignorar sintomas", "correct": false }
     ]
   },
   {
-    "id": "BR_004_ANAFILAXIA_RAMO",
-    "title": "Anafilaxia: janela crítica",
-    "patient": { "name": "Renan", "age": 28, "sex": "M" },
-    "complaint": "Edema de face e falta de ar após alimento.",
-    "history": "Alergia conhecida; urticária difusa.",
-    "vitals": ["PA 85/50", "FC 132", "FR 30", "SpO2 89%"],
-    "timeLimitSec": 60,
-    "severity": "critica",
-    "diagnoses": ["Anafilaxia", "Asma", "Ansiedade", "Choque séptico"],
-    "correctDiagnosis": "Anafilaxia",
-    "conducts": ["Antialérgico oral", "Adrenalina IM + UTI", "Alta", "Observação"],
-    "correctConduct": "Adrenalina IM + UTI",
-    "educationalFeedback": "Sem adrenalina imediata, anafilaxia pode evoluir para colapso em minutos.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Urticária, edema e dispneia com hipotensão.",
-        "vitals": ["PA 85/50", "FC 132", "FR 30", "SpO2 89%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Colapso circulatório e broncoespasmo refratário.",
-        "vitals": ["PA 60/30", "FC 150", "FR 6", "SpO2 75%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Após adrenalina e suporte, melhora de perfusão e ventilação.",
-        "vitals": ["PA 110/70", "FC 98", "FR 18", "SpO2 97%"],
-        "outcome": "survive"
-      }
+    "title": "AVC isquêmico",
+    "description": "Paciente apresenta fraqueza em hemicorpo direito e fala arrastada.",
+    "difficulty": 3,
+    "timeLimit": 30,
+    "actions": [
+      { "text": "Acionar protocolo de AVC imediatamente", "correct": true },
+      { "text": "Esperar melhora", "correct": false },
+      { "text": "Administrar sedativo", "correct": false }
     ]
   },
   {
-    "id": "BR_005_TCE_RAMO",
-    "title": "TCE: vigilância vs deterioração",
-    "patient": { "name": "Fabiano", "age": 34, "sex": "M" },
-    "complaint": "Queda com cefaleia e vômitos.",
-    "history": "Sonolência progressiva; amnésia do evento.",
-    "vitals": ["PA 145/90", "FC 92", "FR 18", "SpO2 98%"],
-    "timeLimitSec": 100,
-    "severity": "alta",
-    "diagnoses": ["TCE com risco de sangramento", "Enxaqueca", "Ansiedade", "Sinusite"],
-    "correctDiagnosis": "TCE com risco de sangramento",
-    "conducts": ["Alta imediata", "Observação + neuroimagem + internação", "Analgésico e alta", "Sedação contínua"],
-    "correctConduct": "Observação + neuroimagem + internação",
-    "educationalFeedback": "Em TCE, deterioração pode ser silenciosa: observar e investigar reduz risco de herniação.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Cefaleia e vômitos pós-trauma, risco de hematoma.",
-        "vitals": ["PA 145/90", "FC 92", "FR 18", "SpO2 98%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Piora neurológica: anisocoria e rebaixamento progressivo.",
-        "vitals": ["PA 170/100", "FC 52", "FR 10", "SpO2 93%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Monitorização e intervenção precoces evitam deterioração.",
-        "vitals": ["PA 135/85", "FC 78", "FR 16", "SpO2 98%"],
-        "outcome": "survive"
-      }
+    "title": "Choque séptico",
+    "description": "Paciente com infecção grave, hipotensão e taquicardia.",
+    "difficulty": 4,
+    "timeLimit": 25,
+    "actions": [
+      { "text": "Iniciar antibiótico e suporte hemodinâmico", "correct": true },
+      { "text": "Dar alta", "correct": false },
+      { "text": "Oferecer analgésico apenas", "correct": false }
     ]
   },
-  {
-    "id": "BR_006_HEMORRAGIA_POSPARTO_RAMO",
-    "title": "Hemorragia pós-parto com choque",
-    "patient": { "name": "Larissa", "age": 29, "sex": "F" },
-    "complaint": "Sangramento vaginal importante e tontura.",
-    "history": "Pós-parto recente, fraqueza e palidez.",
-    "vitals": ["PA 85/50", "FC 140", "FR 26", "SpO2 94%"],
-    "timeLimitSec": 70,
-    "severity": "critica",
-    "diagnoses": ["Hemorragia pós-parto", "Ansiedade", "Gastroenterite", "Asma"],
-    "correctDiagnosis": "Hemorragia pós-parto",
-    "conducts": ["Alta", "Observação", "Protocolo hemorragia + cirurgia/UTI", "Analgésico simples"],
-    "correctConduct": "Protocolo hemorragia + cirurgia/UTI",
-    "educationalFeedback": "Hemorragia pós-parto é emergência: atraso aumenta risco de choque e óbito.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Sangramento ativo com sinais de hipoperfusão.",
-        "vitals": ["PA 85/50", "FC 140", "FR 26", "SpO2 94%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Choque hemorrágico profundo e rebaixamento.",
-        "vitals": ["PA 60/35", "FC 155", "FR 30", "SpO2 88%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Após protocolo e controle do sangramento, melhora hemodinâmica.",
-        "vitals": ["PA 110/70", "FC 105", "FR 18", "SpO2 97%"],
-        "outcome": "survive"
-      }
-    ]
-  },
-  {
-    "id": "BR_007_DKA_RAMO",
-    "title": "DKA: correção adequada vs colapso",
-    "patient": { "name": "Maurício", "age": 23, "sex": "M" },
-    "complaint": "Vômitos, sede intensa e respiração rápida.",
-    "history": "DM1, interrompeu insulina; hálito cetônico.",
-    "vitals": ["PA 98/60", "FC 125", "FR 30", "SpO2 97%"],
-    "timeLimitSec": 95,
-    "severity": "alta",
-    "diagnoses": ["Cetoacidose diabética", "Gastroenterite", "Hipoglicemia", "Ansiedade"],
-    "correctDiagnosis": "Cetoacidose diabética",
-    "conducts": ["Alta", "Insulina SC e alta", "Protocolo DKA + UTI", "Antiemético apenas"],
-    "correctConduct": "Protocolo DKA + UTI",
-    "educationalFeedback": "DKA exige protocolo e monitorização; tratamento incompleto pode evoluir para choque/arrítmias.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Desidratação e acidose: risco de instabilidade rápida.",
-        "vitals": ["PA 98/60", "FC 125", "FR 30", "SpO2 97%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Hipotensão e arritmia por distúrbio eletrolítico.",
-        "vitals": ["PA 75/45", "FC 160", "FR 34", "SpO2 92%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Com protocolo, melhora de perfusão e padrão respiratório.",
-        "vitals": ["PA 115/75", "FC 95", "FR 18", "SpO2 98%"],
-        "outcome": "survive"
-      }
-    ]
-  },
-  {
-    "id": "BR_008_TEPTX_RAMO",
-    "title": "TEP: risco de piora hemodinâmica",
-    "patient": { "name": "Suelen", "age": 46, "sex": "F" },
-    "complaint": "Dispneia súbita e dor torácica.",
-    "history": "Cirurgia recente; panturrilha dolorosa.",
-    "vitals": ["PA 105/65", "FC 128", "FR 30", "SpO2 88%"],
-    "timeLimitSec": 95,
-    "severity": "alta",
-    "diagnoses": ["Tromboembolismo pulmonar", "Asma", "Pneumonia", "Ansiedade"],
-    "correctDiagnosis": "Tromboembolismo pulmonar",
-    "conducts": ["Alta", "Analgésico simples", "Anticoagulação + internação", "Observação sem medidas"],
-    "correctConduct": "Anticoagulação + internação",
-    "educationalFeedback": "TEP pode descompensar rapidamente: manejar e internar conforme gravidade.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Hipoxemia e taquicardia; suspeita forte de TEP.",
-        "vitals": ["PA 105/65", "FC 128", "FR 30", "SpO2 88%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Hipotensão e síncope: provável TEP maciço.",
-        "vitals": ["PA 70/40", "FC 145", "FR 34", "SpO2 82%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Com anticoagulação e suporte, melhora progressiva.",
-        "vitals": ["PA 115/70", "FC 100", "FR 20", "SpO2 95%"],
-        "outcome": "survive"
-      }
-    ]
-  },
-  {
-    "id": "BR_009_ECLAMPSIA_RAMO",
-    "title": "Eclâmpsia: controle rápido",
-    "patient": { "name": "Caroline", "age": 27, "sex": "F" },
-    "complaint": "Cefaleia intensa e crise convulsiva.",
-    "history": "Gestante 34 semanas, edema, visão turva.",
-    "vitals": ["PA 190/120", "FC 115", "FR 24", "SpO2 95%"],
-    "timeLimitSec": 80,
-    "severity": "critica",
-    "diagnoses": ["Eclâmpsia", "Enxaqueca", "Hipoglicemia", "Ansiedade"],
-    "correctDiagnosis": "Eclâmpsia",
-    "conducts": ["Alta", "Sulfato de magnésio + UTI/obstetrícia", "Analgésico simples", "Sedação sem medidas obstétricas"],
-    "correctConduct": "Sulfato de magnésio + UTI/obstetrícia",
-    "educationalFeedback": "Eclâmpsia exige MgSO4 e estabilização imediata; atrasos elevam risco materno-fetal.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "HAS grave com sinais neurológicos em gestante.",
-        "vitals": ["PA 190/120", "FC 115", "FR 24", "SpO2 95%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Convulsões recorrentes e rebaixamento: risco de AVC/aspiração.",
-        "vitals": ["PA 210/130", "FC 130", "FR 10", "SpO2 85%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Após MgSO4 e estabilização, reduz risco de novas crises.",
-        "vitals": ["PA 160/100", "FC 98", "FR 18", "SpO2 97%"],
-        "outcome": "survive"
-      }
-    ]
-  },
-  {
-    "id": "BR_010_HEMORRAGIA_DIGESTIVA_RAMO",
-    "title": "HDA: estabilizar ou chocar",
-    "patient": { "name": "Geraldo", "age": 66, "sex": "M" },
-    "complaint": "Hematêmese e fraqueza intensa.",
-    "history": "Etilismo e possível cirrose; melena.",
-    "vitals": ["PA 92/55", "FC 122", "FR 20", "SpO2 96%"],
-    "timeLimitSec": 95,
-    "severity": "alta",
-    "diagnoses": ["Hemorragia digestiva alta", "Gastrite simples", "Intoxicação alimentar", "Ansiedade"],
-    "correctDiagnosis": "Hemorragia digestiva alta",
-    "conducts": ["Alta", "IBP oral e alta", "Internação + estabilização + endoscopia", "Observação sem medidas"],
-    "correctConduct": "Internação + estabilização + endoscopia",
-    "educationalFeedback": "Sem estabilização adequada, HDA pode evoluir rapidamente para choque hemorrágico.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Sangramento ativo com instabilidade limítrofe.",
-        "vitals": ["PA 92/55", "FC 122", "FR 20", "SpO2 96%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Rebaixamento e hipotensão profunda por choque hemorrágico.",
-        "vitals": ["PA 60/35", "FC 145", "FR 28", "SpO2 90%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Após reposição e abordagem, perfusão melhora e sangramento é controlado.",
-        "vitals": ["PA 115/70", "FC 96", "FR 18", "SpO2 97%"],
-        "outcome": "survive"
-      }
-    ]
-  },
-  {
-    "id": "BR_011_PNEUMOTORAX_RAMO",
-    "title": "Trauma torácico com deterioração",
-    "patient": { "name": "Wesley", "age": 31, "sex": "M" },
-    "complaint": "Dispneia intensa após trauma no tórax.",
-    "history": "Acidente; piora rápida.",
-    "vitals": ["PA 95/60", "FC 120", "FR 32", "SpO2 90%"],
-    "timeLimitSec": 75,
-    "severity": "critica",
-    "diagnoses": ["Pneumotórax hipertensivo", "Contusão pulmonar", "Asma", "IAM"],
-    "correctDiagnosis": "Pneumotórax hipertensivo",
-    "conducts": ["Oxigênio apenas", "Toracocentese imediata", "Observação", "Alta"],
-    "correctConduct": "Toracocentese imediata",
-    "educationalFeedback": "Pneumotórax hipertensivo piora em minutos; descompressão imediata salva vida.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Dispneia e instabilidade sugerindo pneumotórax hipertensivo.",
-        "vitals": ["PA 95/60", "FC 120", "FR 32", "SpO2 90%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Parada iminente por compressão mediastinal.",
-        "vitals": ["PA 60/30", "FC 150", "FR 6", "SpO2 70%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Após descompressão, melhora ventilatória e hemodinâmica.",
-        "vitals": ["PA 120/75", "FC 100", "FR 18", "SpO2 96%"],
-        "outcome": "survive"
-      }
-    ]
-  },
-  {
-    "id": "BR_012_PSIQ_RAMO",
-    "title": "Agitação: risco físico e deterioração",
-    "patient": { "name": "André", "age": 32, "sex": "M" },
-    "complaint": "Agitação intensa e agressividade.",
-    "history": "Uso de estimulantes; insônia e paranoia.",
-    "vitals": ["PA 160/100", "FC 140", "FR 24", "SpO2 96%"],
-    "timeLimitSec": 110,
-    "severity": "alta",
-    "diagnoses": ["Agitação psicomotora por intoxicação/psicose", "Hipoglicemia", "Sepse", "AVC"],
-    "correctDiagnosis": "Agitação psicomotora por intoxicação/psicose",
-    "conducts": ["Alta", "Contenção + sedação + avaliação psiquiátrica", "Antibiótico EV + UTI", "Analgésico"],
-    "correctConduct": "Contenção + sedação + avaliação psiquiátrica",
-    "educationalFeedback": "Agitação grave pode levar a exaustão, hipertermia e eventos adversos; controle seguro é essencial.",
-    "stages": [
-      {
-        "id": "initial",
-        "status": "Agitação com taquicardia e risco à equipe/paciente.",
-        "vitals": ["PA 160/100", "FC 140", "FR 24", "SpO2 96%"],
-        "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-      },
-      {
-        "id": "worsening",
-        "status": "Exaustão e colapso: hipertermia e arritmia por intoxicação.",
-        "vitals": ["PA 90/55", "FC 170", "FR 30", "SpO2 90%"],
-        "outcome": "death"
-      },
-      {
-        "id": "stabilized",
-        "status": "Após contenção/sedação adequadas, sinais estabilizam e avaliação completa é possível.",
-        "vitals": ["PA 130/85", "FC 105", "FR 18", "SpO2 97%"],
-        "outcome": "survive"
-      },
-      {
-  "id": "PED-06",
-  "type": "pediatria",
-  "title": "Sepse neonatal precoce",
-  "complaint": "Letargia e recusa alimentar",
-  "history": "RN de 5 dias, hipoativo, hipotérmico.",
-  "vitals": ["FC 190", "Temp 35,5°C", "SatO2 91%"],
-  "diagnoses": ["Sepse neonatal", "Hipoglicemia", "Refluxo"],
-  "correctDiagnosis": "Sepse neonatal",
-  "conducts": ["Antibiótico EV imediato", "Alta com orientação", "Antitérmico"],
-  "correctConduct": "Antibiótico EV imediato",
-  "educationalFeedback": "Sepse neonatal é emergência absoluta.",
-  "timeLimitSec": 60,
-  "stages": [
-    {
-      "id": "initial",
-      "status": "Perfusão ruim e letargia",
-      "vitals": ["TEC >4s"],
-      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-    },
-    {
-      "id": "worsening",
-      "status": "Choque séptico",
-      "vitals": ["PA indetectável"],
-      "outcome": "death"
-    },
-    {
-      "id": "stabilized",
-      "status": "Melhora clínica",
-      "vitals": ["FC 150"],
-      "outcome": "survive"
-    }
-  ]
-},
-{
-  "id": "PED-07",
-  "type": "pediatria",
-  "title": "Crise asmática grave",
-  "complaint": "Falta de ar",
-  "history": "Criança de 8 anos, asmática, sem resposta ao broncodilatador em casa.",
-  "vitals": ["FR 40", "SatO2 89%"],
-  "diagnoses": ["Asma grave", "Pneumonia", "Ansiedade"],
-  "correctDiagnosis": "Asma grave",
-  "conducts": ["Beta-agonista inalatório + corticoide", "Alta", "Antibiótico"],
-  "correctConduct": "Beta-agonista inalatório + corticoide",
-  "educationalFeedback": "Crise grave exige tratamento imediato.",
-  "timeLimitSec": 80
-},
-{
-  "id": "PED-08",
-  "type": "pediatria",
-  "title": "TCE infantil",
-  "complaint": "Queda de altura",
-  "history": "Criança de 3 anos caiu da escada, sonolenta.",
-  "vitals": ["FC 130", "ECG 13"],
-  "diagnoses": ["Traumatismo craniano", "Convulsão", "AVC"],
-  "correctDiagnosis": "Traumatismo craniano",
-  "conducts": ["TC de crânio + observação", "Alta imediata", "Antitérmico"],
-  "correctConduct": "TC de crânio + observação",
-  "educationalFeedback": "TCE em criança exige vigilância.",
-  "timeLimitSec": 90
-},
 
-{
-  "id": "AD-01",
-  "type": "adulto",
-  "title": "IAM com supra de ST",
-  "complaint": "Dor torácica intensa",
-  "history": "Homem, 58 anos, hipertenso, dor há 40 min.",
-  "vitals": ["PA 150/90", "FC 104"],
-  "diagnoses": ["IAM com supra", "Ansiedade", "Refluxo"],
-  "correctDiagnosis": "IAM com supra",
-  "conducts": ["AAS + reperfusão imediata", "Dipirona", "Alta"],
-  "correctConduct": "AAS + reperfusão imediata",
-  "educationalFeedback": "Tempo é músculo.",
-  "timeLimitSec": 70,
-  "stages": [
-    {
-      "id": "initial",
-      "status": "Dor intensa e sudorese",
-      "vitals": ["FC 104"],
-      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-    },
-    {
-      "id": "worsening",
-      "status": "FV / PCR",
-      "vitals": ["Pulso ausente"],
-      "outcome": "death"
-    },
-    {
-      "id": "stabilized",
-      "status": "Dor aliviada",
-      "vitals": ["FC 78"],
-      "outcome": "survive"
-    }
-  ]
-},
-{
-  "id": "AD-02",
-  "type": "adulto",
-  "title": "AVC isquêmico agudo",
-  "complaint": "Déficit neurológico",
-  "history": "Mulher 72 anos, início há 1h.",
-  "vitals": ["PA 180/100"],
-  "diagnoses": ["AVC isquêmico", "Hipoglicemia", "Crise convulsiva"],
-  "correctDiagnosis": "AVC isquêmico",
-  "conducts": ["TC imediata + trombólise", "Alta", "Anticonvulsivante"],
-  "correctConduct": "TC imediata + trombólise",
-  "educationalFeedback": "Janela terapêutica é crítica.",
-  "timeLimitSec": 90
-},
-{
-  "id": "AD-03",
-  "type": "adulto",
-  "title": "Sepse de foco pulmonar",
-  "complaint": "Febre e confusão",
-  "history": "Idoso com pneumonia.",
-  "vitals": ["PA 85/50", "FC 120"],
-  "diagnoses": ["Sepse", "Desidratação", "Insuficiência cardíaca"],
-  "correctDiagnosis": "Sepse",
-  "conducts": ["Antibiótico EV + volume", "Alta", "Analgésico"],
-  "correctConduct": "Antibiótico EV + volume",
-  "educationalFeedback": "Sepse mata rápido.",
-  "timeLimitSec": 60
-},
-      {
-  "id": "PED-09",
-  "type": "pediatria",
-  "title": "Broncoaspiração",
-  "complaint": "Engasgo e cianose",
-  "history": "Lactente de 9 meses engasgou durante alimentação.",
-  "vitals": ["SatO2 82%", "FR 60"],
-  "diagnoses": ["Broncoaspiração", "Asma", "Laringite"],
-  "correctDiagnosis": "Broncoaspiração",
-  "conducts": ["Aspiração de vias aéreas + O2", "Alta", "Antibiótico oral"],
-  "correctConduct": "Aspiração de vias aéreas + O2",
-  "educationalFeedback": "Broncoaspiração pode levar a insuficiência respiratória rapidamente.",
-  "timeLimitSec": 60
-},
-{
-  "id": "PED-10",
-  "type": "pediatria",
-  "title": "Hipoglicemia infantil",
-  "complaint": "Convulsão",
-  "history": "Criança de 6 anos diabética, uso irregular de insulina.",
-  "vitals": ["Glicemia 32 mg/dL", "FC 140"],
-  "diagnoses": ["Hipoglicemia", "Epilepsia", "AVC"],
-  "correctDiagnosis": "Hipoglicemia",
-  "conducts": ["Glicose EV imediata", "Anticonvulsivante", "Alta"],
-  "correctConduct": "Glicose EV imediata",
-  "educationalFeedback": "Hipoglicemia é causa comum e reversível de convulsão.",
-  "timeLimitSec": 50
-},
-{
-  "id": "PED-11",
-  "type": "pediatria",
-  "title": "Meningite bacteriana",
-  "complaint": "Febre e rigidez de nuca",
-  "history": "Criança de 5 anos, febre alta e vômitos.",
-  "vitals": ["Temp 40°C", "FC 150"],
-  "diagnoses": ["Meningite", "Virosses", "Sinusite"],
-  "correctDiagnosis": "Meningite",
-  "conducts": ["Antibiótico EV imediato", "Alta", "Analgésico"],
-  "correctConduct": "Antibiótico EV imediato",
-  "educationalFeedback": "Atraso no antibiótico aumenta mortalidade.",
-  "timeLimitSec": 60,
-  "stages": [
-    {
-      "id": "initial",
-      "status": "Rebaixamento progressivo",
-      "vitals": ["ECG 12"],
-      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-    },
-    {
-      "id": "worsening",
-      "status": "Choque séptico",
-      "vitals": ["PA indetectável"],
-      "outcome": "death"
-    },
-    {
-      "id": "stabilized",
-      "status": "Resposta ao antibiótico",
-      "vitals": ["FC 110"],
-      "outcome": "survive"
-    }
-  ]
-},
-{
-  "id": "PED-12",
-  "type": "pediatria",
-  "title": "Cetoacidose diabética",
-  "complaint": "Respiração ofegante",
-  "history": "Adolescente 14 anos, DM1, vômitos e hálito cetônico.",
-  "vitals": ["FR 32", "Glicemia 420"],
-  "diagnoses": ["Cetoacidose diabética", "Asma", "Ansiedade"],
-  "correctDiagnosis": "Cetoacidose diabética",
-  "conducts": ["Insulina EV + hidratação", "Alta", "Antibiótico"],
-  "correctConduct": "Insulina EV + hidratação",
-  "educationalFeedback": "Correção lenta evita edema cerebral.",
-  "timeLimitSec": 90
-},
-      {
-  "id": "AD-04",
-  "type": "adulto",
-  "title": "TEP agudo",
-  "complaint": "Dispneia súbita",
-  "history": "Mulher 45 anos, pós-operatório recente.",
-  "vitals": ["SatO2 85%", "FC 120"],
-  "diagnoses": ["TEP", "Asma", "Ansiedade"],
-  "correctDiagnosis": "TEP",
-  "conducts": ["AngioTC + anticoagulação", "Alta", "Broncodilatador"],
-  "correctConduct": "AngioTC + anticoagulação",
-  "educationalFeedback": "TEP é causa importante de morte súbita.",
-  "timeLimitSec": 70
-},
-{
-  "id": "AD-05",
-  "type": "adulto",
-  "title": "Hemorragia digestiva alta",
-  "complaint": "Vômitos com sangue",
-  "history": "Homem etilista, melena.",
-  "vitals": ["PA 90/60", "FC 130"],
-  "diagnoses": ["HDA", "Gastrite", "Pancreatite"],
-  "correctDiagnosis": "HDA",
-  "conducts": ["Volume + endoscopia", "Alta", "Analgésico"],
-  "correctConduct": "Volume + endoscopia",
-  "educationalFeedback": "Instabilidade indica sangramento ativo.",
-  "timeLimitSec": 60
-},
-{
-  "id": "AD-06",
-  "type": "adulto",
-  "title": "Pneumotórax hipertensivo",
-  "complaint": "Dor torácica e dispneia",
-  "history": "Trauma torácico fechado.",
-  "vitals": ["SatO2 80%", "PA 85/50"],
-  "diagnoses": ["Pneumotórax hipertensivo", "IAM", "Asma"],
-  "correctDiagnosis": "Pneumotórax hipertensivo",
-  "conducts": ["Drenagem torácica imediata", "TC antes", "Alta"],
-  "correctConduct": "Drenagem torácica imediata",
-  "educationalFeedback": "Não se espera exame em pneumotórax hipertensivo.",
-  "timeLimitSec": 45,
-  "stages": [
-    {
-      "id": "initial",
-      "status": "Desvio de traqueia",
-      "vitals": ["SatO2 80%"],
-      "next": { "onCorrect": "stabilized", "onWrong": "worsening" }
-    },
-    {
-      "id": "worsening",
-      "status": "PCR",
-      "vitals": ["Pulso ausente"],
-      "outcome": "death"
-    },
-    {
-      "id": "stabilized",
-      "status": "Expansão pulmonar",
-      "vitals": ["SatO2 96%"],
-      "outcome": "survive"
-    }
+  {
+    "title": "Parada cardiorrespiratória",
+    "description": "Paciente inconsciente, sem pulso e sem respiração.",
+    "difficulty": 5,
+    "timeLimit": 20,
+    "actions": [
+      { "text": "Iniciar RCP imediatamente", "correct": true },
+      { "text": "Esperar equipe chegar", "correct": false },
+      { "text": "Abandonar atendimento", "correct": false }
+    ]
+  },
+
+  {
+    "title": "Afogamento",
+    "description": "Vítima retirada da água inconsciente, respiração irregular.",
+    "difficulty": 4,
+    "timeLimit": 25,
+    "actions": [
+      { "text": "Garantir vias aéreas e oxigenação", "correct": true },
+      { "text": "Colocar sentado e esperar", "correct": false },
+      { "text": "Oferecer líquidos", "correct": false }
+    ]
+  },
+
+  {
+    "title": "Crise hipertensiva",
+    "description": "Paciente com PA 220x120 mmHg e cefaleia intensa.",
+    "difficulty": 3,
+    "timeLimit": 35,
+    "actions": [
+      { "text": "Reduzir PA de forma controlada", "correct": true },
+      { "text": "Ignorar valor da pressão", "correct": false },
+      { "text": "Reduzir abruptamente", "correct": false }
+    ]
+  },
+
+  {
+    "title": "Queimadura extensa",
+    "description": "Paciente com queimadura de 30% da superfície corporal.",
+    "difficulty": 4,
+    "timeLimit": 30,
+    "actions": [
+      { "text": "Iniciar reposição volêmica e analgesia", "correct": true },
+      { "text": "Aplicar gelo diretamente", "correct": false },
+      { "text": "Aguardar cicatrização espontânea", "correct": false }
+    ]
+  },
+
+  {
+    "title": "Intoxicação medicamentosa",
+    "description": "Paciente ingeriu grande quantidade de medicamentos desconhecidos.",
+    "difficulty": 3,
+    "timeLimit": 35,
+    "actions": [
+      { "text": "Avaliar vias aéreas e acionar toxicologia", "correct": true },
+      { "text": "Induzir vômito sem avaliação", "correct": false },
+      { "text": "Liberar imediatamente", "correct": false }
     ]
   }
 ]
