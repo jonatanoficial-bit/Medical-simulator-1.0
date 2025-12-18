@@ -1,100 +1,41 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <title>Simulador de Atendimento Médico</title>
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0b2a3a" />
-
-  <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="style.css" />
-
+  <meta charset="UTF-8">
+  <title>Medical Simulator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ================= CAPA ================= -->
-<section id="splashScreen" class="screen splash">
-  <div class="splash-content">
-    <h1>Simulador de Atendimento Médico</h1>
-    <p>Toque na tela para iniciar</p>
+<!-- CAPA -->
+<div id="coverScreen" class="screen active">
+  <div class="cover-overlay">
+    <h1 id="typewriter"></h1>
+    <p>Toque ou clique para iniciar</p>
   </div>
-</section>
+</div>
 
-<!-- ================= MENU ================= -->
-<section id="menuScreen" class="screen menu hidden">
-  <div class="menu-box">
-    <h2>Menu Principal</h2>
-    <button id="btnStart">Iniciar Plantão</button>
-    <button id="btnRanking">Ranking</button>
-    <button id="btnReset">Reiniciar Carreira</button>
+<!-- PERFIL -->
+<div id="profileScreen" class="screen">
+  <h2>Crie seu perfil</h2>
+  <input id="playerName" placeholder="Seu nome" />
+  <div class="avatar-grid" id="avatarGrid"></div>
+  <button id="startGameBtn">Iniciar Plantão</button>
+</div>
+
+<!-- JOGO -->
+<div id="gameScreen" class="screen">
+  <div class="hud">
+    <div id="hudName"></div>
+    <div id="timer">00:00</div>
   </div>
-</section>
-
-<!-- ================= JOGO ================= -->
-<section id="gameScreen" class="screen game hidden">
-
-  <!-- HUD -->
-  <header class="hud">
-    <div>Tempo: <span id="timer">--</span>s</div>
-    <div>Pontos: <span id="score">0</span></div>
-    <div>Nível: <span id="level">1</span></div>
-  </header>
-
-  <!-- ATENDIMENTO -->
-  <main class="case-area">
-    <h3 id="caseTitle">Caso Clínico</h3>
-    <p id="caseText">Aguardando caso...</p>
-
-    <div id="actions" class="actions">
-      <!-- ações vêm do JS -->
-    </div>
-  </main>
-
-  <footer class="game-footer">
-    <button id="btnFinishCase">Finalizar Atendimento</button>
-  </footer>
-
-</section>
-
-<!-- ================= RELATÓRIO ================= -->
-<section id="reportScreen" class="screen report hidden">
-  <div class="report-box">
-    <h2>Relatório do Plantão</h2>
-
-    <p>Casos Atendidos: <strong id="repCases"></strong></p>
-    <p>Acertos: <strong id="repHits"></strong></p>
-    <p>Erros / Óbitos: <strong id="repErrors"></strong></p>
-    <p>Pontuação Final: <strong id="repScore"></strong></p>
-
-    <button id="btnCertificate">Gerar Certificado</button>
-    <button id="btnBackMenu">Voltar ao Menu</button>
-  </div>
-</section>
-
-<!-- ================= CERTIFICADO ================= -->
-<section id="certificateScreen" class="screen certificate hidden">
-  <div class="certificate-box" id="certificateContent">
-    <h2>Certificado de Conclusão</h2>
-    <p>Certificamos que</p>
-    <h3 id="certName">Profissional</h3>
-    <p>concluiu o plantão médico com êxito.</p>
-    <p>Pontuação: <span id="certScore"></span></p>
-    <p>Nível alcançado: <span id="certLevel"></span></p>
-    <small>Simulador de Atendimento Médico</small>
-  </div>
-
-  <button id="btnDownloadCert">Baixar Certificado</button>
-  <button id="btnCertBack">Voltar</button>
-</section>
+  <h2 id="caseTitle"></h2>
+  <p id="caseText"></p>
+  <button id="finishBtn">Finalizar Atendimento</button>
+</div>
 
 <script src="script.js"></script>
-
-<script>
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.register("sw.js");
-  }
-</script>
-
 </body>
 </html>
