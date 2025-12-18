@@ -1,286 +1,102 @@
-/****************************************************
- * SIMULADOR DE ATENDIMENTO MÉDICO — SCRIPT FINAL
- ****************************************************/
+// =======================
+// ESTADO GLOBAL
+// =======================
+let state = {
+  name: "",
+  avatar: "",
+  startTime: null,
+  currentCase: null
+};
 
-/* =======================
-   ESTADO GLOBAL
-======================= */
-let currentScreen = "splash";
-let gameState = null;
-let allCases = [];
-let currentCase = null;
-let timer = null;
-let timeLeft = 0;
-let selectedCorrect = false;
+// =======================
+// ELEMENTOS
+// =======================
+const coverScreen = document.getElementById("coverScreen");
+const profileScreen = document.getElementById("profileScreen");
+const gameScreen = document.getElementById("gameScreen");
+const typewriter = document.getElementById("typewriter");
 
-/* =======================
-   CONSTANTES
-======================= */
-const SAVE_KEY = "sim_med_save_v1";
-const RANK_KEY = "sim_med_rank_v1";
+const avatarGrid = document.getElementById("avatarGrid");
+const playerNameInput = document.getElementById("playerName");
+const startGameBtn = document.getElementById("startGameBtn");
 
-/* =======================
-   BOOT
-======================= */
-document.addEventListener("DOMContentLoaded", () => {
-  bindSplash();
-  bindMenu();
-  bindGameButtons();
-  loadCases();
+const hudName = document.getElementById("hudName");
+const timerEl = document.getElementById("timer");
+const caseTitle = document.getElementById("caseTitle");
+const caseText = document.getElementById("caseText");
+
+// =======================
+// TYPEWRITER
+// =======================
+const text = "Bem-vindo ao Medical Simulator";
+let i = 0;
+function typeEffect() {
+  if (i < text.length) {
+    typewriter.textContent += text.charAt(i);
+    i++;
+    setTimeout(typeEffect, 60);
+  }
+}
+typeEffect();
+
+// =======================
+// CAPA → PERFIL
+// =======================
+coverScreen.addEventListener("click", () => {
+  coverScreen.classList.remove("active");
+  profileScreen.classList.add("active");
 });
 
-/* =======================
-   SPLASH
-======================= */
-function bindSplash() {
-  const splash = document.getElementById("splashScreen");
-  splash.addEventListener(
-    "pointerdown",
-    () => {
-      splash.classList.add("hidden");
-      showScreen("menu");
-    },
-    { once: true }
-  );
+// =======================
+// AVATARES
+// =======================
+for (let i = 1; i <= 6; i++) {
+  const img = document.createElement("img");
+  img.src = `images/avatar${i}.png`;
+  img.onclick = () => {
+    document.querySelectorAll(".avatar-grid img").forEach(a => a.classList.remove("selected"));
+    img.classList.add("selected");
+    state.avatar = img.src;
+  };
+  avatarGrid.appendChild(img);
 }
 
-/* =======================
-   MENU
-======================= */
-function bindMenu() {
-  document.getElementById("btnStart").addEventListener("pointerdown", startGame);
-  document
-    .getElementById("btnReset")
-    .addEventListener("pointerdown", resetCareer);
-}
+// =======================
+// INICIAR JOGO
+// =======================
+startGameBtn.onclick = async () => {
+  if (!playerNameInput.value || !state.avatar) return alert("Preencha nome e avatar");
 
-function startGame() {
-  gameState = loadGame();
-  updateHUD();
-  showScreen("game");
-  nextCase();
-}
+  state.name = playerNameInput.value;
+  state.startTime = Date.now();
 
-/* =======================
-   GAME BUTTONS
-======================= */
-function bindGameButtons() {
-  document
-    .getElementById("btnFinishCase")
-    .addEventListener("pointerdown", finishCase);
+  profileScreen.classList.remove("active");
+  gameScreen.classList.add("active");
 
-  document
-    .getElementById("btnBackMenu")
-    ?.addEventListener("pointerdown", () => showScreen("menu"));
+  hudName.textContent = state.name;
+  loadCase();
+  startTimer();
+};
 
-  document
-    .getElementById("btnCertificate")
-    ?.addEventListener("pointerdown", showCertificate);
-
-  document
-    .getElementById("btnCertBack")
-    ?.addEventListener("pointerdown", () => showScreen("report"));
-
-  document
-    .getElementById("btnDownloadCert")
-    ?.addEventListener("pointerdown", downloadCertificate);
-}
-
-/* =======================
-   LOAD CASES
-======================= */
-async function loadCases() {
-  const res = await fetch("cases.json");
-  allCases = await res.json();
-}
-
-/* =======================
-   CASE FLOW
-======================= */
-function nextCase() {
-  selectedCorrect = false;
-
-  const available = allCases.filter(
-    (c) => c.difficulty <= gameState.difficulty
-  );
-
-  currentCase = available[Math.floor(Math.random() * available.length)];
-
-  document.getElementById("caseTitle").textContent = currentCase.title;
-  document.getElementById("caseText").textContent = currentCase.description;
-
-  renderActions(currentCase);
-  startTimer(currentCase.timeLimit || 40);
-}
-
-function renderActions(caseData) {
-  const actions = document.getElementById("actions");
-  actions.innerHTML = "";
-
-  caseData.actions.forEach((act) => {
-    const btn = document.createElement("button");
-    btn.textContent = act.text;
-    if (!act.correct) btn.classList.add("wrong");
-
-    btn.addEventListener("pointerdown", () => {
-      selectedCorrect = act.correct;
-      stopTimer();
-    });
-
-    actions.appendChild(btn);
-  });
-}
-
-/* =======================
-   TIMER
-======================= */
-function startTimer(seconds) {
-  stopTimer();
-  timeLeft = seconds;
-  document.getElementById("timer").textContent = timeLeft;
-
-  timer = setInterval(() => {
-    timeLeft--;
-    document.getElementById("timer").textContent = timeLeft;
-
-    if (timeLeft <= 0) {
-      stopTimer();
-      registerFailure(true);
-    }
+// =======================
+// TIMER
+// =======================
+function startTimer() {
+  setInterval(() => {
+    const diff = Math.floor((Date.now() - state.startTime) / 1000);
+    const min = String(Math.floor(diff / 60)).padStart(2, "0");
+    const sec = String(diff % 60).padStart(2, "0");
+    timerEl.textContent = `${min}:${sec}`;
   }, 1000);
 }
 
-function stopTimer() {
-  if (timer) clearInterval(timer);
-}
-
-/* =======================
-   FINISH CASE
-======================= */
-function finishCase() {
-  stopTimer();
-
-  if (!selectedCorrect) {
-    registerFailure(false);
-    return;
-  }
-
-  gameState.score += 100;
-  gameState.cases++;
-  gameState.xp += 20;
-
-  checkLevelUp();
-  saveGame(gameState);
-
-  updateHUD();
-  nextCase();
-}
-
-/* =======================
-   FAILURE / ÓBITO
-======================= */
-function registerFailure(timeOut) {
-  gameState.errors++;
-  gameState.score -= 50;
-
-  saveGame(gameState);
-  endShift();
-}
-
-/* =======================
-   END SHIFT
-======================= */
-function endShift() {
-  saveToRanking();
-  showReport();
-}
-
-/* =======================
-   REPORT
-======================= */
-function showReport() {
-  document.getElementById("repCases").textContent = gameState.cases;
-  document.getElementById("repHits").textContent =
-    gameState.cases - gameState.errors;
-  document.getElementById("repErrors").textContent = gameState.errors;
-  document.getElementById("repScore").textContent = gameState.score;
-
-  showScreen("report");
-}
-
-/* =======================
-   CERTIFICATE
-======================= */
-function showCertificate() {
-  document.getElementById("certScore").textContent = gameState.score;
-  document.getElementById("certLevel").textContent = gameState.level;
-  showScreen("certificate");
-}
-
-function downloadCertificate() {
-  window.print();
-}
-
-/* =======================
-   PROGRESSION
-======================= */
-function checkLevelUp() {
-  if (gameState.xp >= gameState.level * 100) {
-    gameState.level++;
-    gameState.difficulty = Math.min(5, gameState.difficulty + 1);
-  }
-}
-
-/* =======================
-   SAVE / LOAD
-======================= */
-function loadGame() {
-  return (
-    JSON.parse(localStorage.getItem(SAVE_KEY)) || {
-      level: 1,
-      xp: 0,
-      score: 0,
-      cases: 0,
-      errors: 0,
-      difficulty: 1,
-    }
-  );
-}
-
-function saveGame(state) {
-  localStorage.setItem(SAVE_KEY, JSON.stringify(state));
-}
-
-function resetCareer() {
-  localStorage.removeItem(SAVE_KEY);
-  location.reload();
-}
-
-/* =======================
-   RANKING
-======================= */
-function saveToRanking() {
-  const rank = JSON.parse(localStorage.getItem(RANK_KEY)) || [];
-  rank.push({
-    score: gameState.score,
-    level: gameState.level,
-    date: new Date().toLocaleDateString(),
-  });
-  rank.sort((a, b) => b.score - a.score);
-  localStorage.setItem(RANK_KEY, JSON.stringify(rank.slice(0, 10)));
-}
-
-/* =======================
-   UI HELPERS
-======================= */
-function showScreen(name) {
-  document.querySelectorAll(".screen").forEach((s) =>
-    s.classList.add("hidden")
-  );
-  document.getElementById(`${name}Screen`).classList.remove("hidden");
-}
-
-function updateHUD() {
-  document.getElementById("score").textContent = gameState.score;
-  document.getElementById("level").textContent = gameState.level;
+// =======================
+// CASOS
+// =======================
+async function loadCase() {
+  const res = await fetch("cases.json");
+  const cases = await res.json();
+  state.currentCase = cases[Math.floor(Math.random() * cases.length)];
+  caseTitle.textContent = state.currentCase.title;
+  caseText.textContent = state.currentCase.description;
 }
