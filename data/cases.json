@@ -1,0 +1,161 @@
+[
+  {
+    "id": 1,
+    "name": "José Silva",
+    "age": 45,
+    "gender": "M",
+    "chiefComplaint": "Dor torácica súbita acompanhada de náuseas",
+    "history": "Fumante, hipertenso, histórico familiar de infarto",
+    "vitals": {
+      "pressao": "160/100 mmHg",
+      "freqCardiaca": "98 bpm",
+      "saturacao": "94%",
+      "temperatura": "36.8 °C"
+    },
+    "examFindings": "Ausculta pulmonar sem estertores, dor retroesternal que não melhora com mudança de posição.",
+    "tests": {
+      "ecg": "Elevação do segmento ST em D2, D3 e avF.",
+      "troponina": "Aumentada (2,5 ng/mL)",
+      "raiox": "Infiltrado discreto em base esquerda"
+    },
+    "requiredActions": [
+      "test_ecg",
+      "test_blood",
+      "admin_asa"
+    ],
+    "diagnosis": "Infarto Agudo do Miocárdio",
+    "examSystems": {
+      "Geral": "Sudorese fria, paciente ansioso, palidez.",
+      "Cardiovascular": "Bulhas normofonéticas, sem sopros. Pulsos periféricos presentes.",
+      "Respiratório": "MV presente bilateral, sem estertores.",
+      "Abdome": "Sem dor à palpação.",
+      "Neurológico": "Orientado, sem déficits focais."
+    },
+    "physiologyProfile": {
+      "baseDeltas": {
+        "pressaoSys": -0.18,
+        "pressaoDia": -0.1,
+        "freq": 0.4,
+        "saturacao": -0.06,
+        "temperatura": 0.0
+      },
+      "thresholds": {
+        "unstable": {
+          "pressaoSys": 95,
+          "saturacao": 92
+        },
+        "critical": {
+          "pressaoSys": 80,
+          "saturacao": 85
+        }
+      },
+      "maxMinutesToDeath": 45
+    },
+    "differentials": [
+      "Dissecção de aorta",
+      "Pericardite aguda",
+      "Embolia pulmonar",
+      "Esofagite/refluxo",
+      "Pneumotórax"
+    ],
+    "protocol": [
+      "ABCDE inicial",
+      "ECG em até 10 min",
+      "AAS se não contraindicado",
+      "Anticoagulação conforme protocolo",
+      "Acionar hemodinâmica / trombólise se indicado"
+    ]
+  },
+  {
+    "id": 2,
+    "name": "Maria Oliveira",
+    "age": 30,
+    "gender": "F",
+    "chiefComplaint": "Falta de ar súbita e dor torácica pleurítica",
+    "history": "Uso recente de anticoncepcional oral, imobilização devido a fratura de tornozelo há duas semanas",
+    "vitals": {
+      "pressao": "110/70 mmHg",
+      "freqCardiaca": "110 bpm",
+      "saturacao": "90%",
+      "temperatura": "37.0 °C"
+    },
+    "examFindings": "Paciente ansiosa, taquipneica, roncos esparsos à ausculta pulmonar.",
+    "tests": {
+      "dDimero": "Elevado (2.0 µg/mL)",
+      "angioTC": "Trombo em artéria pulmonar direita",
+      "gasometria": "pO2 60 mmHg, pCO2 32 mmHg, pH 7.45"
+    },
+    "requiredActions": [
+      "test_imagem",
+      "admin_anticoagulante",
+      "admin_oxigenio"
+    ],
+    "diagnosis": "Embolia Pulmonar",
+    "examSystems": {
+      "Geral": "Taquipneico, uso de musculatura acessória.",
+      "Respiratório": "Sibilos difusos, prolongamento expiratório.",
+      "Cardiovascular": "Taquicardia, sem sopros.",
+      "Neurológico": "Ansiedade, fala em frases curtas."
+    },
+    "differentials": [
+      "Pneumonia",
+      "Edema agudo de pulmão",
+      "TEP",
+      "DPOC exacerbado",
+      "Ansiedade/pânico"
+    ],
+    "protocol": [
+      "Avaliar gravidade",
+      "Oxigênio se hipoxemia",
+      "Broncodilatador inalatório",
+      "Corticoide sistêmico",
+      "Reavaliar resposta"
+    ]
+  },
+  {
+    "id": 3,
+    "name": "João Ferreira",
+    "age": 55,
+    "gender": "M",
+    "chiefComplaint": "Dor abdominal intensa no quadrante inferior direito",
+    "history": "Dor há 12 horas, náuseas, sem apetite, histórico prévio de apendicite na família",
+    "vitals": {
+      "pressao": "120/80 mmHg",
+      "freqCardiaca": "88 bpm",
+      "saturacao": "97%",
+      "temperatura": "38.5 °C"
+    },
+    "examFindings": "Sensibilidade aumentada e defesa abdominal no quadrante inferior direito, sinal de Blumberg positivo.",
+    "tests": {
+      "hemograma": "Leucócitos 16.000/mm³, neutrofilia",
+      "ultrassom": "Inflamação de apêndice, diâmetro aumentado",
+      "tomografia": "Confirmando apendicite aguda"
+    },
+    "requiredActions": [
+      "test_blood",
+      "test_imagem",
+      "refer_cirurgia"
+    ],
+    "diagnosis": "Apendicite Aguda",
+    "examSystems": {
+      "Geral": "Febril, desconforto importante.",
+      "Abdome": "Dor em FID, defesa, Blumberg positivo.",
+      "Respiratório": "Sem alterações relevantes.",
+      "Cardiovascular": "Sem alterações relevantes."
+    },
+    "differentials": [
+      "Gastroenterite",
+      "Diverticulite",
+      "Cólica renal",
+      "Doença inflamatória intestinal",
+      "Gravidez ectópica (em mulheres)"
+    ],
+    "protocol": [
+      "Analgesia",
+      "Hidratação",
+      "Hemograma/CRP",
+      "Imagem (US/TC)",
+      "Cirurgia geral"
+    ]
+  }
+]
