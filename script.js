@@ -26,197 +26,6 @@ class CaseRepository {
   }
 }
 
-
-/**
- * PhysiologyModel
- * Modelo simples porém robusto de fisiologia para simulação:
- * - vitais dinâmicos com tendência de deterioração por diagnóstico
- * - efeitos de tratamentos com tempo de início e duração
- * - exames com tempo para resultado (prazos realistas em "minutos de jogo")
- *
- * Observação: Para manter simplicidade, 1 segundo real = 1 minuto de jogo (TIME_SCALE).
- */
-class PhysiologyModel {
-  static TIME_SCALE_MIN_PER_SEC = 1; // 1s real = 1 min de jogo
-
-  constructor(caseData) {
-    this.caseData = caseData;
-
-    // Vitals (valores "atuais")
-    const v = caseData.vitals || {};
-    // Suporta formatos antigos (strings) e novos (numéricos)
-    const pressaoStr = v.pressao || v.pa || '';
-    const paMatch = typeof pressaoStr === 'string' ? pressaoStr.match(/(\d{2,3})\s*\/\s*(\d{2,3})/) : null;
-    const pressaoSys = v.pressaoSys ?? (paMatch ? Number(paMatch[1]) : 120);
-    const pressaoDia = v.pressaoDia ?? (paMatch ? Number(paMatch[2]) : 80);
-
-    const fcStr = v.freqCardiaca || v.fc || '';
-    const fcMatch = typeof fcStr === 'string' ? fcStr.match(/(\d{2,3})/) : null;
-    const freq = v.freq ?? (fcMatch ? Number(fcMatch[1]) : 80);
-
-    const satStr = v.saturacao || v.spo2 || '';
-    const satMatch = typeof satStr === 'string' ? satStr.match(/(\d{2,3})/) : null;
-    const saturacao = (typeof v.saturacao === 'number' ? v.saturacao : undefined) ?? (satMatch ? Number(satMatch[1]) : 98);
-
-    const tempStr = v.temperatura || v.temp || '';
-    const tempMatch = typeof tempStr === 'string' ? tempStr.match(/(\d{2}(?:\.\d)?)/) : null;
-    const temperatura = (typeof v.temperatura === 'number' ? v.temperatura : undefined) ?? (tempMatch ? Number(tempMatch[1]) : 37.0);
-
-    this.vitals = {
-      pressaoSys,
-      pressaoDia,
-      freq,
-      saturacao,
-      temperatura
-    };
-
-    // Estado clínico
-    this.status = 'Estável';
-    this.minutesElapsed = 0;
-
-    // Perfil de deterioração por diagnóstico (pode ser estendido por dados do caso)
-    // deltas por minuto de jogo
-    const profile = caseData.physiologyProfile || this._defaultProfileForDiagnosis(caseData.diagnosis);
-    this.baseDeltas = profile.baseDeltas; // { pressaoSys, pressaoDia, freq, saturacao, temperatura }
-    this.thresholds = profile.thresholds; // limites para status
-    this.maxMinutesToDeath = profile.maxMinutesToDeath ?? 60;
-
-    // Tratamentos ativos/agendados
-    this.effects = []; // {key, startAtMin, endAtMin, effectDeltas}
-
-    // Exames solicitados (tempo de entrega)
-    this.orderedExams = new Map(); // actionKey -> { orderedAtMin, readyAtMin, delivered:boolean }
-  }
-
-  _defaultProfileForDiagnosis(diagnosis) {
-    const d = (diagnosis || '').toLowerCase();
-    if (d.includes('infarto') || d.includes('iam')) {
-      return {
-        baseDeltas: { pressaoSys: -0.15, pressaoDia: -0.08, freq: 0.35, saturacao: -0.05, temperatura: 0.01 },
-        thresholds: { unstable: { pressaoSys: 95, saturacao: 92 }, critical: { pressaoSys: 80, saturacao: 85 } },
-        maxMinutesToDeath: 45
-      };
-    }
-    if (d.includes('sepse')) {
-      return {
-        baseDeltas: { pressaoSys: -0.25, pressaoDia: -0.15, freq: 0.45, saturacao: -0.08, temperatura: 0.03 },
-        thresholds: { unstable: { pressaoSys: 95, saturacao: 92 }, critical: { pressaoSys: 75, saturacao: 85 } },
-        maxMinutesToDeath: 35
-      };
-    }
-    if (d.includes('tromboembolismo') || d.includes('tep')) {
-      return {
-        baseDeltas: { pressaoSys: -0.18, pressaoDia: -0.10, freq: 0.5, saturacao: -0.18, temperatura: 0.0 },
-        thresholds: { unstable: { pressaoSys: 95, saturacao: 90 }, critical: { pressaoSys: 80, saturacao: 82 } },
-        maxMinutesToDeath: 25
-      };
-    }
-    // padrão "leve"
-    return {
-      baseDeltas: { pressaoSys: -0.06, pressaoDia: -0.03, freq: 0.15, saturacao: -0.05, temperatura: 0.0 },
-      thresholds: { unstable: { pressaoSys: 100, saturacao: 93 }, critical: { pressaoSys: 85, saturacao: 87 } },
-      maxMinutesToDeath: 70
-    };
-  }
-
-  /** Agenda efeito de tratamento. effectDeltas são deltas por minuto. */
-  applyTreatment(key, { startIn = 0, duration = 10, effect = {} } = {}) {
-    const startAtMin = this.minutesElapsed + Math.max(0, startIn);
-    const endAtMin = startAtMin + Math.max(1, duration);
-    const effectDeltas = {
-      pressaoSys: effect.pressaoSys ?? effect.pressao ?? 0,
-      pressaoDia: effect.pressaoDia ?? 0,
-      freq: effect.fc ?? effect.freq ?? 0,
-      saturacao: effect.saturacao ?? 0,
-      temperatura: effect.temperatura ?? 0
-    };
-    this.effects.push({ key, startAtMin, endAtMin, effectDeltas });
-  }
-
-  /** Marca um exame como solicitado e retorna o "tempo estimado" de entrega (minutos de jogo). */
-  orderExam(actionKey, turnaroundMin) {
-    if (this.orderedExams.has(actionKey)) return this.orderedExams.get(actionKey);
-    const orderedAtMin = this.minutesElapsed;
-    const readyAtMin = orderedAtMin + Math.max(1, turnaroundMin);
-    const rec = { orderedAtMin, readyAtMin, delivered: false };
-    this.orderedExams.set(actionKey, rec);
-    return rec;
-  }
-
-  /** Retorna true se exame está pronto e ainda não entregue. */
-  isExamReady(actionKey) {
-    const rec = this.orderedExams.get(actionKey);
-    return !!rec && !rec.delivered && this.minutesElapsed >= rec.readyAtMin;
-  }
-
-  markExamDelivered(actionKey) {
-    const rec = this.orderedExams.get(actionKey);
-    if (rec) rec.delivered = true;
-  }
-
-  /** Tick de simulação (dtSeconds em segundos reais). */
-  tick(dtSeconds = 1) {
-    const minutesToAdvance = dtSeconds * PhysiologyModel.TIME_SCALE_MIN_PER_SEC;
-    this.minutesElapsed += minutesToAdvance;
-
-    // 1) deterioração base
-    this._applyDeltas(this.baseDeltas, minutesToAdvance);
-
-    // 2) efeitos de tratamentos (apenas se dentro da janela)
-    for (const eff of this.effects) {
-      if (this.minutesElapsed >= eff.startAtMin && this.minutesElapsed <= eff.endAtMin) {
-        this._applyDeltas(eff.effectDeltas, minutesToAdvance);
-      }
-    }
-    // remover efeitos expirados
-    this.effects = this.effects.filter(e => this.minutesElapsed <= e.endAtMin);
-
-    // 3) clamp vitais (limites plausíveis)
-    this.vitals.pressaoSys = this._clamp(this.vitals.pressaoSys, 40, 220);
-    this.vitals.pressaoDia = this._clamp(this.vitals.pressaoDia, 20, 140);
-    this.vitals.freq = this._clamp(this.vitals.freq, 20, 220);
-    this.vitals.saturacao = this._clamp(this.vitals.saturacao, 50, 100);
-    this.vitals.temperatura = this._clamp(this.vitals.temperatura, 34.0, 42.0);
-
-    // 4) atualizar status por thresholds e tempo total
-    this._updateStatus();
-
-    return { ...this.vitals, status: this.status, minutesElapsed: this.minutesElapsed };
-  }
-
-  _applyDeltas(deltas, minutes) {
-    this.vitals.pressaoSys += (deltas.pressaoSys ?? 0) * minutes;
-    this.vitals.pressaoDia += (deltas.pressaoDia ?? 0) * minutes;
-    this.vitals.freq += (deltas.freq ?? 0) * minutes;
-    this.vitals.saturacao += (deltas.saturacao ?? 0) * minutes;
-    this.vitals.temperatura += (deltas.temperatura ?? 0) * minutes;
-  }
-
-  _updateStatus() {
-    const t = this.thresholds || {};
-    const unstable = t.unstable || { pressaoSys: 100, saturacao: 93 };
-    const critical = t.critical || { pressaoSys: 85, saturacao: 87 };
-
-    if (this.minutesElapsed >= this.maxMinutesToDeath) {
-      this.status = 'Óbito';
-      return;
-    }
-
-    if (this.vitals.pressaoSys <= critical.pressaoSys || this.vitals.saturacao <= critical.saturacao) {
-      this.status = 'Crítico';
-      return;
-    }
-    if (this.vitals.pressaoSys <= unstable.pressaoSys || this.vitals.saturacao <= unstable.saturacao) {
-      this.status = 'Instável';
-      return;
-    }
-    this.status = 'Estável';
-  }
-
-  _clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
-}
-
-
 class GameEngine {
   constructor(config, caseRepo, ui) {
     this.config = config;
@@ -277,73 +86,67 @@ class GameEngine {
     const patient = {
       id: Date.now() + Math.random(),
       case: newCase,
-      // Estado clínico virá do motor fisiológico
       status: 'Estável',
+      deteriorationTimer: 60, // segundos até piorar; pode ser ajustado posteriormente
       actionsPerformed: new Set(),
       diagnosisMade: false,
-      arrivedAt: new Date(),
-
-      // Logs para relatório/tutor
-      orderedExams: new Set(),
-      givenTreatments: new Set(),
-      notes: [],
-
-      // Motor fisiológico (novo)
-      physiology: new PhysiologyModel(newCase)
+      arrivedAt: new Date()
     };
 
-    // Espelho dos vitais para UI legada (atualizado a cada tick)
-    const initVitals = patient.physiology.vitals;
-    patient.pressaoSys = initVitals.pressaoSys;
-    patient.pressaoDia = initVitals.pressaoDia;
-    patient.freq = initVitals.freq;
-    patient.saturacao = initVitals.saturacao;
-    patient.temperatura = initVitals.temperatura;
-
-    // Mantém compatibilidade com recursos antigos
+    // Copia sinais vitais iniciais do caso para o paciente. Cada paciente possui um objeto
+    // vitals com números para facilitar a atualização dinâmica.  Se o caso não tiver
+    // definição explícita, utiliza valores padrão.
+    patient.vitals = {
+      pressaoSys: newCase.vitals?.pressaoSys ?? 120,
+      pressaoDia: newCase.vitals?.pressaoDia ?? 80,
+      freq: newCase.vitals?.freq ?? 80,
+      saturacao: newCase.vitals?.saturacao ?? 98,
+      temperatura: newCase.vitals?.temperatura ?? 37.0
+    };
+    // Para simular deterioração, definimos incrementos de alteração por segundo.  Esses valores
+    // podem ser ajustados para cada caso, mas por padrão aceleram a frequência e reduzem a saturação.
+    patient.vitalDeltas = {
+      pressaoSys: -0.1,
+      pressaoDia: -0.05,
+      freq: 0.5,
+      saturacao: -0.2,
+      temperatura: 0.0
+    };
+    // Lista de efeitos de tratamento ativos. Cada efeito tem chave, início e duração e um mapa de alterações
+    // aplicadas aos vitais.
     patient.treatmentEffects = [];
-
     this.patients.push(patient);
     this.ui.renderPatientQueue(this.patients, this.activePatientId);
   }
 
   updatePatients() {
-    // Tick do motor fisiológico e atualização de status/vitais
+    // Atualiza temporizadores e status
     for (const patient of this.patients) {
-      if (patient.diagnosisMade) continue;
-
-      const prevStatus = patient.status;
-      const sim = patient.physiology ? patient.physiology.tick(1) : null;
-
-      if (sim) {
-        // espelha vitais para UI
-        patient.pressaoSys = sim.pressaoSys;
-        patient.pressaoDia = sim.pressaoDia;
-        patient.freq = sim.freq;
-        patient.saturacao = sim.saturacao;
-        patient.temperatura = sim.temperatura;
-        patient.status = sim.status;
-      } else {
-        // fallback legado
+      if (!patient.diagnosisMade) {
+        // Atualiza sinais vitais dinâmicos
         this.updateVitalsForPatient(patient);
-      }
-
-      if (patient.status !== prevStatus) {
-        if (patient.status === 'Instável') this.ui.showNotification(`Paciente ${patient.case.name} piorou para instável!`);
-        if (patient.status === 'Crítico') this.ui.showNotification(`Paciente ${patient.case.name} piorou para crítico!`);
-      }
-
-      if (patient.status === 'Óbito') {
-        patient.diagnosisMade = true;
-        this.ui.showNotification(`Paciente ${patient.case.name} evoluiu a óbito por falta de atendimento!`);
-        this.handlePatientDeath(patient);
+        // Atualiza timer de deterioração para mudanças abruptas de status
+        patient.deteriorationTimer--;
+        if (patient.deteriorationTimer <= 0) {
+          if (patient.status === 'Estável') {
+            patient.status = 'Instável';
+            patient.deteriorationTimer = 30;
+            this.ui.showNotification(`Paciente ${patient.case.name} piorou para instável!`);
+          } else if (patient.status === 'Instável') {
+            patient.status = 'Crítico';
+            patient.deteriorationTimer = 20;
+            this.ui.showNotification(`Paciente ${patient.case.name} piorou para crítico!`);
+          } else if (patient.status === 'Crítico') {
+            // Paciente morre
+            patient.status = 'Óbito';
+            patient.diagnosisMade = true;
+            this.ui.showNotification(`Paciente ${patient.case.name} evoluiu a óbito por falta de atendimento!`);
+            this.handlePatientDeath(patient);
+          }
+        }
       }
     }
-
-    // Re-render mínimo (fila e paciente ativo)
     this.ui.renderPatientQueue(this.patients, this.activePatientId);
-    const active = this.patients.find(p => p.id === this.activePatientId);
-    if (active) this.ui.renderPatientDetails(active, this);
   }
 
   /**
@@ -407,66 +210,31 @@ class GameEngine {
       case 'history':
         this.ui.displayHistory(patient.case.history);
         break;
-      case 'exam': {
-        // Exame físico por sistemas (se disponível no caso)
-        const systems = patient.case.examSystems;
-        if (systems && typeof systems === 'object') {
-          const parts = [];
-          for (const [sys, val] of Object.entries(systems)) {
-            parts.push(`<div class="exam-system"><strong>${sys}:</strong> ${val}</div>`);
-          }
-          this.ui.displayExam(parts.join(''));
-        } else {
-          const findings = patient.case.examDetails || patient.case.examFindings;
-          this.ui.displayExam(findings);
-        }
+      case 'exam':
+        // Exibe exame físico detalhado por sistemas se disponível
+        const findings = patient.case.examDetails || patient.case.examFindings;
+        this.ui.displayExam(findings);
         break;
-      }
-      case 'test_ecg': {
-        const rec = patient.physiology.orderExam('test_ecg', 2);
-        patient.orderedExams.add('test_ecg');
-        if (!patient.physiology.isExamReady('test_ecg')) {
-          const eta = Math.max(0, Math.ceil(rec.readyAtMin - patient.physiology.minutesElapsed));
-          this.ui.displayTest('ECG', `ECG solicitado. Aguardando resultado (~${eta} min).`);
-        } else {
-          patient.physiology.markExamDelivered('test_ecg');
-          this.ui.displayTest('ECG', patient.case.tests.ecg);
-        }
+      case 'test_ecg':
+        this.ui.displayTest('ECG', patient.case.tests.ecg);
         break;
-      }
-      case 'test_blood': {
-        const rec = patient.physiology.orderExam('test_blood', 15);
-        patient.orderedExams.add('test_blood');
-        if (!patient.physiology.isExamReady('test_blood')) {
-          const eta = Math.max(0, Math.ceil(rec.readyAtMin - patient.physiology.minutesElapsed));
-          this.ui.displayTest('Exames de sangue', `Coleta solicitada. Resultado em processamento (~${eta} min).`);
-        } else {
-          patient.physiology.markExamDelivered('test_blood');
-          const bloodResults = [];
-          ['troponina', 'dDimero', 'hemograma'].forEach(key => {
-            if (patient.case.tests[key]) bloodResults.push(`${key}: ${patient.case.tests[key]}`);
-          });
-          this.ui.displayTest('Exames de sangue', bloodResults.join('<br/>') || 'Sem dados');
-        }
+      case 'test_blood':
+        // combinar múltiplos possíveis campos: troponina/dDimero/hemograma
+        const bloodResults = [];
+        ['troponina', 'dDimero', 'hemograma'].forEach(key => {
+          if (patient.case.tests[key]) bloodResults.push(`${key}: ${patient.case.tests[key]}`);
+        });
+        this.ui.displayTest('Exames de sangue', bloodResults.join('<br/>') || 'Sem dados');
         break;
-      }
-      case 'test_imagem': {
-        const rec = patient.physiology.orderExam('test_imagem', 20);
-        patient.orderedExams.add('test_imagem');
-        if (!patient.physiology.isExamReady('test_imagem')) {
-          const eta = Math.max(0, Math.ceil(rec.readyAtMin - patient.physiology.minutesElapsed));
-          this.ui.displayTest('Imagem', `Exame de imagem solicitado. Laudo/Imagem em ~${eta} min.`);
-        } else {
-          patient.physiology.markExamDelivered('test_imagem');
-          const imageKeys = ['raiox', 'angioTC', 'ultrassom', 'tomografia'];
-          const imgResults = [];
-          imageKeys.forEach(key => {
-            if (patient.case.tests[key]) imgResults.push(`${key}: ${patient.case.tests[key]}`);
-          });
-          this.ui.displayTest('Imagem', imgResults.join('<br/>') || 'Sem dados');
-        }
+      case 'test_imagem':
+        // mostrar primeira imagem disponível
+        const imageKeys = ['raiox', 'angioTC', 'ultrassom', 'tomografia'];
+        const imgResults = [];
+        imageKeys.forEach(key => {
+          if (patient.case.tests[key]) imgResults.push(`${key}: ${patient.case.tests[key]}`);
+        });
+        this.ui.displayTest('Exames de imagem', imgResults.join('<br/>') || 'Sem dados');
         break;
-      }
       case 'admin_asa':
         this.ui.displayTreatment('Ácido Acetilsalicílico administrado.');
         // Efeito do ASA: reduz frequência cardíaca e melhora saturação levemente por 15s
@@ -874,9 +642,9 @@ class UIController {
       engine.performAction(patient.id, 'exam');
     });
 
-    // Diagnóstico (abre overlay com lista de diagnósticos possíveis)
+    // Diagnóstico (abre uma tela dedicada como os exames)
     const btnDiagnose = this.createActionButton('Diagnóstico', 'fa-notes-medical', () => {
-      this.showDiagnosisDialog(patient, engine);
+      this.showDiagnosis(patient, engine);
     });
     // Cria botões de categorias de exames em vez de mostrar cada exame individualmente.
     // Cada botão abre um overlay com todas as opções possíveis para a categoria selecionada
@@ -912,15 +680,13 @@ class UIController {
       treatmentsContainer.appendChild(el);
     });
 
-    // Botões principais fixos (sempre visíveis)
+    // Botões principais (sempre visíveis)
     actionsDiv.appendChild(btnHistory);
     actionsDiv.appendChild(btnExam);
 
-    // Categorias de exames e tratamentos
+    // Adiciona seções de exames (categorias)
     actionsDiv.appendChild(testsContainer);
     actionsDiv.appendChild(treatmentsContainer);
-
-    // Diagnóstico por último
     actionsDiv.appendChild(btnDiagnose);
     this.detailsContainer.appendChild(actionsDiv);
   }
@@ -942,15 +708,11 @@ class UIController {
     return btn;
   }
   displayHistory(history) {
-    const info = document.getElementById('info-container');
-    const section = document.createElement('div');
-    section.innerHTML = `<h3>História Clínica</h3><p>${history}</p>`;
-    info.appendChild(section);
+    // Em algumas telas, o painel de detalhes pode ficar sem espaço para exibir texto.
+    // Por isso, mostramos em um modal dedicado com botão de voltar.
+    this.openInfoModal('História Clínica', `<p>${history}</p>`);
   }
   displayExam(findings) {
-    const info = document.getElementById('info-container');
-    const section = document.createElement('div');
-    // Se 'findings' for um objeto, detalha por sistemas; caso contrário, exibe string
     let html = '<h3>Exame Físico</h3>';
     if (findings && typeof findings === 'object') {
       for (const sys in findings) {
@@ -959,8 +721,7 @@ class UIController {
     } else {
       html += `<p>${findings}</p>`;
     }
-    section.innerHTML = html;
-    info.appendChild(section);
+    this.openInfoModal('Exame Físico', html);
   }
   displayTest(title, result) {
     const info = document.getElementById('info-container');
@@ -969,10 +730,90 @@ class UIController {
     info.appendChild(section);
   }
   displayTreatment(description) {
-    const info = document.getElementById('info-container');
-    const section = document.createElement('div');
-    section.innerHTML = `<h3>Tratamento</h3><p>${description}</p>`;
-    info.appendChild(section);
+    this.openInfoModal('Conduta', `<p>${description}</p>`);
+  }
+
+  // =========================
+  // Modal genérico de info (História/Exame/Conduta)
+  // =========================
+  ensureInfoModal() {
+    let modal = document.getElementById('info-modal');
+    if (modal) return modal;
+    modal = document.createElement('div');
+    modal.id = 'info-modal';
+    modal.className = 'overlay hidden';
+    modal.innerHTML = `
+      <div class="overlay-card">
+        <div class="overlay-header">
+          <h2 id="info-modal-title"></h2>
+          <button id="info-modal-close" class="overlay-back">Voltar</button>
+        </div>
+        <div id="info-modal-body" class="overlay-body"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    modal.querySelector('#info-modal-close').addEventListener('click', () => {
+      modal.classList.add('hidden');
+    });
+    return modal;
+  }
+
+  openInfoModal(title, html) {
+    const modal = this.ensureInfoModal();
+    modal.querySelector('#info-modal-title').textContent = title;
+    modal.querySelector('#info-modal-body').innerHTML = html;
+    modal.classList.remove('hidden');
+  }
+
+  // =========================
+  // Tela de diagnóstico (subtela)
+  // =========================
+  showDiagnosis(patient, engine) {
+    const diagnosisPage = document.getElementById('diagnosis-page');
+    const diagnosisContent = document.getElementById('diagnosis-content');
+    const backBtn = document.getElementById('diagnosis-back');
+
+    // Lista ampla de diagnósticos (para induzir erro/forçar raciocínio)
+    const all = (window.DIAGNOSIS_CATALOG || []).slice();
+    // Sempre incluir o correto (caso o catálogo ainda esteja vazio)
+    if (patient?.case?.diagnosis && !all.includes(patient.case.diagnosis)) {
+      all.unshift(patient.case.diagnosis);
+    }
+    if (all.length === 0) {
+      all.push('Dor abdominal inespecífica', 'Apendicite aguda', 'Colecistite', 'Pancreatite', 'IAM', 'TEP', 'Pneumonia', 'Sepse', 'AVC', 'Crise asmática');
+    }
+
+    diagnosisContent.innerHTML = `
+      <div class="overlay-card">
+        <div class="overlay-header">
+          <h2>Diagnóstico</h2>
+          <p class="muted">Selecione o diagnóstico final. Isso influencia pontuação e desfecho.</p>
+        </div>
+        <div class="overlay-grid">
+          ${all.map(d => `<button class="choice-btn" data-diagnosis="${this.escapeHtml(d)}">${this.escapeHtml(d)}</button>`).join('')}
+        </div>
+      </div>
+    `;
+
+    diagnosisPage.classList.add('active');
+    backBtn.onclick = () => diagnosisPage.classList.remove('active');
+
+    diagnosisContent.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const d = btn.getAttribute('data-diagnosis');
+        engine.performAction(patient.id, 'diagnose', { diagnosis: d });
+        diagnosisPage.classList.remove('active');
+      });
+    });
+  }
+
+  escapeHtml(str) {
+    return String(str)
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
   showFeedback(feedback) {
     this.feedbackBody.innerHTML = `<ul>${feedback.messages.map(m => `<li>${m}</li>`).join('')}</ul><p><strong>Pontuação obtida:</strong> ${feedback.points}</p>`;
