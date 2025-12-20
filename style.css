@@ -620,6 +620,60 @@ body {
   color: #fff;
   cursor: pointer;
 }
+
+/* Modal genérico para História/Exame Físico (evita "sumir" por falta de espaço na tela) */
+.overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 60px;
+  background: rgba(0,0,0,0.55);
+  z-index: 1100;
+}
+
+.overlay.active { display: flex; }
+
+.overlay-card {
+  width: min(860px, 92vw);
+  max-height: 78vh;
+  overflow: hidden;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.95);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.35);
+}
+
+.overlay-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.overlay-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.overlay-body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  max-height: calc(78vh - 56px);
+}
+
+.overlay-back {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  cursor: pointer;
+}
+
+.overlay-back:hover { background: rgba(0,0,0,0.7); }
 #treatment-back:hover, #diagnosis-back:hover {
   background-color: rgba(0,0,0,0.75);
 }
