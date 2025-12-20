@@ -561,6 +561,17 @@ class UIController {
       });
     }
 
+    // Overlay de história / exame físico
+    this.infoPage = document.getElementById('info-page');
+    this.infoContent = document.getElementById('info-content');
+    this.infoBack = document.getElementById('info-back');
+    if (this.infoBack) {
+      this.infoBack.addEventListener('click', () => {
+        if (this.infoPage) this.infoPage.classList.remove('active');
+        if (this.infoContent) this.infoContent.innerHTML = '';
+      });
+    }
+
   }
   updateLevel(level) {
     this.levelDisplay.textContent = `Nível ${level}`;
@@ -675,10 +686,20 @@ class UIController {
       treatmentsContainer.appendChild(el);
     });
 
-// Adiciona seções de exames (categorias) se houver itens disponíveis
-    if (examCategories.length > 0) {
-      actionsDiv.appendChild(testsContainer);
-    }
+    // Diagnóstico (abre a subtela de diagnóstico com busca e catálogo amplo)
+    const btnDiagnose = this.createActionButton('Diagnóstico', 'fa-notes-medical', () => {
+      this.showDiagnosisDialog(patient, engine);
+    });
+
+    // Linha superior: História / Exame Físico
+    const hxpeRow = document.createElement('div');
+    hxpeRow.className = 'hxpe-row';
+    hxpeRow.appendChild(btnHistory);
+    hxpeRow.appendChild(btnExam);
+    actionsDiv.appendChild(hxpeRow);
+
+    // Exames (categorias)
+    actionsDiv.appendChild(testsContainer);
     actionsDiv.appendChild(treatmentsContainer);
     actionsDiv.appendChild(btnDiagnose);
     this.detailsContainer.appendChild(actionsDiv);
@@ -701,16 +722,11 @@ class UIController {
     return btn;
   }
   displayHistory(history) {
-    const info = document.getElementById('info-container');
-    const section = document.createElement('div');
-    section.innerHTML = `<h3>História Clínica</h3><p>${history}</p>`;
-    info.appendChild(section);
+    this.showInfoOverlay('História Clínica', `<p>${history}</p>`);
   }
   displayExam(findings) {
-    const info = document.getElementById('info-container');
-    const section = document.createElement('div');
     // Se 'findings' for um objeto, detalha por sistemas; caso contrário, exibe string
-    let html = '<h3>Exame Físico</h3>';
+    let html = '';
     if (findings && typeof findings === 'object') {
       for (const sys in findings) {
         html += `<p><strong>${sys.charAt(0).toUpperCase() + sys.slice(1)}:</strong> ${findings[sys]}</p>`;
@@ -718,20 +734,32 @@ class UIController {
     } else {
       html += `<p>${findings}</p>`;
     }
-    section.innerHTML = html;
-    info.appendChild(section);
+    this.showInfoOverlay('Exame Físico', html || '<p>Sem achados registrados.</p>');
   }
   displayTest(title, result) {
-    const info = document.getElementById('info-container');
-    const section = document.createElement('div');
-    section.innerHTML = `<h3>${title}</h3><p>${result || 'Sem resultados'}</p>`;
-    info.appendChild(section);
+    this.showInfoOverlay(title, `<p>${result || 'Sem resultados'}</p>`);
   }
   displayTreatment(description) {
-    const info = document.getElementById('info-container');
-    const section = document.createElement('div');
-    section.innerHTML = `<h3>Tratamento</h3><p>${description}</p>`;
-    info.appendChild(section);
+    this.showInfoOverlay('Tratamento', `<p>${description}</p>`);
+  }
+
+  showInfoOverlay(title, bodyHtml) {
+    const page = document.getElementById('info-page');
+    const ttl = document.getElementById('info-title');
+    const content = document.getElementById('info-content');
+    if (!page || !ttl || !content) {
+      // fallback: mostra no painel interno
+      const info = document.getElementById('info-container');
+      if (info) {
+        const section = document.createElement('div');
+        section.innerHTML = `<h3>${title}</h3>${bodyHtml}`;
+        info.appendChild(section);
+      }
+      return;
+    }
+    ttl.textContent = title;
+    content.innerHTML = bodyHtml;
+    page.classList.add('active');
   }
   showFeedback(feedback) {
     this.feedbackBody.innerHTML = `<ul>${feedback.messages.map(m => `<li>${m}</li>`).join('')}</ul><p><strong>Pontuação obtida:</strong> ${feedback.points}</p>`;
