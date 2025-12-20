@@ -18,8 +18,30 @@
       "troponina": "Aumentada (2,5 ng/mL)",
       "raiox": "Infiltrado discreto em base esquerda"
     },
-    "requiredActions": ["test_ecg", "test_blood", "admin_asa"],
-    "diagnosis": "Infarto Agudo do Miocárdio"
+    "requiredActions": [
+      "test_ecg",
+      "test_blood",
+      "admin_asa"
+    ],
+    "diagnosis": "Infarto Agudo do Miocárdio",
+    "specialty": "Cardiologia",
+    "difficulty": 3,
+    "differentials": [
+      "Angina instável",
+      "TEP",
+      "Refluxo"
+    ],
+    "protocol": [
+      "Dor torácica: ECG + troponina precoce",
+      "AAS se suspeita"
+    ],
+    "physiologyProfile": {
+      "type": "mi",
+      "severity": 0.7
+    },
+    "examSystems": {
+      "Geral": "Ausculta pulmonar sem estertores, dor retroesternal que não melhora com mudança de posição."
+    }
   },
   {
     "id": 2,
@@ -37,11 +59,33 @@
     "examFindings": "Paciente ansiosa, taquipneica, roncos esparsos à ausculta pulmonar.",
     "tests": {
       "dDimero": "Elevado (2.0 µg/mL)",
-      "angioTC": "Trombo em artéria pulmonar direita",    
+      "angioTC": "Trombo em artéria pulmonar direita",
       "gasometria": "pO2 60 mmHg, pCO2 32 mmHg, pH 7.45"
     },
-    "requiredActions": ["test_imagem", "admin_anticoagulante", "admin_oxigenio"],
-    "diagnosis": "Embolia Pulmonar"
+    "requiredActions": [
+      "test_imagem",
+      "admin_anticoagulante",
+      "admin_oxigenio"
+    ],
+    "diagnosis": "Embolia Pulmonar",
+    "specialty": "Neurologia",
+    "difficulty": 2,
+    "differentials": [
+      "AVC",
+      "Vertigem periférica",
+      "Hipoglicemia"
+    ],
+    "protocol": [
+      "Avaliar ABC e glicemia",
+      "Exame neurológico e TC se indicado"
+    ],
+    "physiologyProfile": {
+      "type": "stroke",
+      "severity": 0.4
+    },
+    "examSystems": {
+      "Geral": "Paciente ansiosa, taquipneica, roncos esparsos à ausculta pulmonar."
+    }
   },
   {
     "id": 3,
@@ -59,10 +103,829 @@
     "examFindings": "Sensibilidade aumentada e defesa abdominal no quadrante inferior direito, sinal de Blumberg positivo.",
     "tests": {
       "hemograma": "Leucócitos 16.000/mm³, neutrofilia",
-      "ultrassom": "Inflamação de apêndice, diâmetro aumentado",   
+      "ultrassom": "Inflamação de apêndice, diâmetro aumentado",
       "tomografia": "Confirmando apendicite aguda"
     },
-    "requiredActions": ["test_blood", "test_imagem", "refer_cirurgia"],
-    "diagnosis": "Apendicite Aguda"
+    "requiredActions": [
+      "test_blood",
+      "test_imagem",
+      "refer_cirurgia"
+    ],
+    "diagnosis": "Apendicite Aguda",
+    "specialty": "Infectologia",
+    "difficulty": 3,
+    "differentials": [
+      "Pneumonia",
+      "TEP",
+      "Asma"
+    ],
+    "protocol": [
+      "Avaliar sinais vitais",
+      "Solicitar exames básicos e tratar causa provável"
+    ],
+    "physiologyProfile": {
+      "type": "sepsis",
+      "severity": 0.35
+    },
+    "examSystems": {
+      "Geral": "Sensibilidade aumentada e defesa abdominal no quadrante inferior direito, sinal de Blumberg positivo."
+    }
+  },
+  {
+    "id": 4,
+    "name": "Maria Oliveira",
+    "age": 28,
+    "gender": "F",
+    "specialty": "Ginecologia",
+    "difficulty": 3,
+    "chiefComplaint": "Dor pélvica intensa + sangramento vaginal",
+    "history": "Atraso menstrual 6 semanas, sem doenças prévias.",
+    "vitals": {
+      "pressaoSys": 95,
+      "pressaoDia": 60,
+      "freq": 122,
+      "saturacao": 98,
+      "temperatura": 36.9
+    },
+    "examSystems": {
+      "Geral": [
+        "Palidez cutânea",
+        "Sudorese fria"
+      ],
+      "Abdome": [
+        "Dor à palpação em hipogástrio",
+        "Defesa involuntária leve"
+      ],
+      "Gineco": [
+        "Sangramento vaginal moderado"
+      ]
+    },
+    "tests": {
+      "Laboratoriais": {
+        "Beta-hCG": "Positivo (alto)",
+        "Hemograma": "Hb 9.2 g/dL; Ht 28%",
+        "Tipagem": "O+"
+      },
+      "Imagem": {
+        "USG transvaginal": "Ausência de saco gestacional intrauterino; massa anexial direita + líquido livre"
+      },
+      "Outros": {
+        "PA seriada": "Queda progressiva"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "USG transvaginal",
+        "Beta-hCG",
+        "Hemograma"
+      ],
+      "medsIV": [
+        "Acesso venoso + cristalóide"
+      ],
+      "procedures": [
+        "Avaliar cirurgia/GO urgente"
+      ],
+      "diagnosis": "Gravidez ectópica rota"
+    },
+    "diagnosis": "Gravidez ectópica rota",
+    "differentials": [
+      "Aborto incompleto",
+      "Cisto ovariano roto",
+      "DIP"
+    ],
+    "protocol": [
+      "Avaliar instabilidade hemodinâmica",
+      "Solicitar beta-hCG e USG TV",
+      "Reposição volêmica e acionar GO"
+    ],
+    "physiologyProfile": {
+      "type": "hemorrhage",
+      "severity": 0.75
+    }
+  },
+  {
+    "id": 5,
+    "name": "João Pereira",
+    "age": 66,
+    "gender": "M",
+    "specialty": "Neurologia",
+    "difficulty": 3,
+    "chiefComplaint": "Fraqueza súbita em hemicorpo direito e fala enrolada",
+    "history": "HAS e DM2, início há 50 minutos.",
+    "vitals": {
+      "pressaoSys": 180,
+      "pressaoDia": 105,
+      "freq": 88,
+      "saturacao": 96,
+      "temperatura": 36.7
+    },
+    "examSystems": {
+      "Neurológico": [
+        "Desvio de rima labial à esquerda",
+        "Força 2/5 em MSD e MID",
+        "Afasia motora"
+      ],
+      "Geral": [
+        "Glicemia capilar 140 mg/dL"
+      ]
+    },
+    "tests": {
+      "Imagem": {
+        "TC crânio sem contraste": "Sem sangramento evidente; sinais precoces discretos de isquemia"
+      },
+      "Outros": {
+        "NIHSS": "9"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "TC crânio sem contraste",
+        "Glicemia capilar"
+      ],
+      "medsIV": [
+        "Avaliar trombólise (se elegível)"
+      ],
+      "procedures": [
+        "Protocolar AVC"
+      ],
+      "diagnosis": "AVC isquêmico agudo"
+    },
+    "diagnosis": "AVC isquêmico agudo",
+    "differentials": [
+      "AVC hemorrágico",
+      "Hipoglicemia",
+      "Crise epiléptica pós-ictal"
+    ],
+    "protocol": [
+      "Tempo é cérebro: definir LKW",
+      "TC sem contraste para excluir hemorragia",
+      "Considerar trombólise/trombectomia"
+    ],
+    "physiologyProfile": {
+      "type": "stroke",
+      "severity": 0.6
+    }
+  },
+  {
+    "id": 6,
+    "name": "Ana Souza",
+    "age": 19,
+    "gender": "F",
+    "specialty": "Pneumologia",
+    "difficulty": 2,
+    "chiefComplaint": "Falta de ar e chiado após contato com poeira",
+    "history": "Asmática, sem internações prévias.",
+    "vitals": {
+      "pressaoSys": 120,
+      "pressaoDia": 75,
+      "freq": 118,
+      "saturacao": 89,
+      "temperatura": 37.0
+    },
+    "examSystems": {
+      "Respiratório": [
+        "Sibilos difusos",
+        "Uso de musculatura acessória",
+        "FR 32 irpm"
+      ],
+      "Geral": [
+        "Ansiosa, fala frases curtas"
+      ]
+    },
+    "tests": {
+      "Outros": {
+        "Pico de fluxo": "35% do previsto",
+        "SatO2": "89% ar ambiente"
+      },
+      "Imagem": {
+        "RX tórax": "Sem consolidações"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "SatO2",
+        "Pico de fluxo"
+      ],
+      "medsIV": [
+        "Corticoide sistêmico"
+      ],
+      "procedures": [
+        "Nebulização com beta-agonista + ipratrópio",
+        "Oxigênio"
+      ],
+      "diagnosis": "Crise asmática grave"
+    },
+    "diagnosis": "Crise asmática grave",
+    "differentials": [
+      "TEP",
+      "Pneumonia",
+      "Ansiedade/pânico"
+    ],
+    "protocol": [
+      "Oxigênio",
+      "SABA repetido + ipratrópio",
+      "Corticoide precoce",
+      "Reavaliar resposta e risco de intubação"
+    ],
+    "physiologyProfile": {
+      "type": "asthma",
+      "severity": 0.7
+    }
+  },
+  {
+    "id": 7,
+    "name": "Carlos Lima",
+    "age": 52,
+    "gender": "M",
+    "specialty": "Infectologia",
+    "difficulty": 4,
+    "chiefComplaint": "Febre alta, confusão, pressão baixa",
+    "history": "Diarreia há 2 dias, comorbidades: DM2.",
+    "vitals": {
+      "pressaoSys": 82,
+      "pressaoDia": 48,
+      "freq": 132,
+      "saturacao": 93,
+      "temperatura": 39.4
+    },
+    "examSystems": {
+      "Geral": [
+        "Rebaixamento de consciência leve",
+        "Extremidades frias"
+      ],
+      "Cardio": [
+        "Tempo de enchimento capilar 4s"
+      ],
+      "Respiratório": [
+        "FR 28 irpm"
+      ]
+    },
+    "tests": {
+      "Laboratoriais": {
+        "Lactato": "4.8 mmol/L",
+        "Leuco": "18.500",
+        "Creatinina": "2.1 mg/dL"
+      },
+      "Outros": {
+        "SIRS": "positivo"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Lactato",
+        "Hemograma",
+        "Função renal"
+      ],
+      "medsIV": [
+        "Antibiótico de amplo espectro",
+        "Cristalóide 30 mL/kg"
+      ],
+      "procedures": [
+        "Protocolo sepse",
+        "Culturas antes do ATB"
+      ],
+      "diagnosis": "Choque séptico"
+    },
+    "diagnosis": "Choque séptico",
+    "differentials": [
+      "Choque hipovolêmico",
+      "Anafilaxia",
+      "Choque cardiogênico"
+    ],
+    "protocol": [
+      "Reconhecer sepse",
+      "Coletar lactato e culturas",
+      "Reposição volêmica",
+      "ATB em 1 hora",
+      "Vasopressor se refratário"
+    ],
+    "physiologyProfile": {
+      "type": "sepsis",
+      "severity": 0.85
+    }
+  },
+  {
+    "id": 8,
+    "name": "Pedro Santos",
+    "age": 34,
+    "gender": "M",
+    "specialty": "Trauma",
+    "difficulty": 4,
+    "chiefComplaint": "Acidente de moto, dor torácica e dispneia",
+    "history": "Trauma há 20 min, sem comorbidades.",
+    "vitals": {
+      "pressaoSys": 90,
+      "pressaoDia": 60,
+      "freq": 140,
+      "saturacao": 82,
+      "temperatura": 36.5
+    },
+    "examSystems": {
+      "Respiratório": [
+        "Murmúrio vesicular abolido à direita",
+        "Timpanismo à percussão direita",
+        "Desvio traqueal à esquerda"
+      ],
+      "Geral": [
+        "Cianose perioral"
+      ]
+    },
+    "tests": {
+      "Imagem": {
+        "RX tórax": "Hipertransparência direita + colapso pulmonar"
+      },
+      "Outros": {
+        "USG eFAST": "Negativo para líquido livre abdominal"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Ausculta",
+        "RX tórax"
+      ],
+      "medsIV": [
+        "Analgesia"
+      ],
+      "procedures": [
+        "Descompressão imediata (agulha)",
+        "Dreno de tórax"
+      ],
+      "diagnosis": "Pneumotórax hipertensivo"
+    },
+    "diagnosis": "Pneumotórax hipertensivo",
+    "differentials": [
+      "Tamponamento cardíaco",
+      "Hemotórax maciço",
+      "TEP"
+    ],
+    "protocol": [
+      "ABCDE",
+      "Descompressão imediata sem esperar RX se instável",
+      "Dreno de tórax"
+    ],
+    "physiologyProfile": {
+      "type": "pneumothorax",
+      "severity": 0.9
+    }
+  },
+  {
+    "id": 9,
+    "name": "Luciana Ferreira",
+    "age": 31,
+    "gender": "F",
+    "specialty": "Cirurgia",
+    "difficulty": 2,
+    "chiefComplaint": "Dor em fossa ilíaca direita + náuseas",
+    "history": "Sem comorbidades, dor migratória há 12h.",
+    "vitals": {
+      "pressaoSys": 118,
+      "pressaoDia": 72,
+      "freq": 104,
+      "saturacao": 98,
+      "temperatura": 38.1
+    },
+    "examSystems": {
+      "Abdome": [
+        "Dor à palpação em FID",
+        "Sinal de Blumberg positivo",
+        "Defesa localizada"
+      ],
+      "Geral": [
+        "Anorexia"
+      ]
+    },
+    "tests": {
+      "Laboratoriais": {
+        "Leuco": "14.200",
+        "PCR": "6 mg/dL"
+      },
+      "Imagem": {
+        "USG abdome": "Apêndice espessado, não compressível"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Hemograma",
+        "USG abdome"
+      ],
+      "medsIV": [
+        "Hidratação",
+        "Analgesia"
+      ],
+      "procedures": [
+        "Avaliar cirurgia"
+      ],
+      "diagnosis": "Apendicite aguda"
+    },
+    "diagnosis": "Apendicite aguda",
+    "differentials": [
+      "Gastroenterite",
+      "Cisto ovariano",
+      "ITU"
+    ],
+    "protocol": [
+      "Avaliar sinais de peritonite",
+      "Imagem (USG/TC)",
+      "Antibiótico e cirurgia conforme avaliação"
+    ],
+    "physiologyProfile": {
+      "type": "appendicitis",
+      "severity": 0.45
+    }
+  },
+  {
+    "id": 10,
+    "name": "Rafael Almeida",
+    "age": 40,
+    "gender": "M",
+    "specialty": "Alergia",
+    "difficulty": 4,
+    "chiefComplaint": "Urticária difusa + edema de lábios + dispneia após picada",
+    "history": "Sem comorbidades.",
+    "vitals": {
+      "pressaoSys": 78,
+      "pressaoDia": 45,
+      "freq": 128,
+      "saturacao": 90,
+      "temperatura": 36.6
+    },
+    "examSystems": {
+      "Geral": [
+        "Urticária difusa",
+        "Edema de glote (estridor)"
+      ],
+      "Respiratório": [
+        "Sibilos",
+        "FR 30"
+      ],
+      "Cardio": [
+        "Hipotensão"
+      ]
+    },
+    "tests": {
+      "Outros": {
+        "Resposta esperada": "Melhora após adrenalina IM"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Avaliação de via aérea"
+      ],
+      "medsIV": [
+        "Cristalóide"
+      ],
+      "procedures": [
+        "Adrenalina IM",
+        "Oxigênio",
+        "Antihistamínico + corticoide"
+      ],
+      "diagnosis": "Anafilaxia"
+    },
+    "diagnosis": "Anafilaxia",
+    "differentials": [
+      "Crise asmática",
+      "Angioedema hereditário",
+      "Choque séptico"
+    ],
+    "protocol": [
+      "Adrenalina IM imediatamente",
+      "Suporte de via aérea",
+      "Fluidos",
+      "Observação"
+    ],
+    "physiologyProfile": {
+      "type": "anaphylaxis",
+      "severity": 0.85
+    }
+  },
+  {
+    "id": 11,
+    "name": "Bruno Costa",
+    "age": 23,
+    "gender": "M",
+    "specialty": "Endocrinologia",
+    "difficulty": 4,
+    "chiefComplaint": "Poliúria, vômitos e respiração ofegante",
+    "history": "DM1, parou insulina há 2 dias.",
+    "vitals": {
+      "pressaoSys": 92,
+      "pressaoDia": 58,
+      "freq": 124,
+      "saturacao": 97,
+      "temperatura": 37.3
+    },
+    "examSystems": {
+      "Geral": [
+        "Desidratado",
+        "Hálito cetônico"
+      ],
+      "Respiratório": [
+        "Respiração de Kussmaul"
+      ]
+    },
+    "tests": {
+      "Laboratoriais": {
+        "Glicose": "480 mg/dL",
+        "Cetonas": "+++",
+        "pH": "7.12",
+        "K": "5.6 mEq/L"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Gasometria",
+        "Glicemia",
+        "Cetonas",
+        "Eletrólitos"
+      ],
+      "medsIV": [
+        "Cristalóide",
+        "Insulina IV"
+      ],
+      "procedures": [
+        "Protocolo CAD"
+      ],
+      "diagnosis": "Cetoacidose diabética"
+    },
+    "diagnosis": "Cetoacidose diabética",
+    "differentials": [
+      "Gastroenterite",
+      "Sepse",
+      "Intoxicação"
+    ],
+    "protocol": [
+      "Reposição volêmica",
+      "Insulina IV",
+      "Monitorar potássio",
+      "Tratar gatilho"
+    ],
+    "physiologyProfile": {
+      "type": "dka",
+      "severity": 0.8
+    }
+  },
+  {
+    "id": 12,
+    "name": "Helena Martins",
+    "age": 72,
+    "gender": "F",
+    "specialty": "Gastro",
+    "difficulty": 3,
+    "chiefComplaint": "Melena e tontura",
+    "history": "Uso crônico de AINE, HAS.",
+    "vitals": {
+      "pressaoSys": 88,
+      "pressaoDia": 54,
+      "freq": 118,
+      "saturacao": 95,
+      "temperatura": 36.4
+    },
+    "examSystems": {
+      "Geral": [
+        "Palidez",
+        "Sudorese"
+      ],
+      "Abdome": [
+        "Dor epigástrica leve"
+      ],
+      "Cardio": [
+        "Hipotensão ortostática"
+      ]
+    },
+    "tests": {
+      "Laboratoriais": {
+        "Hb": "7.4 g/dL",
+        "Ureia": "80 mg/dL"
+      },
+      "Outros": {
+        "Toque retal": "Fezes negras"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Hemograma",
+        "Tipagem e prova cruzada"
+      ],
+      "medsIV": [
+        "IBP IV",
+        "Cristalóide"
+      ],
+      "procedures": [
+        "Chamar endoscopia"
+      ],
+      "diagnosis": "Hemorragia digestiva alta"
+    },
+    "diagnosis": "Hemorragia digestiva alta",
+    "differentials": [
+      "Hemorragia baixa",
+      "Anemia crônica",
+      "Varizes esofágicas"
+    ],
+    "protocol": [
+      "Acesso venoso calibroso",
+      "Reposição volêmica",
+      "IBP",
+      "Transfusão conforme necessidade",
+      "Endoscopia"
+    ],
+    "physiologyProfile": {
+      "type": "gi_bleed",
+      "severity": 0.75
+    }
+  },
+  {
+    "id": 13,
+    "name": "Marcos Ribeiro",
+    "age": 58,
+    "gender": "M",
+    "specialty": "Cardiologia",
+    "difficulty": 4,
+    "chiefComplaint": "Dispneia súbita e dor pleurítica",
+    "history": "Cirurgia recente, perna inchada há 3 dias.",
+    "vitals": {
+      "pressaoSys": 98,
+      "pressaoDia": 62,
+      "freq": 126,
+      "saturacao": 86,
+      "temperatura": 37.1
+    },
+    "examSystems": {
+      "Respiratório": [
+        "Taquipneia 34 irpm",
+        "Ausculta sem estertores"
+      ],
+      "Geral": [
+        "Sinais de TVP em MMII esquerdo"
+      ]
+    },
+    "tests": {
+      "Outros": {
+        "D-dímero": "Alto",
+        "ECG": "Taquicardia sinusal",
+        "AngioTC": "Trombo em artéria pulmonar principal"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "ECG",
+        "D-dímero",
+        "AngioTC"
+      ],
+      "medsIV": [
+        "Anticoagulação"
+      ],
+      "procedures": [
+        "Oxigênio",
+        "Estratificar risco"
+      ],
+      "diagnosis": "Tromboembolismo pulmonar"
+    },
+    "diagnosis": "Tromboembolismo pulmonar",
+    "differentials": [
+      "IAM",
+      "Pneumonia",
+      "Pneumotórax"
+    ],
+    "protocol": [
+      "Avaliar risco",
+      "Anticoagular",
+      "Imagem confirmatória",
+      "Suporte ventilatório"
+    ],
+    "physiologyProfile": {
+      "type": "pe",
+      "severity": 0.85
+    }
+  },
+  {
+    "id": 14,
+    "name": "Sofia Rocha",
+    "age": 27,
+    "gender": "F",
+    "specialty": "Infectologia",
+    "difficulty": 4,
+    "chiefComplaint": "Febre, rigidez de nuca e fotofobia",
+    "history": "Início há 6h, sem comorbidades.",
+    "vitals": {
+      "pressaoSys": 110,
+      "pressaoDia": 70,
+      "freq": 112,
+      "saturacao": 98,
+      "temperatura": 39.1
+    },
+    "examSystems": {
+      "Neurológico": [
+        "Rigidez de nuca",
+        "Sinal de Kernig positivo"
+      ],
+      "Geral": [
+        "Fotofobia",
+        "Cefaleia intensa"
+      ]
+    },
+    "tests": {
+      "Laboratoriais": {
+        "Hemograma": "Leuco 16.000"
+      },
+      "Outros": {
+        "Punção lombar": "Pleocitose neutrofílica; proteína alta; glicose baixa"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Hemograma",
+        "Punção lombar"
+      ],
+      "medsIV": [
+        "Antibiótico imediato",
+        "Dexametasona"
+      ],
+      "procedures": [
+        "Isolamento",
+        "Coleta hemoculturas"
+      ],
+      "diagnosis": "Meningite bacteriana"
+    },
+    "diagnosis": "Meningite bacteriana",
+    "differentials": [
+      "Meningite viral",
+      "Enxaqueca",
+      "Hemorragia subaracnóidea"
+    ],
+    "protocol": [
+      "ATB não pode atrasar",
+      "Coletar culturas",
+      "Punção lombar quando seguro",
+      "Dexametasona"
+    ],
+    "physiologyProfile": {
+      "type": "meningitis",
+      "severity": 0.65
+    }
+  },
+  {
+    "id": 15,
+    "name": "Diego Nunes",
+    "age": 50,
+    "gender": "M",
+    "specialty": "Neurologia",
+    "difficulty": 2,
+    "chiefComplaint": "Convulsão generalizada e confusão pós-ictal",
+    "history": "Etilista, sem uso de medicações regulares.",
+    "vitals": {
+      "pressaoSys": 145,
+      "pressaoDia": 90,
+      "freq": 110,
+      "saturacao": 96,
+      "temperatura": 37.8
+    },
+    "examSystems": {
+      "Neurológico": [
+        "Pós-ictal sonolento",
+        "Sem déficit focal"
+      ],
+      "Geral": [
+        "Tremores",
+        "Diaforese"
+      ]
+    },
+    "tests": {
+      "Laboratoriais": {
+        "Na": "132",
+        "Glicose": "90"
+      },
+      "Outros": {
+        "EEG": "Não disponível na emergência"
+      }
+    },
+    "requiredActions": {
+      "exams": [
+        "Glicemia",
+        "Eletrólitos"
+      ],
+      "medsIV": [
+        "Benzodiazepínico se recorrente"
+      ],
+      "procedures": [
+        "Avaliar abstinência alcoólica"
+      ],
+      "diagnosis": "Crise convulsiva por abstinência alcoólica"
+    },
+    "diagnosis": "Crise convulsiva por abstinência alcoólica",
+    "differentials": [
+      "Epilepsia",
+      "Hipoglicemia",
+      "AVC"
+    ],
+    "protocol": [
+      "ABC",
+      "Identificar gatilho",
+      "BZD se crise ativa",
+      "Tiamina + hidratação"
+    ],
+    "physiologyProfile": {
+      "type": "withdrawal",
+      "severity": 0.4
+    }
   }
 ]

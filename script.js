@@ -3,26 +3,54 @@
 
 class CaseRepository {
   constructor(cases) {
-    this.cases = cases;
-    this.usedCases = [];
+    this.cases = Array.isArray(cases) ? cases : [];
+    // Guardamos IDs já usados por "pool" (ex.: por especialidade) para reduzir repetição
+    this.usedByKey = new Map(); // key -> Set(ids)
+  }
+
+  _getKey(filter) {
+    const spec = filter?.specialty ? String(filter.specialty) : 'ALL';
+    const diff = filter?.maxDifficulty ? String(filter.maxDifficulty) : 'ANY';
+    const minL = filter?.minLevel ? String(filter.minLevel) : 'ANY';
+    return `${spec}|${diff}|${minL}`;
+  }
+
+  _filterCases(filter = {}) {
+    const { specialty, maxDifficulty, minLevel } = filter;
+    return this.cases.filter(c => {
+      if (specialty && specialty !== 'ALL' && c.specialty !== specialty) return false;
+      if (typeof maxDifficulty === 'number' && (c.difficulty ?? 1) > maxDifficulty) return false;
+      if (typeof minLevel === 'number' && (c.minLevel ?? 1) > minLevel) return false;
+      return true;
+    });
   }
 
   /**
-   * Retorna um caso aleatório e marca como usado (para evitar repetição imediata).
+   * Retorna um caso aleatório (filtrável) e marca como usado (para evitar repetição imediata).
    */
-  getRandomCase() {
-    if (this.cases.length === 0) return null;
-    // Se esgotou todos, recicla
-    if (this.usedCases.length === this.cases.length) {
-      this.usedCases = [];
-    }
-    let caseCandidate;
-    do {
-      const index = Math.floor(Math.random() * this.cases.length);
-      caseCandidate = this.cases[index];
-    } while (this.usedCases.includes(caseCandidate.id));
-    this.usedCases.push(caseCandidate.id);
-    return JSON.parse(JSON.stringify(caseCandidate)); // retorna cópia profunda
+  getRandomCase(filter = {}) {
+    const pool = this._filterCases(filter);
+    if (pool.length === 0) return null;
+
+    const key = this._getKey(filter);
+    if (!this.usedByKey.has(key)) this.usedByKey.set(key, new Set());
+    const used = this.usedByKey.get(key);
+
+    // Se já usou todos do pool, recicla
+    if (used.size >= pool.length) used.clear();
+
+    const available = pool.filter(c => !used.has(c.id));
+    const chosen = available[Math.floor(Math.random() * available.length)];
+    used.add(chosen.id);
+    return chosen;
+  }
+
+  /**
+   * Retorna lista de especialidades disponíveis (para montar filtros na UI).
+   */
+  getSpecialties() {
+    const specs = new Set(this.cases.map(c => c.specialty).filter(Boolean));
+    return ['ALL', ...Array.from(specs).sort()];
   }
 }
 
@@ -31,6 +59,8 @@ class GameEngine {
     this.config = config;
     this.caseRepo = caseRepo;
     this.ui = ui;
+    this.caseFilter = { specialty: 'ALL', minLevel: 1 };
+    this.mode = 'shift';
     this.currentLevel = config.initialLevel;
     this.score = 0;
     this.errorCount = 0;
@@ -80,7 +110,7 @@ class GameEngine {
   }
 
   spawnPatient() {
-    const newCase = this.caseRepo.getRandomCase();
+    const newCase = this.caseRepo.getRandomCase(this.caseFilter || {});
     if (!newCase) return;
     // Define paciente interno
     const patient = {
@@ -126,7 +156,7 @@ class GameEngine {
         // Atualiza sinais vitais dinâmicos
         this.updateVitalsForPatient(patient);
         // Atualiza timer de deterioração para mudanças abruptas de status
-        patient.deteriorationTimer--;
+        patient.deteriorationTimer -= (this.mode === 'training' ? 0.4 : 1);
         if (patient.deteriorationTimer <= 0) {
           if (patient.status === 'Estável') {
             patient.status = 'Instável';
@@ -415,7 +445,7 @@ class GameEngine {
 
   handlePatientDeath(patient) {
     // Penaliza pontuação e erros
-    this.score -= this.config.scoring.deathPenalty;
+    this.score -= (this.mode === 'training' ? Math.round(this.config.scoring.deathPenalty * 0.25) : this.config.scoring.deathPenalty);
     if (this.score < 0) this.score = 0;
     this.errorCount++;
     // óbito conta como caso incorreto
@@ -561,17 +591,6 @@ class UIController {
       });
     }
 
-    // Overlay de história / exame físico
-    this.infoPage = document.getElementById('info-page');
-    this.infoContent = document.getElementById('info-content');
-    this.infoBack = document.getElementById('info-back');
-    if (this.infoBack) {
-      this.infoBack.addEventListener('click', () => {
-        if (this.infoPage) this.infoPage.classList.remove('active');
-        if (this.infoContent) this.infoContent.innerHTML = '';
-      });
-    }
-
   }
   updateLevel(level) {
     this.levelDisplay.textContent = `Nível ${level}`;
@@ -686,20 +705,10 @@ class UIController {
       treatmentsContainer.appendChild(el);
     });
 
-    // Diagnóstico (abre a subtela de diagnóstico com busca e catálogo amplo)
-    const btnDiagnose = this.createActionButton('Diagnóstico', 'fa-notes-medical', () => {
-      this.showDiagnosisDialog(patient, engine);
-    });
-
-    // Linha superior: História / Exame Físico
-    const hxpeRow = document.createElement('div');
-    hxpeRow.className = 'hxpe-row';
-    hxpeRow.appendChild(btnHistory);
-    hxpeRow.appendChild(btnExam);
-    actionsDiv.appendChild(hxpeRow);
-
-    // Exames (categorias)
-    actionsDiv.appendChild(testsContainer);
+// Adiciona seções de exames (categorias) se houver itens disponíveis
+    if (examCategories.length > 0) {
+      actionsDiv.appendChild(testsContainer);
+    }
     actionsDiv.appendChild(treatmentsContainer);
     actionsDiv.appendChild(btnDiagnose);
     this.detailsContainer.appendChild(actionsDiv);
@@ -722,11 +731,16 @@ class UIController {
     return btn;
   }
   displayHistory(history) {
-    this.showInfoOverlay('História Clínica', `<p>${history}</p>`);
+    const info = document.getElementById('info-container');
+    const section = document.createElement('div');
+    section.innerHTML = `<h3>História Clínica</h3><p>${history}</p>`;
+    info.appendChild(section);
   }
   displayExam(findings) {
+    const info = document.getElementById('info-container');
+    const section = document.createElement('div');
     // Se 'findings' for um objeto, detalha por sistemas; caso contrário, exibe string
-    let html = '';
+    let html = '<h3>Exame Físico</h3>';
     if (findings && typeof findings === 'object') {
       for (const sys in findings) {
         html += `<p><strong>${sys.charAt(0).toUpperCase() + sys.slice(1)}:</strong> ${findings[sys]}</p>`;
@@ -734,32 +748,20 @@ class UIController {
     } else {
       html += `<p>${findings}</p>`;
     }
-    this.showInfoOverlay('Exame Físico', html || '<p>Sem achados registrados.</p>');
+    section.innerHTML = html;
+    info.appendChild(section);
   }
   displayTest(title, result) {
-    this.showInfoOverlay(title, `<p>${result || 'Sem resultados'}</p>`);
+    const info = document.getElementById('info-container');
+    const section = document.createElement('div');
+    section.innerHTML = `<h3>${title}</h3><p>${result || 'Sem resultados'}</p>`;
+    info.appendChild(section);
   }
   displayTreatment(description) {
-    this.showInfoOverlay('Tratamento', `<p>${description}</p>`);
-  }
-
-  showInfoOverlay(title, bodyHtml) {
-    const page = document.getElementById('info-page');
-    const ttl = document.getElementById('info-title');
-    const content = document.getElementById('info-content');
-    if (!page || !ttl || !content) {
-      // fallback: mostra no painel interno
-      const info = document.getElementById('info-container');
-      if (info) {
-        const section = document.createElement('div');
-        section.innerHTML = `<h3>${title}</h3>${bodyHtml}`;
-        info.appendChild(section);
-      }
-      return;
-    }
-    ttl.textContent = title;
-    content.innerHTML = bodyHtml;
-    page.classList.add('active');
+    const info = document.getElementById('info-container');
+    const section = document.createElement('div');
+    section.innerHTML = `<h3>Tratamento</h3><p>${description}</p>`;
+    info.appendChild(section);
   }
   showFeedback(feedback) {
     this.feedbackBody.innerHTML = `<ul>${feedback.messages.map(m => `<li>${m}</li>`).join('')}</ul><p><strong>Pontuação obtida:</strong> ${feedback.points}</p>`;
@@ -1171,345 +1173,209 @@ class UIController {
 }
 
 // Controle de fluxo da aplicação
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   // Dados embutidos para evitar problemas de carregamento de arquivo local
-  const casesData = [
-    {
-      id: 1,
-      name: 'José Silva',
-      age: 45,
-      gender: 'M',
-      chiefComplaint: 'Dor torácica súbita acompanhada de náuseas',
-      history: 'Fumante, hipertenso, histórico familiar de infarto',
-      // Define sinais vitais numéricos para permitir deterioração dinâmica
-      vitals: {
-        pressaoSys: 160,
-        pressaoDia: 100,
-        freq: 98,
-        saturacao: 94,
-        temperatura: 36.8
-      },
-      // Detalhes de exame físico por sistemas
-      examDetails: {
-        cardiovascular: 'Dor retroesternal intensa, sem alívio em repouso',
-        respiratory: 'Ausculta pulmonar sem estertores',
-        abdominal: 'Abdome sem dor à palpação',
-        neurological: 'Sem déficit neurológico'
-      },
-      tests: {
-        ecg: 'Elevação do segmento ST em D2, D3 e avF.',
-        troponina: 'Aumentada (2,5 ng/mL)',
-        raiox: 'Infiltrado discreto em base esquerda'
-      },
-      requiredActions: ['test_ecg', 'test_blood', 'admin_asa'],
-      differentialDiagnoses: [
-        'Angina Instável', 'Dissecção de Aorta', 'Estenose Aórtica'
-      ],
-      diagnosis: 'Infarto Agudo do Miocárdio'
-    },
-    {
-      id: 2,
-      name: 'Maria Oliveira',
-      age: 30,
-      gender: 'F',
-      chiefComplaint: 'Falta de ar súbita e dor torácica pleurítica',
-      history: 'Uso recente de anticoncepcional oral, imobilização devido a fratura de tornozelo há duas semanas',
-      vitals: {
-        pressaoSys: 110,
-        pressaoDia: 70,
-        freq: 110,
-        saturacao: 90,
-        temperatura: 37.0
-      },
-      examDetails: {
-        cardiovascular: 'Taquicardia moderada',
-        respiratory: 'Taquipneia e roncos esparsos à ausculta',
-        abdominal: 'Abdome flácido sem dor',
-        neurological: 'Sem alterações'
-      },
-      tests: {
-        dDimero: 'Elevado (2.0 µg/mL)',
-        angioTC: 'Trombo em artéria pulmonar direita',
-        gasometria: 'pO2 60 mmHg, pCO2 32 mmHg, pH 7.45'
-      },
-      requiredActions: ['test_imagem', 'admin_anticoagulante', 'admin_oxigenio'],
-      differentialDiagnoses: [
-        'Pneumonia', 'Asma Aguda', 'Pneumotórax'
-      ],
-      diagnosis: 'Embolia Pulmonar'
-    },
-    {
-      id: 3,
-      name: 'João Ferreira',
-      age: 55,
-      gender: 'M',
-      chiefComplaint: 'Dor abdominal intensa no quadrante inferior direito',
-      history: 'Dor há 12 horas, náuseas, sem apetite, histórico prévio de apendicite na família',
-      vitals: {
-        pressaoSys: 120,
-        pressaoDia: 80,
-        freq: 88,
-        saturacao: 97,
-        temperatura: 38.5
-      },
-      examDetails: {
-        cardiovascular: 'Frequência cardíaca levemente elevada',
-        respiratory: 'Pulmões sem alterações',
-        abdominal: 'Sensibilidade aumentada no QID, Blumberg positivo',
-        neurological: 'Paciente consciente e orientado'
-      },
-      tests: {
-        hemograma: 'Leucócitos 16.000/mm³, neutrofilia',
-        ultrassom: 'Inflamação de apêndice, diâmetro aumentado',
-        tomografia: 'Confirmando apendicite aguda'
-      },
-      requiredActions: ['test_blood', 'test_imagem', 'refer_cirurgia'],
-      differentialDiagnoses: [
-        'Gastrite', 'Colecistite', 'Diverticulite'
-      ],
-      diagnosis: 'Apendicite Aguda'
-    },
-    {
-      id: 4,
-      name: 'Ana Souza',
-      age: 70,
-      gender: 'F',
-      chiefComplaint: 'Perda de força súbita no lado direito e dificuldade de falar',
-      history: 'Hipertensa, diabética e portadora de fibrilação atrial, sem uso regular de anticoagulante',
-      vitals: {
-        pressaoSys: 160,
-        pressaoDia: 90,
-        freq: 80,
-        saturacao: 95,
-        temperatura: 36.7
-      },
-      examDetails: {
-        cardiovascular: 'Ritmo irregular, presença de fibrilação atrial',
-        respiratory: 'Pulmões limpos à ausculta',
-        abdominal: 'Sem dor à palpação',
-        neurological: 'Fraqueza em hemicorpo direito, dificuldade de articulação da fala'
-      },
-      tests: {
-        ecg: 'Fibrilação atrial',
-        tomografia: 'Lesão isquêmica em território de artéria cerebral média esquerda',
-        raiox: 'Sem alterações'
-      },
-      requiredActions: ['test_imagem', 'admin_anticoagulante', 'admin_oxigenio'],
-      differentialDiagnoses: [
-        'Hipoglicemia', 'Crise Convulsiva', 'Enxaqueca Hemiplégica'
-      ],
-      diagnosis: 'Acidente Vascular Cerebral Isquêmico'
-    },
-    {
-      id: 5,
-      name: 'Carlos Lima',
-      age: 60,
-      gender: 'M',
-      chiefComplaint: 'Febre alta, hipotensão e dor abdominal difusa',
-      history: 'Cirurgia abdominal recente por perfuração intestinal, diabético tipo 2',
-      vitals: {
-        pressaoSys: 90,
-        pressaoDia: 60,
-        freq: 120,
-        saturacao: 92,
-        temperatura: 39.0
-      },
-      examDetails: {
-        cardiovascular: 'Taquicardia intensa',
-        respiratory: 'Sons vesiculares diminuídos nas bases',
-        abdominal: 'Abdome distendido com dor difusa e defesa muscular',
-        neurological: 'Ligeira confusão mental'
-      },
-      tests: {
-        hemograma: 'Leucócitos 18.000/mm³, neutrofilia',
-        gasometria: 'pH 7.30, lactato elevado',
-        tomografia: 'Coleções intra‑abdominais e sinais de peritonite',
-        ecg: 'Taquicardia sinusal'
-      },
-      requiredActions: ['test_blood', 'test_imagem', 'admin_antibiotico', 'admin_oxigenio'],
-      differentialDiagnoses: [
-        'Apendicite', 'Pancreatite', 'Choque Cardiogênico'
-      ],
-      diagnosis: 'Sepse de origem abdominal'
-    },
-    {
-      id: 6,
-      name: 'Luana Costa',
-      age: 25,
-      gender: 'F',
-      chiefComplaint: 'Chiado no peito e falta de ar',
-      history: 'Asmática em uso de broncodilatadores, iniciou sintomas há 2 horas',
-      vitals: {
-        pressaoSys: 110,
-        pressaoDia: 70,
-        freq: 130,
-        saturacao: 88,
-        temperatura: 37.2
-      },
-      examDetails: {
-        cardiovascular: 'Taquicardia',
-        respiratory: 'Sibilos difusos e uso de musculatura acessória',
-        abdominal: 'Sem dor abdominal',
-        neurological: 'Ansiosa, mas orientada'
-      },
-      tests: {
-        ecg: 'Taquicardia sinusal',
-        raiox: 'Hiperinsuflação pulmonar difusa',
-        troponina: 'Normal'
-      },
-      requiredActions: ['test_imagem', 'admin_oxigenio'],
-      differentialDiagnoses: [
-        'Pneumonia', 'Alveolite', 'Edema Pulmonar'
-      ],
-      diagnosis: 'Crise Asmática'
-    },
-    {
-      id: 7,
-      name: 'Pedro Santos',
-      age: 48,
-      gender: 'M',
-      chiefComplaint: 'Tontura, sudorese e episódio de desmaio',
-      history: 'Portador de diabetes tipo 1 em uso de insulina, refeição atrasada',
-      vitals: {
-        pressaoSys: 100,
-        pressaoDia: 60,
-        freq: 90,
-        saturacao: 96,
-        temperatura: 36.5
-      },
-      examDetails: {
-        cardiovascular: 'Taquicardia leve',
-        respiratory: 'Sem alterações',
-        abdominal: 'Abdome flácido e indolor',
-        neurological: 'Confuso, sudoreico, responsivo a estímulos'
-      },
-      tests: {
-        hemograma: 'Sem alterações significativas',
-        ecg: 'Taquicardia sinusal',
-        dDimero: 'Normal'
-      },
-      requiredActions: ['test_blood', 'admin_oxigenio'],
-      differentialDiagnoses: [
-        'Infarto Agudo do Miocárdio', 'Acidente Vascular Cerebral', 'Choque Séptico'
-      ],
-      diagnosis: 'Hipoglicemia'
-    },
-    {
-      id: 8,
-      name: 'Bruno Rocha',
-      age: 40,
-      gender: 'M',
-      chiefComplaint: 'Dor abdominal intensa após acidente automobilístico',
-      history: 'Acidente de alta energia, uso do cinto de segurança, perda momentânea da consciência',
-      vitals: {
-        pressaoSys: 90,
-        pressaoDia: 50,
-        freq: 140,
-        saturacao: 90,
-        temperatura: 37.2
-      },
-      examDetails: {
-        cardiovascular: 'Taquicardia significativa',
-        respiratory: 'Respiração rápida e superficial',
-        abdominal: 'Distensão abdominal, dor generalizada e sensibilidade à palpação',
-        neurological: 'Confuso, orientado a dor'
-      },
-      tests: {
-        ecg: 'Taquicardia sinusal',
-        hemograma: 'Hemoglobina 9 g/dL, anemia aguda',
-        ultrassom: 'Presença de líquido livre em cavidade abdominal',
-        tomografia: 'Hematoma esplênico e hemoperitônio'
-      },
-      requiredActions: ['test_blood', 'test_imagem', 'refer_cirurgia'],
-      differentialDiagnoses: [
-        'Pancreatite', 'Apendicite', 'Ruptura de aneurisma'
-      ],
-      diagnosis: 'Trauma abdominal com hemorragia interna'
-    },
-    {
-      id: 9,
-      name: 'Júlia Mendes',
-      age: 52,
-      gender: 'F',
-      chiefComplaint: 'Vômitos com sangue e fezes enegrecidas',
-      history: 'Uso crônico de anti‑inflamatórios, hipertensão arterial sistêmica',
-      vitals: {
-        pressaoSys: 100,
-        pressaoDia: 60,
-        freq: 110,
-        saturacao: 94,
-        temperatura: 37.4
-      },
-      examDetails: {
-        cardiovascular: 'Taquicardia',
-        respiratory: 'Sem alterações significativas',
-        abdominal: 'Dor epigástrica à palpação',
-        neurological: 'Alerta, orientada'
-      },
-      tests: {
-        hemograma: 'Hemoglobina 8 g/dL, anemia',
-        ultrassom: 'Conteúdo líquido no estômago sugestivo de sangue',
-        raiox: 'Estômago distendido com níveis hidroaéreos',
-        ecg: 'Taquicardia sinusal'
-      },
-      requiredActions: ['test_blood', 'test_imagem', 'refer_cirurgia'],
-      differentialDiagnoses: [
-        'Colecistite', 'Hepatite', 'Pancreatite'
-      ],
-      diagnosis: 'Hemorragia Digestiva Alta'
-    },
-    {
-      id: 10,
-      name: 'Eduardo Reis',
-      age: 28,
-      gender: 'M',
-      chiefComplaint: 'Confusão mental, bradicardia e convulsões',
-      history: 'Uso recreativo de drogas, suspeita de overdose de opióides',
-      vitals: {
-        pressaoSys: 85,
-        pressaoDia: 50,
-        freq: 50,
-        saturacao: 85,
-        temperatura: 36.0
-      },
-      examDetails: {
-        cardiovascular: 'Bradicardia importante',
-        respiratory: 'Respiração deprimida',
-        abdominal: 'Sem alterações',
-        neurological: 'Pacote convulsivo, lentidão de resposta'
-      },
-      tests: {
-        gasometria: 'pH 7.32, pCO2 55 mmHg, acidose respiratória',
-        ecg: 'Bradicardia sinusal',
-        raiox: 'Sem alterações'
-      },
-      requiredActions: ['test_blood', 'test_imagem', 'admin_oxigenio'],
-      differentialDiagnoses: [
-        'Acidente Vascular Hemorrágico', 'Sepse', 'Síncope Vasovagal'
-      ],
-      diagnosis: 'Overdose de opióides'
-    }
-  ];
-  const configData = {
+    // Carregamento de dados:
+  // - Em hospedagem (http/https): carrega JSON (permite banco grande de casos)
+  // - Em file:// (abrir direto no celular/pc): usa fallback embutido (para não quebrar por CORS)
+  let casesData = [];
+  let configData = null;
+
+  const isFile = (location.protocol === 'file:');
+
+  const defaultConfig = {
     initialLevel: 1,
     maxSimultaneousPatients: 2,
     newPatientIntervalSeconds: 60,
     levelRequirements: {
       '1': { minAccuracy: 0.5, maxErrors: 3 },
       '2': { minAccuracy: 0.7, maxErrors: 2 },
-      '3': { minAccuracy: 0.9, maxErrors: 1 }
+      '3': { minAccuracy: 0.9, maxErrors: 1 },
+      '4': { minAccuracy: 0.92, maxErrors: 1 },
+      '5': { minAccuracy: 0.95, maxErrors: 1 }
     },
     scoring: {
       basePoints: 100,
       correctActionBonus: 20,
       timeBonusMultiplier: 1,
       errorPenalty: 50,
-      deathPenalty: 100
+      deathPenalty: 150,
+      irrelevantActionPenalty: 2
     },
-    // Tempo em segundos para receber resultados dos exames (para simular tempo real)
-    examDelaySeconds: 10
+    examDelaySeconds: 10,
+    // Tempos mais realistas por categoria (segundos)
+    examTimings: {
+      lab: 40,
+      imaging: 60,
+      other: 20
+    }
   };
-  const caseRepo = new CaseRepository(casesData);
+
+    const embeddedFallbackCases = [
+  {
+    'id': 1,
+    'name': 'José Silva',
+    'age': 45,
+    'gender': 'M',
+    'chiefComplaint': 'Dor torácica súbita acompanhada de náuseas',
+    'history': 'Fumante, hipertenso, histórico familiar de infarto',
+    'vitals': {
+      'pressao': '160/100 mmHg',
+      'freqCardiaca': '98 bpm',
+      'saturacao': '94%',
+      'temperatura': '36.8 °C'
+    },
+    'examFindings': 'Ausculta pulmonar sem estertores, dor retroesternal que não melhora com mudança de posição.',
+    'tests': {
+      'ecg': 'Elevação do segmento ST em D2, D3 e avF.',
+      'troponina': 'Aumentada (2,5 ng/mL)',
+      'raiox': 'Infiltrado discreto em base esquerda'
+    },
+    'requiredActions': [
+      'test_ecg',
+      'test_blood',
+      'admin_asa'
+    ],
+    'diagnosis': 'Infarto Agudo do Miocárdio',
+    'specialty': 'Cardiologia',
+    'difficulty': 3,
+    'differentials': [
+      'Angina instável',
+      'TEP',
+      'Refluxo'
+    ],
+    'protocol': [
+      'Dor torácica: ECG + troponina precoce',
+      'AAS se suspeita'
+    ],
+    'physiologyProfile': {
+      'type': 'mi',
+      'severity': 0.7
+    },
+    'examSystems': {
+      'Geral': 'Ausculta pulmonar sem estertores, dor retroesternal que não melhora com mudança de posição.'
+    }
+  },
+  {
+    'id': 2,
+    'name': 'Maria Oliveira',
+    'age': 30,
+    'gender': 'F',
+    'chiefComplaint': 'Falta de ar súbita e dor torácica pleurítica',
+    'history': 'Uso recente de anticoncepcional oral, imobilização devido a fratura de tornozelo há duas semanas',
+    'vitals': {
+      'pressao': '110/70 mmHg',
+      'freqCardiaca': '110 bpm',
+      'saturacao': '90%',
+      'temperatura': '37.0 °C'
+    },
+    'examFindings': 'Paciente ansiosa, taquipneica, roncos esparsos à ausculta pulmonar.',
+    'tests': {
+      'dDimero': 'Elevado (2.0 µg/mL)',
+      'angioTC': 'Trombo em artéria pulmonar direita',
+      'gasometria': 'pO2 60 mmHg, pCO2 32 mmHg, pH 7.45'
+    },
+    'requiredActions': [
+      'test_imagem',
+      'admin_anticoagulante',
+      'admin_oxigenio'
+    ],
+    'diagnosis': 'Embolia Pulmonar',
+    'specialty': 'Neurologia',
+    'difficulty': 2,
+    'differentials': [
+      'AVC',
+      'Vertigem periférica',
+      'Hipoglicemia'
+    ],
+    'protocol': [
+      'Avaliar ABC e glicemia',
+      'Exame neurológico e TC se indicado'
+    ],
+    'physiologyProfile': {
+      'type': 'stroke',
+      'severity': 0.4
+    },
+    'examSystems': {
+      'Geral': 'Paciente ansiosa, taquipneica, roncos esparsos à ausculta pulmonar.'
+    }
+  },
+  {
+    'id': 3,
+    'name': 'João Ferreira',
+    'age': 55,
+    'gender': 'M',
+    'chiefComplaint': 'Dor abdominal intensa no quadrante inferior direito',
+    'history': 'Dor há 12 horas, náuseas, sem apetite, histórico prévio de apendicite na família',
+    'vitals': {
+      'pressao': '120/80 mmHg',
+      'freqCardiaca': '88 bpm',
+      'saturacao': '97%',
+      'temperatura': '38.5 °C'
+    },
+    'examFindings': 'Sensibilidade aumentada e defesa abdominal no quadrante inferior direito, sinal de Blumberg positivo.',
+    'tests': {
+      'hemograma': 'Leucócitos 16.000/mm³, neutrofilia',
+      'ultrassom': 'Inflamação de apêndice, diâmetro aumentado',
+      'tomografia': 'Confirmando apendicite aguda'
+    },
+    'requiredActions': [
+      'test_blood',
+      'test_imagem',
+      'refer_cirurgia'
+    ],
+    'diagnosis': 'Apendicite Aguda',
+    'specialty': 'Infectologia',
+    'difficulty': 3,
+    'differentials': [
+      'Pneumonia',
+      'TEP',
+      'Asma'
+    ],
+    'protocol': [
+      'Avaliar sinais vitais',
+      'Solicitar exames básicos e tratar causa provável'
+    ],
+    'physiologyProfile': {
+      'type': 'sepsis',
+      'severity': 0.35
+    },
+    'examSystems': {
+      'Geral': 'Sensibilidade aumentada e defesa abdominal no quadrante inferior direito, sinal de Blumberg positivo.'
+    }
+  }
+];
+
+  async function loadJson(path) {
+    const res = await fetch(path, { cache: 'no-store' });
+    if (!res.ok) throw new Error('Falha ao carregar ' + path);
+    return await res.json();
+  }
+
+  try {
+    if (isFile) {
+      casesData = embeddedFallbackCases;
+      configData = defaultConfig;
+    } else {
+      const [loadedCases, loadedConfig] = await Promise.all([
+        loadJson('data/cases.json'),
+        loadJson('data/config.json').catch(() => defaultConfig)
+      ]);
+      casesData = Array.isArray(loadedCases) ? loadedCases : embeddedFallbackCases;
+      configData = loadedConfig || defaultConfig;
+      // garante campos novos
+      configData.examTimings = configData.examTimings || defaultConfig.examTimings;
+      configData.examDelaySeconds = configData.examDelaySeconds ?? defaultConfig.examDelaySeconds;
+      configData.scoring = configData.scoring || defaultConfig.scoring;
+      configData.levelRequirements = configData.levelRequirements || defaultConfig.levelRequirements;
+    }
+  } catch (e) {
+    console.warn('Fallback de dados acionado:', e);
+    casesData = embeddedFallbackCases;
+    configData = defaultConfig;
+  }
+
+const caseRepo = new CaseRepository(casesData);
   const ui = new UIController();
   const engine = new GameEngine(configData, caseRepo, ui);
   // Expor engine globalmente para acesso nos eventos
@@ -1593,6 +1459,15 @@ document.addEventListener('DOMContentLoaded', () => {
   // Próximo caso: iniciar plantão a partir do consultório
   const nextCaseButton = document.getElementById('next-case-button');
   nextCaseButton.addEventListener('click', () => {
+    // aplica filtros/mode escolhidos no consultório
+    const specialtySelect = document.getElementById('specialty-select');
+    const modeSelect = document.getElementById('mode-select');
+    const selectedSpecialty = specialtySelect ? specialtySelect.value : 'ALL';
+    const selectedMode = modeSelect ? modeSelect.value : 'shift';
+
+    engine.caseFilter = { specialty: selectedSpecialty, minLevel: engine.currentLevel };
+    engine.mode = selectedMode;
+
     officeScreen.classList.remove('active');
     gameScreen.classList.add('active');
     // Inicia jogo (se ainda não tiver iniciado)
@@ -1603,55 +1478,96 @@ document.addEventListener('DOMContentLoaded', () => {
    * Atualiza o consultório com as estatísticas do jogador
    */
   function updateOfficeScreen() {
-    const officeAvatarEl = document.getElementById('office-avatar');
-    const officePlayerNameEl = document.getElementById('office-player-name');
-    const officeRankEl = document.getElementById('office-rank');
-    const officeScoreEl = document.getElementById('office-score');
-    const officeStatsEl = document.getElementById('office-stats');
-    const rankMap = {
-      1: 'Residente',
-      2: 'Plantonista',
-      3: 'Chefe de Plantão',
-      4: 'Supervisor',
-      5: 'Diretor'
-    };
-    const level = engine.currentLevel;
-    const rankName = rankMap[level] || 'Especialista';
-    officeAvatarEl.src = avatars[engine.player.avatarIndex].image;
-    officeAvatarEl.style.display = 'inline-block';
-    officePlayerNameEl.textContent = engine.player.name;
-    officeRankEl.textContent = `Cargo: ${rankName}`;
-    officeScoreEl.textContent = `Pontuação: ${engine.score}`;
-    // Exibe estatísticas mais detalhadas: casos corretos, erros e gráfico de barras
-    const correctCount = engine.correctCases;
-    const incorrectCount = engine.incorrectCases;
-    const total = correctCount + incorrectCount;
-    // Calcula percentuais para barras, evitando divisão por zero
-    const correctPct = total > 0 ? (correctCount / total) * 100 : 0;
-    const incorrectPct = total > 0 ? (incorrectCount / total) * 100 : 0;
-    // Calcula progresso de promoção baseado em número de casos corretos por nível
-    // Para avançar de nível, consideramos 3 casos corretos por nível como referência.
-    const casesForNextLevel = engine.currentLevel * 3;
-    const progressRatio = casesForNextLevel > 0 ? Math.min(correctCount / casesForNextLevel, 1) : 0;
-    const progressPct = progressRatio * 100;
-    // Constrói gráfico de barras simples usando divs
-    const barHtml = `
-      <div class="stats-bar">
-        <div class="bar-correct" style="width: ${correctPct}%;"></div>
-        <div class="bar-incorrect" style="width: ${incorrectPct}%;"></div>
-      </div>
-    `;
-    // Constrói barra de progresso para promoção
-    const progressBarHtml = `
-      <div class="progress-bar-container">
-        <div class="progress-bar" style="width: ${progressPct}%;"></div>
-      </div>
-      <p>Progresso para promoção: ${progressPct.toFixed(0)}%</p>
-    `;
-    // Define o HTML com texto, gráfico e progresso
-    officeStatsEl.innerHTML = `Casos corretos: ${correctCount}, Erros: ${incorrectCount}, Total: ${total}${barHtml}${progressBarHtml}`;
+  if (!playerProfile) return;
+
+  officeAvatar.style.backgroundImage = `url('${playerProfile.avatar}')`;
+  officeName.textContent = playerProfile.name;
+  officeLevel.textContent = `Nível ${engine.currentLevel} • ${getRankTitle(engine.currentLevel)}`;
+  officeScore.textContent = `${engine.totalScore} pts`;
+
+  // Atualiza estatísticas
+  const stats = engine.stats || { correct: 0, incorrect: 0, deaths: 0 };
+  const total = Math.max(1, (stats.correct + stats.incorrect));
+  const acc = stats.correct / total;
+
+  const statsText = [
+    `Acertos: ${stats.correct}`,
+    `Erros: ${stats.incorrect}`,
+    `Óbitos: ${stats.deaths || 0}`,
+    `Precisão: ${(acc * 100).toFixed(1)}%`
+  ].join(' • ');
+  officeStatsEl.textContent = statsText;
+
+  // Preenche especialidades disponíveis
+  const specialtySelect = document.getElementById('specialty-select');
+  if (specialtySelect && specialtySelect.options.length === 0) {
+    const specs = engine.caseRepo.getSpecialties();
+    specs.forEach(s => {
+      const opt = document.createElement('option');
+      opt.value = s;
+      opt.textContent = (s === 'ALL') ? 'Todas' : s;
+      specialtySelect.appendChild(opt);
+    });
+    specialtySelect.value = engine.caseFilter?.specialty || 'ALL';
   }
-  // Feedback close
+
+  // Desenha gráfico de acertos/erros
+  renderOfficeChart(stats.correct, stats.incorrect);
+
+  // Progresso de campanha/promoção
+  const req = engine.getLevelRequirement(engine.currentLevel);
+  const nextReq = engine.getLevelRequirement(engine.currentLevel + 1);
+  const progressEl = document.getElementById('office-progress');
+  if (progressEl) {
+    const need = req?.minAccuracy ?? 0.5;
+    const pct = Math.min(100, Math.max(0, (acc / need) * 100));
+    progressEl.textContent = `Meta de precisão deste nível: ${(need*100).toFixed(0)}% • Seu progresso: ${pct.toFixed(0)}% • Próxima promoção: ${getRankTitle(engine.currentLevel+1)}`;
+  }
+}
+function renderOfficeChart(correct, incorrect) {
+  const canvas = document.getElementById('office-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  // fundo
+  ctx.fillStyle = 'rgba(255,255,255,0.06)';
+  ctx.fillRect(0,0,w,h);
+
+  const total = Math.max(1, correct + incorrect);
+  const cPct = correct / total;
+  const iPct = incorrect / total;
+
+  const pad = 16;
+  const barW = w - pad*2;
+  const barH = 18;
+  const y = h/2 - barH/2;
+
+  // trilho
+  ctx.fillStyle = 'rgba(0,0,0,0.35)';
+  ctx.fillRect(pad,y,barW,barH);
+
+  // acertos
+  ctx.fillStyle = 'rgba(80, 220, 160, 0.95)';
+  ctx.fillRect(pad,y,barW*cPct,barH);
+
+  // erros
+  ctx.fillStyle = 'rgba(255, 120, 120, 0.95)';
+  ctx.fillRect(pad + barW*cPct,y,barW*iPct,barH);
+
+  // texto
+  ctx.fillStyle = 'rgba(255,255,255,0.9)';
+  ctx.font = '12px system-ui, -apple-system, Segoe UI, Roboto, Arial';
+  ctx.fillText(`Acertos: ${correct}`, pad, y-10);
+  ctx.fillText(`Erros: ${incorrect}`, pad + 140, y-10);
+  ctx.fillText(`Precisão: ${(cPct*100).toFixed(0)}%`, pad, y+barH+18);
+}
+
+ // Feedback close
   ui.feedbackClose.addEventListener('click', () => {
     ui.feedbackModal.classList.add('hidden');
   });
